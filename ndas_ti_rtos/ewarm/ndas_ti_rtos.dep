@@ -1,0 +1,936 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<project>
+  <fileVersion>2</fileVersion>
+  <fileChecksum>2702547210</fileChecksum>
+  <configuration>
+    <name>Release</name>
+    <outputs>
+      <file>$PROJ_DIR$\..\gps\timtick.c</file>
+      <file>$PROJ_DIR$\..\adc\ads131.c</file>
+      <file>$PROJ_DIR$\..\gps\gps.c</file>
+      <file>$PROJ_DIR$\..\log\log.c</file>
+      <file>$PROJ_DIR$\..\log\minIni.c</file>
+      <file>$PROJ_DIR$\..\periph\board.c</file>
+      <file>$PROJ_DIR$\..\periph\calib.c</file>
+      <file>$PROJ_DIR$\..\periph\dma.c</file>
+      <file>$PROJ_DIR$\..\periph\led.c</file>
+      <file>$PROJ_DIR$\..\periph\myspi.c</file>
+      <file>$PROJ_DIR$\..\periph\rtos_handlers.c</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\common\startup_ewarm.c</file>
+      <file>$PROJ_DIR$\Release\Obj\led.pbi</file>
+      <file>$PROJ_DIR$\..\sdcard\sdcard.h</file>
+      <file>$PROJ_DIR$\Release\Obj\calib.pbi</file>
+      <file>$PROJ_DIR$\Release\Obj\calib.__cstat.et</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\sdhost.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</file>
+      <file>$PROJ_DIR$\Release\Obj\main.__cstat.et</file>
+      <file>$PROJ_DIR$\Release\Obj\timtick.pbi</file>
+      <file>$PROJ_DIR$\Release\Obj\timtick.o</file>
+      <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
+      <file>$TOOLKIT_DIR$\lib\dl7M_tln.a</file>
+      <file>$PROJ_DIR$\Release\Obj\proto.o</file>
+      <file>$PROJ_DIR$\..\main.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\inc\hw_common_reg.h</file>
+      <file>$PROJ_DIR$\..\utils\userfunc.h</file>
+      <file>$PROJ_DIR$\Release\Obj\dma.o</file>
+      <file>$PROJ_DIR$\Release\Obj\sintab.o</file>
+      <file>$PROJ_DIR$\Release\Obj\minIni.__cstat.et</file>
+      <file>$PROJ_DIR$\Release\Obj\status.__cstat.et</file>
+      <file>$PROJ_DIR$\Release\Obj\proto.__cstat.et</file>
+      <file>$PROJ_DIR$\Release\Obj\sdreader.o</file>
+      <file>$PROJ_DIR$\..\my_ver.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\xmtx.h</file>
+      <file>$PROJ_DIR$\Release\Obj\log.__cstat.et</file>
+      <file>$PROJ_DIR$\Release\Obj\sintab.pbi</file>
+      <file>$PROJ_DIR$\Release\Obj\pwm.pbi</file>
+      <file>$PROJ_DIR$\Release\Obj\pwm.__cstat.et</file>
+      <file>$TOOLKIT_DIR$\inc\c\time.h</file>
+      <file>$PROJ_DIR$\Release\Obj\main.pbi</file>
+      <file>$PROJ_DIR$\Release\Obj\minIni.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\math.h</file>
+      <file>$PROJ_DIR$\Release\Obj\xchg.o</file>
+      <file>$PROJ_DIR$\Release\Obj\xchg.__cstat.et</file>
+      <file>$TOOLKIT_DIR$\inc\c\xlocale.h</file>
+      <file>$PROJ_DIR$\..\proto\proto.h</file>
+      <file>$PROJ_DIR$\Release\Obj\rtos_handlers.__cstat.et</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink\cc_pal.h</file>
+      <file>$PROJ_DIR$\Release\Obj\compass.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product_string.h</file>
+      <file>$PROJ_DIR$\cc3200.icf</file>
+      <file>$PROJ_DIR$\Release\Obj\rtos_handlers.o</file>
+      <file>$PROJ_DIR$\Release\Obj\dma.pbi</file>
+      <file>$PROJ_DIR$\..\log\log.h</file>
+      <file>$PROJ_DIR$\Release\Obj\sensor.__cstat.et</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdlib.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
+      <file>$PROJ_DIR$\Release\Obj\status.pbi</file>
+      <file>$PROJ_DIR$\..\sensor\sensor.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\inc\hw_uart.h</file>
+      <file>$PROJ_DIR$\Release\Exe\ndas.bin</file>
+      <file>$PROJ_DIR$\Release\Obj\main.o</file>
+      <file>$PROJ_DIR$\..\periph\myspi.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\prcm.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ystdio.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink\include\netcfg.h</file>
+      <file>$PROJ_DIR$\Release\Obj\timtick.__cstat.et</file>
+      <file>$PROJ_DIR$\..\sdcard\stdcmd.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\inc\hw_gpio.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\ewarm_libs\driverlib.a</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\inc\hw_mcspi.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\ewarm_libs\simplelink.a</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink\include\socket.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdio.h</file>
+      <file>$PROJ_DIR$\Release\Obj\sdcard.pbi</file>
+      <file>$PROJ_DIR$\Release\Obj\gps.o</file>
+      <file>$PROJ_DIR$\Release\Obj\myspi.__cstat.et</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink\source\objInclusion.h</file>
+      <file>$PROJ_DIR$\Release\Obj\rtos_handlers.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\inttypes.h</file>
+      <file>$PROJ_DIR$\Release\Obj\status.o</file>
+      <file>$PROJ_DIR$\..\utils\compass.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\udma.h</file>
+      <file>$PROJ_DIR$\Release\Obj\sensor.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\wchar.h</file>
+      <file>$PROJ_DIR$\Release\Obj\log.pbi</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\pin.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\rom_patch.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\timer.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\ewarm_libs\free_rtos.a</file>
+      <file>$PROJ_DIR$\Release\Obj\circbuf.pbi</file>
+      <file>$PROJ_DIR$\..\gps\gps.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\i2c.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdbool.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\spi.h</file>
+      <file>$PROJ_DIR$\Release\Obj\compass.o</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\fatfs\ffconf.h</file>
+      <file>$PROJ_DIR$\Release\Obj\xchg.pbi</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\systick.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\float.h</file>
+      <file>$PROJ_DIR$\Release\Obj\ads131.__cstat.et</file>
+      <file>$PROJ_DIR$\Release\Obj\userfunc.o</file>
+      <file>$TOOLKIT_DIR$\lib\m7M_tl.a</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink\include\wlan_rx_filters.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink\include\fs.h</file>
+      <file>$PROJ_DIR$\Release\Exe\ndas_ti_rtos.out</file>
+      <file>$PROJ_DIR$\Release\Obj\startup_ewarm.o</file>
+      <file>$TOOLKIT_DIR$\inc\c\ctype.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\uart.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\adc.h</file>
+      <file>$PROJ_DIR$\Release\Obj\log.o</file>
+      <file>$PROJ_DIR$\..\sdcard\sdreader.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
+      <file>$PROJ_DIR$\Release\Obj\myspi.o</file>
+      <file>$PROJ_DIR$\..\periph\led.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink\source\spawn.h</file>
+      <file>$PROJ_DIR$\..\periph\board.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\inc\hw_memmap.h</file>
+      <file>$PROJ_DIR$\Release\Obj\minIni.o</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\utils.h</file>
+      <file>$PROJ_DIR$\..\my_defs.h</file>
+      <file>$PROJ_DIR$\Release\Obj\sensor.o</file>
+      <file>$PROJ_DIR$\Release\Obj\board.__cstat.et</file>
+      <file>$TOOLKIT_DIR$\inc\c\ysizet.h</file>
+      <file>$PROJ_DIR$\..\log\minIni.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink\include\wlan.h</file>
+      <file>$PROJ_DIR$\Release\Obj\sdreader.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\xlocale_c.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\ewarm_libs\fatfs.a</file>
+      <file>$PROJ_DIR$\..\proto\status.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink_extlib\provisioninglib\provisioning_api.h</file>
+      <file>$TOOLKIT_DIR$\lib\rt7M_tl.a</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Defaults.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\rom.h</file>
+      <file>$PROJ_DIR$\Release\Obj\twi.o</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\oslib\osi.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\rom_map.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink\include\netapp.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\inc\hw_types.h</file>
+      <file>$PROJ_DIR$\Release\Obj\sdreader.__cstat.et</file>
+      <file>$PROJ_DIR$\Release\Obj\compass.__cstat.et</file>
+      <file>$PROJ_DIR$\Release\Obj\circbuf.o</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\fatfs\integer.h</file>
+      <file>$PROJ_DIR$\Release\Obj\board.pbi</file>
+      <file>$PROJ_DIR$\..\periph\calib.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\gpio.h</file>
+      <file>$PROJ_DIR$\Release\Obj\pwm.o</file>
+      <file>$PROJ_DIR$\..\pwm\pwm.h</file>
+      <file>$PROJ_DIR$\..\utils\circbuf.h</file>
+      <file>$PROJ_DIR$\..\log\minGlue.h</file>
+      <file>$PROJ_DIR$\Release\Obj\startup_ewarm.__cstat.et</file>
+      <file>$PROJ_DIR$\Release\Obj\sdcard.o</file>
+      <file>$PROJ_DIR$\..\periph\rtos_handlers.h</file>
+      <file>$PROJ_DIR$\Release\Obj\ads131.o</file>
+      <file>$TOOLKIT_DIR$\inc\c\ymath.h</file>
+      <file>$PROJ_DIR$\Release\Obj\gps.__cstat.et</file>
+      <file>$TOOLKIT_DIR$\inc\c\xtgmath.h</file>
+      <file>$PROJ_DIR$\Release\Obj\led.__cstat.et</file>
+      <file>$PROJ_DIR$\Release\Obj\led.o</file>
+      <file>$PROJ_DIR$\..\periph\dma.h</file>
+      <file>$PROJ_DIR$\..\adc\struct.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\inc\hw_udma.h</file>
+      <file>$PROJ_DIR$\Release\Obj\proto.pbi</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\inc\hw_gprcm.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
+      <file>$PROJ_DIR$\Release\Obj\userfunc.__cstat.et</file>
+      <file>$PROJ_DIR$\Release\Obj\userfunc.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\inc\hw_timer.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\interrupt.h</file>
+      <file>$PROJ_DIR$\Release\Obj\ndas_ti_rtos.pbd</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\inc\hw_i2c.h</file>
+      <file>$PROJ_DIR$\..\adc\ads131.h</file>
+      <file>$PROJ_DIR$\..\periph\twi.h</file>
+      <file>$PROJ_DIR$\..\periph\twi.c</file>
+      <file>$PROJ_DIR$\..\periph\xchg.c</file>
+      <file>$PROJ_DIR$\..\proto\proto.c</file>
+      <file>$PROJ_DIR$\..\proto\status.c</file>
+      <file>$PROJ_DIR$\..\pwm\pwm.c</file>
+      <file>$PROJ_DIR$\..\sdcard\sdcard.c</file>
+      <file>$PROJ_DIR$\..\sdcard\sdreader.c</file>
+      <file>$PROJ_DIR$\..\sensor\sensor.c</file>
+      <file>$PROJ_DIR$\..\sintab\sintab.c</file>
+      <file>$PROJ_DIR$\..\utils\circbuf.c</file>
+      <file>$PROJ_DIR$\..\utils\compass.c</file>
+      <file>$PROJ_DIR$\..\utils\userfunc.c</file>
+      <file>$PROJ_DIR$\..\main.c</file>
+      <file>$PROJ_DIR$\Release\Obj\sdcard.__cstat.et</file>
+      <file>$PROJ_DIR$\Release\Obj\calib.o</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\fatfs\diskio.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\string.h</file>
+      <file>$PROJ_DIR$\Release\Obj\gps.pbi</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\common\common.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\fatfs\ff.h</file>
+      <file>$PROJ_DIR$\Release\Obj\startup_ewarm.pbi</file>
+      <file>$PROJ_DIR$\Release\Obj\board.o</file>
+      <file>$TOOLKIT_DIR$\inc\c\xtls.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink\user.h</file>
+      <file>$PROJ_DIR$\Release\Obj\ads131.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdarg.h</file>
+      <file>$PROJ_DIR$\Release\Obj\twi.__cstat.et</file>
+      <file>$PROJ_DIR$\Release\List\ndas_ti_rtos.map</file>
+      <file>$PROJ_DIR$\Release\Obj\sintab.__cstat.et</file>
+      <file>$PROJ_DIR$\..\periph\xchg.h</file>
+      <file>$PROJ_DIR$\..\gps\timtick.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\signal.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdint.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink\include\simplelink.h</file>
+      <file>$PROJ_DIR$\Release\Obj\circbuf.__cstat.et</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink\include\device.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\simplelink\include\trace.h</file>
+      <file>$PROJ_DIR$\..\sintab\sintab.h</file>
+      <file>$PROJ_DIR$\Release\Obj\twi.pbi</file>
+      <file>$PROJ_DIR$\Release\Obj\myspi.pbi</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\inc\hw_ints.h</file>
+      <file>$PROJ_DIR$\Release\Obj\dma.__cstat.et</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\version.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\xlocaleuse.h</file>
+      <file>$PROJ_DIR$\..\..\cc3200_libs\driverlib\sdhost.c</file>
+    </outputs>
+    <file>
+      <name>$PROJ_DIR$\..\gps\timtick.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 20</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 19</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 67</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 205 139 118 25 215 71 146 87 89 134 137 88 120 64 170 99 169 121 206 21 165 133 17 113 57 168 207 39 124 100 46 24 173 26 204 60 109 83 54 191 50 74 65 56 130 117 13 136 115</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 46 24 121 25 134 64 120 206 87 89 168 165 21 204 139 124 71 170 88 100 117 56 57 215 115 118 146 137 99 169 39 54 136 109 191 130 205 207 133 17 113 173 26 13 60 83 200 74 50 65</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\adc\ads131.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 154</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 199</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 101</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 56 21 165 133 17 113 57 168 124 191 50 74 65 80 207 24 121 134 137 88 206 39 100 173 46 26 139 64 120 204 118 25 60 215 109 83 170 205 71 146 87 89 99 169 54 130 117 13 136 115 149 212 63 95 161</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 65 121 21 139 134 64 149 24 63 136 207 25 146 71 74 115 26 161 168 165 54 88 46 120 109 170 200 137 95 191 80 130 212 205 173 124 204 117 87 89 83 56 57 133 17 113 50 13 206 39 100 118 60 215 99 169</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\gps\gps.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 76</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 192</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 156</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 56 21 165 133 17 113 57 168 124 191 50 74 65 80 207 24 121 134 137 88 206 39 100 173 46 26 139 64 120 204 118 25 60 215 109 83 170 205 71 146 87 89 99 169 54 130 117 13 136 174 92</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 165 120 170 24 133 17 204 88 46 109 71 200 137 74 130 57 113 117 207 139 25 64 134 121 191 80 174 92 21 124 168 65 54 136 26 87 89 56 50 173 205 13 206 39 100 118 60 215 83 146 99 169</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\log\log.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 111</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 86</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 35</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 120 194 143 97 105 208 198 191 21 165 133 17 113 57 168 124 50 48 131 136 78 211 73 138 126 210 66 104 116 13 121 134 137 88 206 207 39 100 117 139 215 170 99 64 130 204 118 25 60 109 83 46 26 173 205 71 146 87 89 169 24 54 74 65 56 125 150</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 208 21 133 116 17 137 165 205 126 124 215 26 117 204 211 136 50 121 99 139 64 105 24 143 73 66 48 57 113 207 118 120 89 169 13 74 150 194 130 173 54 125 97 198 78 138 210 104 191 131 168 134 206 39 100 88 46 60 83 146 200 65 170 25 109 71 87 56</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\log\minIni.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 119</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 41</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 29</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 108 21 165 133 17 113 57 168 45 197 34 56 124 218 128 85 125 150 194 143 97 74 65 39 191 50</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 165 56 21 125 39 197 34 124 97 50 191 74 45 133 57 168 218 150 65 108 17 113 128 85 194 143</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\periph\board.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 196</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 144</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 123</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 139 134 137 88 164 64 117 215 170 99 118 25 109 120</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 139 64 120 137 118 109 99 134 164 117 25 215 170 88</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\periph\calib.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 189</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 14</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 15</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 24 121 134 137 88 206 21 165 133 17 113 57 168 207 39 124 100 173 46 26 139 64 120 204 118 25 60 215 109 83 170 205 71 146 87 89 99 169 54 191 50 74 65 56 130 117 13 136 145</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 39 165 25 13 21 121 139 24 205 134 137 46 120 124 130 173 26 206 100 170 87 89 74 145 204 54 117 136 207 88 168 109 64 71 200 50 65 133 57 17 113 118 60 215 83 146 99 169 191 56</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\periph\dma.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 27</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 53</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 216</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 74 21 165 133 17 113 57 168 124 65 191 50 134 137 88 215 118 60 139 162 146 83 170 64 109 56 136 160 121 206 207 39 100</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 50 168 165 162 215 83 160 65 21 88 134 60 137 64 56 124 191 118 139 146 170 109 136 121 133 57 17 113 207 74 206 39 100</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\periph\led.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 159</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 12</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 158</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 118 25 60 139 215 87 146 170 120 64 121 134 137 88 206 21 165 133 17 113 57 168 207 39 124 100 115</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 21 120 137 215 165 139 60 146 121 17 25 87 170 64 115 207 113 118 134 206 39 100 88 133 57 168 124</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\periph\myspi.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 114</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 214</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 77</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 63 139 118 25 215 71 137 88 146 87 95 134 83 120 64 170 121 206 21 165 133 17 113 57 168 207 39 124 100 160</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 215 206 120 87 165 118 137 134 170 100 133 168 21 160 139 25 71 146 95 83 64 121 88 39 57 124 63 207 17 113</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\periph\rtos_handlers.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 52</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 79</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 47</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 139 215 134 137 88 170 64 153 208 198 191 21 165 133 17 113 57 168 124 50 48 131 136 78 211 105 73 138 126 210 66 104 116 193 24 121 206 207 39 100 173 46 26 120 204 118 25 60 109 83 205 71 146 87 89 99 169 54 74 65 56 130 117 13</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 26 137 215 208 21 48 39 193 73 13 165 124 99 170 64 66 57 113 205 134 121 139 118 46 200 153 88 126 211 116 136 50 133 17 173 206 100 120 146 65 24 198 78 105 138 210 104 191 131 168 204 54 117 207 25 109 89 169 74 60 83 71 87 56 130</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\cc3200_libs\common\startup_ewarm.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 107</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 195</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 151</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 139 215 170</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 215 139 170</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>[ROOT_NODE]</name>
+      <outputs>
+        <tool>
+          <name>ILINK</name>
+          <file> 106 202</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Release\Exe\ndas_ti_rtos.out</name>
+      <outputs>
+        <tool>
+          <name>ILINK</name>
+          <file> 202</file>
+        </tool>
+        <tool>
+          <name>OBJCOPY</name>
+          <file> 61</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ILINK</name>
+          <file> 51 154 196 189 142 96 27 76 159 111 62 119 114 23 147 52 152 32 122 28 107 81 20 135 102 43 129 90 72 70 132 103 22</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\periph\twi.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 135</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 213</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 201</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 94 207 21 165 133 17 113 57 168 56 124 139 118 215 172 93 87 134 137 88 64 174 24 121 206 39 100 173 46 26 120 204 25 60 109 83 170 205 71 146 89 99 169 54 191 50 74 65 130 117 13 136</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 168 120 83 87 165 121 206 204 118 174 21 26 124 25 24 191 215 56 172 137 57 173 100 64 60 89 130 207 139 93 134 133 88 205 13 39 71 170 99 94 17 113 54 117 136 46 109 146 169 200 74 50 65</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\periph\xchg.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 43</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 98</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 44</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 56 21 165 133 17 113 57 168 124 74 65 191 50 208 198 48 131 136 78 211 105 73 138 126 210 66 104 116 139 164 134 137 88 64 125 150 194 143 97 153 215 170 193 204 118 25 60 109 83 120 121 206 207 39 100 46 115 146 117 99 112 24 173 26 205 71 87 89 169 54 130 13 174 160</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 104 208 121 160 165 215 24 137 124 198 78 194 170 126 204 133 17 21 138 131 60 25 54 134 64 191 164 125 117 26 57 113 50 105 210 88 83 146 136 89 169 56 74 139 153 115 112 205 130 168 65 211 73 66 116 48 143 193 118 120 207 174 99 46 150 97 109 206 39 100 173 13 71 87 200</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\proto\proto.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 23</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 163</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 31</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 139 134 137 88 64 46 121 206 21 165 133 17 113 57 168 207 39 124 100 173 26 120 24 204 118 25 60 215 109 83 170 205 71 146 87 89 99 169 54 191 50 74 65 56 130 117 13 136</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 165 121 118 169 57 204 46 113 21 205 120 89 56 215 137 24 134 13 64 124 173 54 88 207 133 17 26 60 83 146 99 191 130 139 206 39 100 168 117 136 25 109 170 71 87 200 74 50 65</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\proto\status.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 81</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 58</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 30</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 191 21 165 133 17 113 57 168 124 50 139 134 137 88 64 130 121 206 207 39 100 204 118 25 60 215 109 83 170 120 46 26 24 173 205 71 146 87 89 99 169 54 74 65 56 117 13 136 217</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 165 124 21 191 139 54 133 17 137 121 146 64 50 204 170 117 99 134 26 217 57 113 46 118 130 24 205 120 168 88 207 25 109 136 215 89 169 56 65 206 39 100 60 83 173 13 71 87 200 74</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\pwm\pwm.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 147</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 37</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 38</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 24 121 134 137 88 206 21 165 133 17 113 57 168 207 39 124 100 173 46 26 139 64 120 204 118 25 60 215 109 83 170 205 71 146 87 89 99 169 54 191 50 74 65 56 130 117 13 136 42 155 157 148 92</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 100 46 173 165 137 120 124 205 26 206 21 121 139 25 24 157 13 134 39 170 87 89 74 42 148 92 204 54 117 136 207 168 109 64 71 200 50 65 88 133 57 17 113 118 60 215 83 146 99 169 191 56 130 155</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\sdcard\sdcard.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 152</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 75</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 188</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 139 118 69 215 87 134 16 137 88 146 64 120 39 21 165 133 17 113 57 168 124 121 206 207 100 26 205 25 71 89 170 99 169 46 24 173 204 60 109 83 54 191 50 74 65 56 130 117 13 136 68 190 143</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 99 13 64 165 146 57 113 204 130 87 121 120 25 21 69 16 205 124 137 139 118 46 117 109 191 215 134 39 26 68 190 133 17 207 89 169 54 136 170 56 143 88 168 206 100 71 24 173 60 83 200 74 50 65</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\sdcard\sdreader.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 32</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 127</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 140</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 112 121 134 137 88 206 21 165 133 17 113 57 168 207 39 124 100 24 173 46 26 139 64 120 204 118 25 60 215 109 83 170 205 71 146 87 89 99 169 54 191 50 74 65 56 130 117 13 136 174</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 134 121 139 24 25 165 39 21 173 137 46 120 124 174 206 100 26 170 87 89 74 207 88 168 205 13 109 64 71 200 50 65 112 133 57 17 113 204 54 117 136 118 60 215 83 146 99 169 191 56 130</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\sensor\sensor.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 122</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 84</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 55</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 82 121 134 137 88 206 21 165 133 17 113 57 168 207 39 124 100 59 24 173 46 26 139 64 120 204 118 25 60 215 109 83 170 205 71 146 87 89 99 169 54 191 50 74 65 56 130 117 13 136 112 174 110</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 64 168 165 21 206 174 24 54 215 124 130 100 121 136 118 120 89 169 56 57 204 59 112 110 134 39 117 60 83 146 137 99 46 191 82 207 88 133 17 113 173 205 26 13 139 25 109 170 71 87 200 74 50 65</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\sintab\sintab.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 28</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 36</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 203</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 212 121 134 137 88 206 21 165 133 17 113 57 168 207 39 124 100</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 17 39 134 121 206 100 21 165 137 207 88 113 212 133 57 168 124</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\utils\circbuf.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 142</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 91</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 209</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 56 21 165 133 17 113 57 168 124 74 65 149 121 134 137 88 206 207 39 100 173 46 26 139 64 120 24 204 118 25 60 215 109 83 170 205 71 146 87 89 99 169 54 191 50 130 117 13 136</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 134 165 215 46 121 24 133 17 21 124 88 173 64 170 149 57 113 207 26 118 120 89 169 56 74 168 65 137 205 13 60 83 146 99 191 130 139 206 39 100 204 54 117 136 25 109 71 87 200 50</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\utils\compass.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 96</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 49</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 141</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 42 21 155 165 133 17 113 57 168 157 26 139 134 137 88 64 120 121 206 207 39 124 100 82 59 24 173 46 204 118 25 60 215 109 83 170 205 71 146 87 89 99 169 54 191 50 74 65 56 130 117 13 136</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 173 155 17 89 133 124 120 56 21 118 169 46 121 139 137 165 59 26 215 64 170 82 57 113 207 205 13 60 83 146 99 191 130 134 157 168 88 206 39 100 24 204 54 117 136 25 109 71 87 200 74 50 65 42</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\utils\userfunc.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 102</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 167</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 166</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 56 21 165 133 17 113 57 168 124 74 65 191 50 39 108 45 197 34 218 128 85 120 139 134 137 88 64 24 121 206 207 100 173 46 26 204 118 25 60 215 109 83 170 205 71 146 87 89 99 169 54 130 117 13 136 33</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 39 139 25 121 137 21 165 173 64 134 108 54 168 197 34 26 109 71 170 200 191 24 124 65 218 85 205 13 206 100 46 87 120 89 74 33 57 133 17 113 50 45 128 56 88 204 117 136 207 118 60 215 83 146 99 169 130</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\main.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 62</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 40</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 18</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 117 139 215 170 99 137 88 64 134 13 121 206 21 165 133 17 113 57 168 207 39 124 100 46 145 24 173 26 120 204 118 25 60 109 83 205 71 146 87 89 169 54 191 50 74 65 56 130 136 148 115 210 208 198 48 131 78 211 105 73 138 126 66 104 116 59 92 174 112 217</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 26 215 124 21 148 39 46 137 64 24 109 170 25 56 208 191 54 134 165 173 89 169 210 120 92 112 139 206 100 168 121 205 13 118 146 99 130 50 65 105 145 115 59 204 174 217 88 207 133 57 17 113 117 136 60 83 71 87 200 74 198 78 138 104 131 211 73 126 66 116 48</file>
+        </tool>
+      </inputs>
+    </file>
+  </configuration>
+</project>
+
+
