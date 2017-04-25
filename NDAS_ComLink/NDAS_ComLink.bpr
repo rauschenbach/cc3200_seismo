@@ -1,0 +1,197 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.06.00"/>
+    <PROJECT value="NDAS_ComLink.exe"/>
+    <OBJFILES value="NDAS_ComLink.obj main.obj utils.obj HardwareLayer\ComPort.obj About.obj 
+      proto.obj WriteCommandThread.obj ReadPortThread.obj FindStationsThread.obj"/>
+    <RESFILES value="NDAS_ComLink.res"/>
+    <IDLFILES value=""/>
+    <IDLGENFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES) main.dfm About.dfm"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value="vclx.lib SignalLabScopePkgCB6.lib OpenWirePkgCB6.lib 
+      SignalLabBasicPkgCB6.lib dclusr.lib tee.lib rtl.lib vcl.lib"/>
+    <SPARELIBS value="vcl.lib rtl.lib tee.lib dclusr.lib SignalLabBasicPkgCB6.lib 
+      OpenWirePkgCB6.lib SignalLabScopePkgCB6.lib vclx.lib"/>
+    <PACKAGES value="vcl.bpi rtl.bpi vclx.bpi dclusr.bpi dbrtl.bpi"/>
+    <PATHCPP value=".;HardwareLayer"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="ilink32"/>
+    <USERDEFINES value="_DEBUG"/>
+    <SYSDEFINES value="NO_STRICT"/>
+    <MAINSOURCE value="NDAS_ComLink.cpp"/>
+    <INCLUDEPATH value="$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\OpenWire;..\common"/>
+    <LIBPATH value="$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;nmea"/>
+    <WARNINGS value="-w-par"/>
+    <OTHERFILES value=""/>
+  </MACROS>
+  <OPTIONS>
+    <IDLCFLAGS value="-I$(BCB)\Projects -I$(BCB)\LabPacks -IHardwareLayer -I$(BCB)\user 
+      -I$(BCB)\include -I$(BCB)\include\vcl -I$(BCB)\OpenWire -I..\common 
+      -src_suffix cpp -D_DEBUG -no_stdstream -no_tie -boa"/>
+    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl60.csm -Hc -Vx -Ve -X- -r- -a4 -6 -b- -k -y -v -vi- 
+      -c -tW -tWM"/>
+    <PFLAGS value="-$Y+ -$W -$O- -$A8 -v -JPHNE -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zi"/>
+    <LFLAGS value="-D&quot;&quot; -S:0x200000 -Sc:0x4000 -aa -Tpe -x -Gn -v"/>
+    <OTHERFILES value=""/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0w32.obj sysinit.obj $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mt.lib"/>
+    <OTHERFILES value=""/>
+  </LINKER>
+  <FILELIST>
+      <FILE FILENAME="NDAS_ComLink.res" FORMNAME="" UNITNAME="NDAS_ComLink.res" CONTAINERID="ResTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="NDAS_ComLink.cpp" FORMNAME="" UNITNAME="NDAS_ComLink" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="main.cpp" FORMNAME="frmMain" UNITNAME="main" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="utils.cpp" FORMNAME="" UNITNAME="utils" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="HardwareLayer\ComPort.cpp" FORMNAME="" UNITNAME="ComPort" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="About.cpp" FORMNAME="frmAbout" UNITNAME="About" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="proto.cpp" FORMNAME="" UNITNAME="proto" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="WriteCommandThread.cpp" FORMNAME="" UNITNAME="WriteCommandThread" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="ReadPortThread.cpp" FORMNAME="" UNITNAME="ReadPortThread" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="FindStationsThread.cpp" FORMNAME="" UNITNAME="FindStationsThread" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+  </FILELIST>
+  <BUILDTOOLS>
+  </BUILDTOOLS>
+
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1049
+CodePage=1251
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[Excluded Packages]
+c:\bcb\Bin\dclado60.bpl=Borland ADO DB Components
+c:\bcb\Bin\dclbde60.bpl=Borland BDE DB Components
+C:\bcb\Bin\dbx60.bpl=Borland SQL Explorer UI Package
+c:\bcb\Bin\DCLIB60.bpl=InterBase Data Access Components
+c:\bcb\Bin\dclcds60.bpl=Borland Base Cached ClientDataset Component
+C:\bcb\Bin\dclmid60.bpl=Borland MyBase DataAccess Components
+c:\bcb\Bin\dclbdecds60.bpl=Borland Local BDE ClientDataset Components
+c:\bcb\Bin\dclqrt60.bpl=QuickReport Components
+c:\bcb\Bin\dcltee60.bpl=TeeChart Components
+c:\bcb\Bin\dcldss60.bpl=Borland Decision Cube Components
+c:\bcb\Bin\dcltqr60.bpl=TeeChart for QuickReport Components
+c:\bcb\Bin\dclclxdb60.bpl=Borland CLX Database Components
+C:\bcb\Bin\dclclxstd60.bpl=Borland CLX Standard Components
+c:\bcb\Bin\dclmcn60.bpl=Borland DataSnap Connection Components
+c:\bcb\Bin\dclsmpedit60.bpl=Borland Editor Script Enhancements
+c:\bcb\Bin\applet60.bpl=Borland Control Panel Applet Package
+c:\bcb\Bin\dclemacsedit60.bpl=Borland Editor Emacs Enhancements
+c:\bcb\Bin\dclact60.bpl=Borland ActionBar Components
+c:\bcb\Bin\dclmlwiz60.bpl=Borland Markup Language Wizards
+c:\bcb\Bin\idefilters60.bpl=IDE Filter for CPP32
+c:\bcb\Bin\dclbcbsmp60.bpl=Borland Sample Controls Design Time Package
+c:\bcb\Bin\dclnet60.bpl=Borland Internet Components
+c:\bcb\Bin\DBWEBXPRT.BPL=Borland Web Wizard Package
+c:\bcb\Bin\DCLNMF60.bpl=NetMasters Fastnet Tools
+c:\bcb\Bin\dclwbm60.bpl=Borland InternetExpress Components
+c:\bcb\Bin\bcbie60.bpl=Borland C++Builder Internet Explorer 5 Components Package
+c:\bcb\Bin\dclwebsnap60.bpl=Borland WebSnap Components
+c:\bcb\Bin\dclsoap60.bpl=Borland SOAP Components
+c:\bcb\Bin\dclocx60.bpl=Borland Sample Imported ActiveX Controls
+c:\bcb\Bin\dcldbx60.bpl=Borland dbExpress Components
+c:\bcb\Bin\dcldbxcds60.bpl=Borland Local DBX ClientDataset Components
+c:\bcb\Bin\dclindy60.bpl=Internet Direct (Indy) for D6 Property and Component Editors
+c:\bcb\Bin\bcb2kaxserver60.bpl=Borland C++Builder COM Server Components Sample Package
+c:\bcb\Bin\dclite60.bpl=Borland Integrated Translation Environment
+
+[HistoryLists\hlIncludePath]
+Count=16
+Item0=$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\OpenWire;..\common
+Item1=$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\OpenWire
+Item2=..\GNS110_bf504f;images;$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\OpenWire
+Item3=images;$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\OpenWire
+Item4=images;$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\include;$(BCB)\include\vcl;..\GNS110_bf504f;$(BCB)\OpenWire
+Item5=nmea;images;$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\include;$(BCB)\include\vcl;C:\bcb\OpenWire
+Item6=nmea;images;$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\include;$(BCB)\include\vcl;C:\bcb\OpenWire;C:\GNSSoft\GNS110_ctrl\nmea
+Item7=images;$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\include;$(BCB)\include\vcl;C:\bcb\OpenWire;C:\GNSSoft\GNS110_ctrl\nmea
+Item8=images;$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\include;$(BCB)\include\vcl;C:\bcb\OpenWire
+Item9=$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\include;$(BCB)\include\vcl;C:\bcb\OpenWire
+Item10=$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\include;$(BCB)\include\vcl;C:\bcb\OpenWire
+Item11=..\..\save\test;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;C:\projects\WinXP\new_test_atcs;$(BCB)\include;$(BCB)\include\vcl;C:\bcb\OpenWire
+Item12=$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;C:\projects\WinXP\new_test_atcs;$(BCB)\include;$(BCB)\include\vcl;C:\bcb\OpenWire
+Item13=$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;C:\projects\WinXP\new_test_atcs;$(BCB)\include;$(BCB)\include\vcl
+Item14=$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;C:\Program Files\Borland\CBuilder6\Projects;C:\projects\WinXP\new_test_atcs;$(BCB)\include;$(BCB)\include\vcl
+Item15=HardwareLayer;$(BCB)\user;C:\Program Files\Borland\CBuilder6\Projects;C:\projects\WinXP\new_test_atcs;$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=10
+Item0=$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;nmea
+Item1=nmea;images;$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item2=nmea;images;$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;C:\GNSSoft\GNS110_ctrl\nmea
+Item3=images;$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib;C:\GNSSoft\GNS110_ctrl\nmea
+Item4=images;$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;C:\projects\WinXP\new_test_atcs;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item5=$(BCB)\Projects;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;C:\projects\WinXP\new_test_atcs;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item6=$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;C:\projects\WinXP\new_test_atcs;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item7=..\..\save\test;$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;C:\projects\WinXP\new_test_atcs;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item8=$(BCB)\LabPacks;HardwareLayer;$(BCB)\user;C:\Program Files\Borland\CBuilder6\Projects;C:\projects\WinXP\new_test_atcs;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item9=HardwareLayer;$(BCB)\user;C:\Program Files\Borland\CBuilder6\Projects;C:\projects\WinXP\new_test_atcs;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=1
+Item0=_DEBUG
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+Launcher=
+UseLauncher=0
+DebugCWD=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteLauncher=
+RemoteCWD=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=0
+LinkCGLIB=0
+
+[CORBA]
+AddServerUnit=0
+AddClientUnit=0
+PrecompiledHeaders=0
+  </IDEOPTIONS>
+</PROJECT>
