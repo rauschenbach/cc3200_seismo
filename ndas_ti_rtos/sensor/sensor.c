@@ -1,9 +1,9 @@
 /************************************************************************************************
- *	Датчики, подключеные по шине TWI (I2C). Пакетный режим иногда не работает, поэтому
- *      в примерах от STM рекомендуется читать по 1 или 2 байтам
- * 	Настройка производится так же как в примере STMf401-Discovery
- * 	Все пределы достаточны для расчета углов наклона и поворота
- *      Добавляем также внутреннее АЦП которые измеряет напряжение питания (не на I2C)
+ *	Р”Р°С‚С‡РёРєРё, РїРѕРґРєР»СЋС‡РµРЅС‹Рµ РїРѕ С€РёРЅРµ TWI (I2C). РџР°РєРµС‚РЅС‹Р№ СЂРµР¶РёРј РёРЅРѕРіРґР° РЅРµ СЂР°Р±РѕС‚Р°РµС‚, РїРѕСЌС‚РѕРјСѓ
+ *      РІ РїСЂРёРјРµСЂР°С… РѕС‚ STM СЂРµРєРѕРјРµРЅРґСѓРµС‚СЃСЏ С‡РёС‚Р°С‚СЊ РїРѕ 1 РёР»Рё 2 Р±Р°Р№С‚Р°Рј
+ * 	РќР°СЃС‚СЂРѕР№РєР° РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ С‚Р°Рє Р¶Рµ РєР°Рє РІ РїСЂРёРјРµСЂРµ STMf401-Discovery
+ * 	Р’СЃРµ РїСЂРµРґРµР»С‹ РґРѕСЃС‚Р°С‚РѕС‡РЅС‹ РґР»СЏ СЂР°СЃС‡РµС‚Р° СѓРіР»РѕРІ РЅР°РєР»РѕРЅР° Рё РїРѕРІРѕСЂРѕС‚Р°
+ *      Р”РѕР±Р°РІР»СЏРµРј С‚Р°РєР¶Рµ РІРЅСѓС‚СЂРµРЅРЅРµРµ РђР¦Рџ РєРѕС‚РѕСЂС‹Рµ РёР·РјРµСЂСЏРµС‚ РЅР°РїСЂСЏР¶РµРЅРёРµ РїРёС‚Р°РЅРёСЏ (РЅРµ РЅР° I2C)
  ***********************************************************************************************/
 #include "compass.h"
 #include "sensor.h"
@@ -12,19 +12,19 @@
 #include "twi.h"
 #include "adc.h"
 
-/* Тест модуля - вывод в консоль*/
+/* РўРµСЃС‚ РјРѕРґСѓР»СЏ - РІС‹РІРѕРґ РІ РєРѕРЅСЃРѕР»СЊ*/
 #define         TEST_SENSOR     1
 #undef          TEST_SENSOR
 
-/* Медленая простаивающая задача */
+/* РњРµРґР»РµРЅР°СЏ РїСЂРѕСЃС‚Р°РёРІР°СЋС‰Р°СЏ Р·Р°РґР°С‡Р° */
 #define         SENSOR_TASK_SLEEP       (1000)
 
 
-/* Адреса датчиков на шине I2C */
-#define 	LSM303_ACC_ADDR		0x19	/* Акселерометр в примере неправильный адрес. этот правильный */
-#define 	LSM303_COMP_ADDR	0x1E	/* Компас  */
-#define 	BMP085_ADDR		0x77	/* Датчик температуры и давления */
-#define		HTS221_ADDR		0x5F	/* Датчик влажности */
+/* РђРґСЂРµСЃР° РґР°С‚С‡РёРєРѕРІ РЅР° С€РёРЅРµ I2C */
+#define 	LSM303_ACC_ADDR		0x19	/* РђРєСЃРµР»РµСЂРѕРјРµС‚СЂ РІ РїСЂРёРјРµСЂРµ РЅРµРїСЂР°РІРёР»СЊРЅС‹Р№ Р°РґСЂРµСЃ. СЌС‚РѕС‚ РїСЂР°РІРёР»СЊРЅС‹Р№ */
+#define 	LSM303_COMP_ADDR	0x1E	/* РљРѕРјРїР°СЃ  */
+#define 	BMP085_ADDR		0x77	/* Р”Р°С‚С‡РёРє С‚РµРјРїРµСЂР°С‚СѓСЂС‹ Рё РґР°РІР»РµРЅРёСЏ */
+#define		HTS221_ADDR		0x5F	/* Р”Р°С‚С‡РёРє РІР»Р°Р¶РЅРѕСЃС‚Рё */
 
 
 #define 	ACC_SENSITIVITY_2G     (1)	/*!< accelerometer sensitivity with 2 g full scale [LSB/mg] */
@@ -33,13 +33,13 @@
 #define 	ACC_SENSITIVITY_16G    (12)	/*!< accelerometer sensitivity with 12 g full scale [LSB/mg] */
 
 
-#define 	ACC_FULLSCALE_2G            ((uint8_t) 0x00)	/*!< ±2 g */
-#define 	ACC_FULLSCALE_4G            ((uint8_t) 0x10)	/*!< ±4 g */
-#define 	ACC_FULLSCALE_8G            ((uint8_t) 0x20)	/*!< ±8 g */
-#define 	ACC_FULLSCALE_16G           ((uint8_t) 0x30)	/*!< ±16 g */
+#define 	ACC_FULLSCALE_2G            ((uint8_t) 0x00)	/*!< В±2 g */
+#define 	ACC_FULLSCALE_4G            ((uint8_t) 0x10)	/*!< В±4 g */
+#define 	ACC_FULLSCALE_8G            ((uint8_t) 0x20)	/*!< В±8 g */
+#define 	ACC_FULLSCALE_16G           ((uint8_t) 0x30)	/*!< В±16 g */
 
 
-/* Регистры акселерометра  */
+/* Р РµРіРёСЃС‚СЂС‹ Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂР°  */
 #define 	CTRL_REG1_A		0x20
 #define 	CTRL_REG4_A		0x23
 #define         STATUS_REG_A            0x27	/* Status register acceleration */
@@ -50,18 +50,18 @@
 #define 	OUT_Z_L_A		0x2c
 #define 	OUT_Z_H_A		0x2d
 
-#define  	LSM303_FS_1_3_GA               ((uint8_t) 0x20)	/*!< Full scale = ±1.3 Gauss */
-#define  	LSM303_FS_1_9_GA               ((uint8_t) 0x40)	/*!< Full scale = ±1.9 Gauss */
-#define  	LSM303_FS_2_5_GA               ((uint8_t) 0x60)	/*!< Full scale = ±2.5 Gauss */
-#define 	LSM303_FS_4_0_GA               ((uint8_t) 0x80)	/*!< Full scale = ±4.0 Gauss */
-#define  	LSM303_FS_4_7_GA               ((uint8_t) 0xA0)	/*!< Full scale = ±4.7 Gauss */
-#define 	LSM303_FS_5_6_GA               ((uint8_t) 0xC0)	/*!< Full scale = ±5.6 Gauss */
-#define  	LSM303_FS_8_1_GA               ((uint8_t) 0xE0)	/*!< Full scale = ±8.1 Gauss */
+#define  	LSM303_FS_1_3_GA               ((uint8_t) 0x20)	/*!< Full scale = В±1.3 Gauss */
+#define  	LSM303_FS_1_9_GA               ((uint8_t) 0x40)	/*!< Full scale = В±1.9 Gauss */
+#define  	LSM303_FS_2_5_GA               ((uint8_t) 0x60)	/*!< Full scale = В±2.5 Gauss */
+#define 	LSM303_FS_4_0_GA               ((uint8_t) 0x80)	/*!< Full scale = В±4.0 Gauss */
+#define  	LSM303_FS_4_7_GA               ((uint8_t) 0xA0)	/*!< Full scale = В±4.7 Gauss */
+#define 	LSM303_FS_5_6_GA               ((uint8_t) 0xC0)	/*!< Full scale = В±5.6 Gauss */
+#define  	LSM303_FS_8_1_GA               ((uint8_t) 0xE0)	/*!< Full scale = В±8.1 Gauss */
 
-/* Регистры компаса */
+/* Р РµРіРёСЃС‚СЂС‹ РєРѕРјРїР°СЃР° */
 #define 	CRA_REG_M		0x00	/* data rate reg */
-#define 	CRB_REG_M		0x01	/* GAIN reg - усиление */
-#define		MR_REG_M		0x02	/* Mode sel reg - выбор режима */
+#define 	CRB_REG_M		0x01	/* GAIN reg - СѓСЃРёР»РµРЅРёРµ */
+#define		MR_REG_M		0x02	/* Mode sel reg - РІС‹Р±РѕСЂ СЂРµР¶РёРјР° */
 
 #define		OUT_X_H_M		0x03
 #define		OUT_X_L_M		0x04
@@ -71,17 +71,17 @@
 #define		OUT_Y_L_M		0x08
 #define         SR_REG_M                0x09	/* Status Register magnetic field */
 
-/* Регистры термометра на микросхеме компаса */
+/* Р РµРіРёСЃС‚СЂС‹ С‚РµСЂРјРѕРјРµС‚СЂР° РЅР° РјРёРєСЂРѕСЃС…РµРјРµ РєРѕРјРїР°СЃР° */
 #define 	TEMP_OUT_H_M 		0x31
 #define 	TEMP_OUT_L_M 		0x32
 
-/* Для компаса */
+/* Р”Р»СЏ РєРѕРјРїР°СЃР° */
 #define 	LSM303_TWI_COMP_HI	6
 #define 	LSM303_TWI_COMP_LO      7
 
 
 
-/* Датчик влажности */
+/* Р”Р°С‚С‡РёРє РІР»Р°Р¶РЅРѕСЃС‚Рё */
 #define		HUM_WHO_AM_I		0x0f
 #define		HUM_AM_I_HTS221		0xbc
 
@@ -94,12 +94,12 @@
 #define		HUM_OUT_H               0x29
 
 
-/* Внутренний АЦП */
+/* Р’РЅСѓС‚СЂРµРЅРЅРёР№ РђР¦Рџ */
 #define		NUM_ADC_CHAN		3
 #define 	NUM_ADC_SAMPLES		8
 
 
-/* Калибровочные коэффициенты микросхемы BMP185. Может быть записано в eeprom датчика */
+/* РљР°Р»РёР±СЂРѕРІРѕС‡РЅС‹Рµ РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РјРёРєСЂРѕСЃС…РµРјС‹ BMP185. РњРѕР¶РµС‚ Р±С‹С‚СЊ Р·Р°РїРёСЃР°РЅРѕ РІ eeprom РґР°С‚С‡РёРєР° */
 static struct bmp085_calibr_pars {
     s16 ac1;
     s16 ac2;
@@ -121,7 +121,7 @@ static struct bmp085_calibr_pars {
 } bmp085_regs;
 
 
-/* Калибровочные коэффициенты микросхемы HTS221 */
+/* РљР°Р»РёР±СЂРѕРІРѕС‡РЅС‹Рµ РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РјРёРєСЂРѕСЃС…РµРјС‹ HTS221 */
 static struct hts221_calibr_pars {
     int x0;
     int x1;
@@ -131,40 +131,40 @@ static struct hts221_calibr_pars {
 
 
 
-/* Простаивающая задача опроса датчиков по I2C */
+/* РџСЂРѕСЃС‚Р°РёРІР°СЋС‰Р°СЏ Р·Р°РґР°С‡Р° РѕРїСЂРѕСЃР° РґР°С‚С‡РёРєРѕРІ РїРѕ I2C */
 static void vSensorTask(void *);
 
-/* Акселерометр */
+/* РђРєСЃРµР»РµСЂРѕРјРµС‚СЂ */
 static int lsm303_acc_start(void);
 static u8 lsm303_get_acc_status(void);
 static int lsm303_get_acc_data(lsm303_data *);
 
-/* Компас */
+/* РљРѕРјРїР°СЃ */
 static int lsm303_comp_start(void);
 static u8 lsm303_get_comp_status(void);
 static int lsm303_get_comp_data(lsm303_data *);
 
-/* Датчик температуры и давления */
+/* Р”Р°С‚С‡РёРє С‚РµРјРїРµСЂР°С‚СѓСЂС‹ Рё РґР°РІР»РµРЅРёСЏ */
 static int bmp085_init(void);
 static int bmp085_data_get(int *, int *);
 
-/* Датчик влажности */
+/* Р”Р°С‚С‡РёРє РІР»Р°Р¶РЅРѕСЃС‚Рё */
 static int hts221_init(void);
 static int hts221_data_get(int *);
 static u8 hts221_get_hum_status(void);
 
-/* АЦП на борту  */
+/* РђР¦Рџ РЅР° Р±РѕСЂС‚Сѓ  */
 static int adc_init(void);
 static int adc_data_get(void);
 
 /**
- * Создание задачи, которая читает даные из lsm303
+ * РЎРѕР·РґР°РЅРёРµ Р·Р°РґР°С‡Рё, РєРѕС‚РѕСЂР°СЏ С‡РёС‚Р°РµС‚ РґР°РЅС‹Рµ РёР· lsm303
  */
 int sensor_create_task(int par)
 {
     int ret;
 
-    /* Создаем задачу, которая будет получать данные сенсоров */
+    /* РЎРѕР·РґР°РµРј Р·Р°РґР°С‡Сѓ, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ РїРѕР»СѓС‡Р°С‚СЊ РґР°РЅРЅС‹Рµ СЃРµРЅСЃРѕСЂРѕРІ */
     ret = osi_TaskCreate(vSensorTask, "SensorTask", OSI_STACK_SIZE, &par, SENSOR_TASK_PRIORITY, NULL);
     if (ret != OSI_OK) {
 	PRINTF("ERROR: Create SensorTask error!\r\n");
@@ -177,12 +177,12 @@ int sensor_create_task(int par)
 
 
 /**
- * Задача опроса сенсоров. Раз в 10 секунд достаточно.
+ * Р—Р°РґР°С‡Р° РѕРїСЂРѕСЃР° СЃРµРЅСЃРѕСЂРѕРІ. Р Р°Р· РІ 10 СЃРµРєСѓРЅРґ РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ.
  */
 static void vSensorTask(void *par)
 {
-    static SENSOR_DATE_t sens;	/* 16 байт сенсоров */
-    TEST_STATE_t status;	/* 4 байта непонятного выравнивания */
+    static SENSOR_DATE_t sens;	/* 16 Р±Р°Р№С‚ СЃРµРЅСЃРѕСЂРѕРІ */
+    TEST_STATE_t status;	/* 4 Р±Р°Р№С‚Р° РЅРµРїРѕРЅСЏС‚РЅРѕРіРѕ РІС‹СЂР°РІРЅРёРІР°РЅРёСЏ */
     lsm303_data comp, acc;
     int temp, press;
     u8 res;
@@ -190,46 +190,46 @@ static void vSensorTask(void *par)
 
     while (1) {
 
-	/* Ждем */
+	/* Р–РґРµРј */
 	if (Osi_twi_obj_lock() == OSI_OK) {
           
-        /* Получаем состояние сенсоров - они установились предварительно */
+        /* РџРѕР»СѓС‡Р°РµРј СЃРѕСЃС‚РѕСЏРЅРёРµ СЃРµРЅСЃРѕСЂРѕРІ - РѕРЅРё СѓСЃС‚Р°РЅРѕРІРёР»РёСЃСЊ РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅРѕ */
             status_get_test_state(&status);
           
 
-	    /* Получаем данные сенсоров (можно один раз) */
+	    /* РџРѕР»СѓС‡Р°РµРј РґР°РЅРЅС‹Рµ СЃРµРЅСЃРѕСЂРѕРІ (РјРѕР¶РЅРѕ РѕРґРёРЅ СЂР°Р·) */
 	    status_get_sensor_date(&sens);
 
 
-	     /* Напряжение - увеличить втрое */
+	     /* РќР°РїСЂСЏР¶РµРЅРёРµ - СѓРІРµР»РёС‡РёС‚СЊ РІС‚СЂРѕРµ */
             sens.voltage = adc_data_get() * 3;
 
-	    /* Не подставляю SENSOR_DATA_t - неизвестно, выровнено там или нет! */
+	    /* РќРµ РїРѕРґСЃС‚Р°РІР»СЏСЋ SENSOR_DATA_t - РЅРµРёР·РІРµСЃС‚РЅРѕ, РІС‹СЂРѕРІРЅРµРЅРѕ С‚Р°Рј РёР»Рё РЅРµС‚! */
 	    if (status.press_ok && bmp085_data_get(&temp, &press) == SUCCESS) {
 		sens.temper = temp;
 		sens.press = press;
 #if defined TEST_SENSOR
-		PRINTF("Temp: %2.01f °C, Press: %d kPa\r\n", (f32) sens.temper / 10., sens.press);
+		PRINTF("Temp: %2.01f В°C, Press: %d kPa\r\n", (f32) sens.temper / 10., sens.press);
 #endif
 	    }
 
 
-	    /* Если есть датчики наклона, получаем с них данные и считаем параметры наклона */
+	    /* Р•СЃР»Рё РµСЃС‚СЊ РґР°С‚С‡РёРєРё РЅР°РєР»РѕРЅР°, РїРѕР»СѓС‡Р°РµРј СЃ РЅРёС… РґР°РЅРЅС‹Рµ Рё СЃС‡РёС‚Р°РµРј РїР°СЂР°РјРµС‚СЂС‹ РЅР°РєР»РѕРЅР° */
 	    if (status.acc_ok) {
-		/*  Если не читается - возвращается 0! */
+		/*  Р•СЃР»Рё РЅРµ С‡РёС‚Р°РµС‚СЃСЏ - РІРѕР·РІСЂР°С‰Р°РµС‚СЃСЏ 0! */
 		res = lsm303_get_acc_status();
 		if (res & 8) {
 		    lsm303_get_acc_data(&acc);
 		}
 	    }
 
-	    /* Читаем компас после чтения акселерометра */
+	    /* Р§РёС‚Р°РµРј РєРѕРјРїР°СЃ РїРѕСЃР»Рµ С‡С‚РµРЅРёСЏ Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂР° */
 	    if (status.comp_ok) {
 		res = lsm303_get_comp_status();
 		if (res & 1) {
 		    lsm303_get_comp_data(&comp);
 
-		    /* Расчитаем углы */
+		    /* Р Р°СЃС‡РёС‚Р°РµРј СѓРіР»С‹ */
 		    calc_angles(&acc, &comp);
 		    sens.pitch = acc.x;
 		    sens.roll = acc.y;
@@ -240,16 +240,16 @@ static void vSensorTask(void *par)
 			x = (acc.x / 10);
 			y = (acc.y / 10);
 			z = (acc.z / 10);
-			PRINTF("P = %d°, R = %d°, Head = %d°\r\n", x, y, z);
+			PRINTF("P = %dВ°, R = %dВ°, Head = %dВ°\r\n", x, y, z);
 		    }
 #endif
 		}
 	    }
 
-	    /* Читаем влажность */
+	    /* Р§РёС‚Р°РµРј РІР»Р°Р¶РЅРѕСЃС‚СЊ */
 	    if (status.hum_ok) {
 		res = hts221_get_hum_status();
-		/* Данные готовы */
+		/* Р”Р°РЅРЅС‹Рµ РіРѕС‚РѕРІС‹ */
 		if (res & 2) {
 		    res = hts221_data_get(&temp);
 		    sens.humid = temp;
@@ -262,16 +262,16 @@ static void vSensorTask(void *par)
 
 	    status_set_sensor_date(&sens);
 
- 	    /* Меняем данные сенсоров  */	
+ 	    /* РњРµРЅСЏРµРј РґР°РЅРЅС‹Рµ СЃРµРЅСЃРѕСЂРѕРІ  */	
 	    log_change_adc_header(&sens);
             
-           /* Проверка USB кабеля - в режиме NORMAL у нас всегда SD будет подключена к процессору */ 
+           /* РџСЂРѕРІРµСЂРєР° USB РєР°Р±РµР»СЏ - РІ СЂРµР¶РёРјРµ NORMAL Сѓ РЅР°СЃ РІСЃРµРіРґР° SD Р±СѓРґРµС‚ РїРѕРґРєР»СЋС‡РµРЅР° Рє РїСЂРѕС†РµСЃСЃРѕСЂСѓ */ 
 	    if (get_sd_state() == SD_CARD_TO_CR && get_sd_cable() == 0) {
-		board_reset();	/* Сброс платы */
+		board_reset();	/* РЎР±СЂРѕСЃ РїР»Р°С‚С‹ */
 	    }
             
 
-	    /* Отдаем блокировку */
+	    /* РћС‚РґР°РµРј Р±Р»РѕРєРёСЂРѕРІРєСѓ */
 	    Osi_twi_obj_unlock();
 	}
 
@@ -281,7 +281,7 @@ static void vSensorTask(void *par)
 
 
 /**
- * Инициализация сенсоров
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРµРЅСЃРѕСЂРѕРІ
  */
 int sensor_init(void)
 {
@@ -290,12 +290,12 @@ int sensor_init(void)
 
     adc_init();
 
-    /* Запускаем акселерометр  */
+    /* Р—Р°РїСѓСЃРєР°РµРј Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂ  */
     if (lsm303_acc_start() == SUCCESS) {
 	res |= TEST_STATE_ACCEL_OK;
     }
 
-    /* Запускаем компас */
+    /* Р—Р°РїСѓСЃРєР°РµРј РєРѕРјРїР°СЃ */
     if (lsm303_comp_start() == SUCCESS) {
 	res |= TEST_STATE_COMP_OK;
     }
@@ -304,7 +304,7 @@ int sensor_init(void)
     }
 
 
-    /* Запускаем датчик давления */
+    /* Р—Р°РїСѓСЃРєР°РµРј РґР°С‚С‡РёРє РґР°РІР»РµРЅРёСЏ */
     if (bmp085_init() == SUCCESS) {
 	res |= TEST_STATE_PRESS_OK;
     }
@@ -315,7 +315,7 @@ int sensor_init(void)
 }
 
 /**
- * Инициализация АЦП на ногах 58 59 и 60
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РђР¦Рџ РЅР° РЅРѕРіР°С… 58 59 Рё 60
  */
 int adc_init(void)
 {
@@ -348,7 +348,7 @@ int adc_data_get(void)
     int i = 0;
     int data;
 
-    MAP_ADCChannelEnable(ADC_BASE, ADC_CH_1);	/* Включаем канал */
+    MAP_ADCChannelEnable(ADC_BASE, ADC_CH_1);	/* Р’РєР»СЋС‡Р°РµРј РєР°РЅР°Р» */
 
 	//UART_PRINT("\n\rTotal no of 32 bit ADC data printed :4096 \n\r");
 	//UART_PRINT("\n\rADC data format:\n\r");
@@ -356,21 +356,21 @@ int adc_data_get(void)
 	//UART_PRINT("\n\rbits[31:14]: Time stamp of ADC sample \n\r");
         while (i < NUM_ADC_SAMPLES + 4) {
 	    if (MAP_ADCFIFOLvlGet(ADC_BASE, ADC_CH_1)) {
-                u32 temp = MAP_ADCFIFORead(ADC_BASE, ADC_CH_1); /* Читаем АЦП */                
+                u32 temp = MAP_ADCFIFORead(ADC_BASE, ADC_CH_1); /* Р§РёС‚Р°РµРј РђР¦Рџ */                
 
-		/* Снимаем данные после каждого 4-го измерения */
+		/* РЎРЅРёРјР°РµРј РґР°РЅРЅС‹Рµ РїРѕСЃР»Рµ РєР°Р¶РґРѕРіРѕ 4-РіРѕ РёР·РјРµСЂРµРЅРёСЏ */
                 if(i > 4) {                
                   temp = (temp >> 2) & 0xfff;
-                  sample += temp;                  /* Накопим данные */ 
+                  sample += temp;                  /* РќР°РєРѕРїРёРј РґР°РЅРЅС‹Рµ */ 
 		}
               i++;                
 	    }
 	} 
         
-        sample /=  NUM_ADC_SAMPLES;                /* Считаем среднее */      
+        sample /=  NUM_ADC_SAMPLES;                /* РЎС‡РёС‚Р°РµРј СЃСЂРµРґРЅРµРµ */      
         data = sample * 1400 / 4096;
        
-	/* вЫключаем канал */
+	/* РІР«РєР»СЋС‡Р°РµРј РєР°РЅР°Р» */
 	MAP_ADCChannelDisable(ADC_BASE, ADC_CH_1);
 //    PRINTF("Voltage of chan1: %ld\n", data);
       return data;
@@ -378,7 +378,7 @@ int adc_data_get(void)
 
 
 /**
- * Инициализация микросхемы. Датчик влажности
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјРёРєСЂРѕСЃС…РµРјС‹. Р”Р°С‚С‡РёРє РІР»Р°Р¶РЅРѕСЃС‚Рё
  */
 int hts221_init(void)
 {
@@ -388,14 +388,14 @@ int hts221_init(void)
 
 
     do {
-	/* Датчик вообще живой? */
+	/* Р”Р°С‚С‡РёРє РІРѕРѕР±С‰Рµ Р¶РёРІРѕР№? */
 	res = twi_read_reg_value(HTS221_ADDR, HUM_WHO_AM_I, &data0);
 	if (res != SUCCESS && data0 != HUM_AM_I_HTS221) {
 	    PRINTF("Error hts221 init\r\n");
 	    break;
 	}
 
-	/* Прочитаем EEPROM и расчитаем коэффициенты с 30h адреса - не хочет читать блоком!!! */
+	/* РџСЂРѕС‡РёС‚Р°РµРј EEPROM Рё СЂР°СЃС‡РёС‚Р°РµРј РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ СЃ 30h Р°РґСЂРµСЃР° - РЅРµ С…РѕС‡РµС‚ С‡РёС‚Р°С‚СЊ Р±Р»РѕРєРѕРј!!! */
 	res = twi_read_reg_value(HTS221_ADDR, 0x30, &data0);
 	if (res != SUCCESS) {
 	    PRINTF("Error get hts221 calibr. coefs\r\n");
@@ -442,7 +442,7 @@ int hts221_init(void)
 	temp = (((u16) data1 << 8) | data0);
 	hts221_regs.x1 = temp;
 
-	/* Достоверность */
+	/* Р”РѕСЃС‚РѕРІРµСЂРЅРѕСЃС‚СЊ */
 	if (hts221_regs.x1 == hts221_regs.x0 || hts221_regs.y0 == hts221_regs.y1) {
 	    PRINTF("Error counting hts221 coefs\r\n");
 	    break;
@@ -450,7 +450,7 @@ int hts221_init(void)
 
 
 
-	/* Регистр AV_CONF - вн. усреднение на 64 сампла */
+	/* Р РµРіРёСЃС‚СЂ AV_CONF - РІРЅ. СѓСЃСЂРµРґРЅРµРЅРёРµ РЅР° 64 СЃР°РјРїР»Р° */
 	data0 = 0x04;
 	res = twi_write_reg_value(HTS221_ADDR, HUM_AV_CONF, data0);
 	if (res != SUCCESS) {
@@ -459,7 +459,7 @@ int hts221_init(void)
 	}
 
 
-	/* REG1: активный continius mode 12 Гц */
+	/* REG1: Р°РєС‚РёРІРЅС‹Р№ continius mode 12 Р“С† */
 	data0 = 0x85 + 2;
 	res = twi_write_reg_value(HTS221_ADDR, HUM_CTRL_REG1, data0);
 	if (res != SUCCESS) {
@@ -468,7 +468,7 @@ int hts221_init(void)
 	}
 
 
-	/* REG2: нормальный режим, без подогревателя!!!  */
+	/* REG2: РЅРѕСЂРјР°Р»СЊРЅС‹Р№ СЂРµР¶РёРј, Р±РµР· РїРѕРґРѕРіСЂРµРІР°С‚РµР»СЏ!!!  */
 	data0 = 0x01;
 	res = twi_write_reg_value(HTS221_ADDR, HUM_CTRL_REG2, data0);
 	if (res != SUCCESS) {
@@ -477,7 +477,7 @@ int hts221_init(void)
 	}
 
 
-	/* REG3: Data ready не используем */
+	/* REG3: Data ready РЅРµ РёСЃРїРѕР»СЊР·СѓРµРј */
 	data0 = 0x00;
 	res = twi_write_reg_value(HTS221_ADDR, HUM_CTRL_REG3, data0);
 	if (res != SUCCESS) {
@@ -490,7 +490,7 @@ int hts221_init(void)
 
 
 /**
- * Получить данные влажности и превести в значения процентов
+ * РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ РІР»Р°Р¶РЅРѕСЃС‚Рё Рё РїСЂРµРІРµСЃС‚Рё РІ Р·РЅР°С‡РµРЅРёСЏ РїСЂРѕС†РµРЅС‚РѕРІ
  */
 int hts221_data_get(int *hum)
 {
@@ -503,13 +503,13 @@ int hts221_data_get(int *hum)
 	    break;
 	}
 
-	/* Читаем L побайтно */
+	/* Р§РёС‚Р°РµРј L РїРѕР±Р°Р№С‚РЅРѕ */
 	res = twi_read_reg_value(HTS221_ADDR, HUM_OUT_L, &lo);
 	if (res != SUCCESS) {
 	    break;
 	}
 
-	/* Читаем Hi */
+	/* Р§РёС‚Р°РµРј Hi */
 	res = twi_read_reg_value(HTS221_ADDR, HUM_OUT_H, &hi);
 	if (res != SUCCESS) {
 	    break;
@@ -541,22 +541,22 @@ u8 hts221_get_hum_status(void)
 
 
 /**
- * Инициализация микросхемы. Датчик температуры и давления
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјРёРєСЂРѕСЃС…РµРјС‹. Р”Р°С‚С‡РёРє С‚РµРјРїРµСЂР°С‚СѓСЂС‹ Рё РґР°РІР»РµРЅРёСЏ
  */
 int bmp085_init(void)
 {
     int res = FAILURE;
     do {
-	/* Внутри pars все поставлено в 0 */
+	/* Р’РЅСѓС‚СЂРё pars РІСЃРµ РїРѕСЃС‚Р°РІР»РµРЅРѕ РІ 0 */
 	memset(&bmp085_regs, 0, sizeof(struct bmp085_calibr_pars));
-	/* Читаем коэффициенты из датчика температуры  - 24 байта */
+	/* Р§РёС‚Р°РµРј РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РёР· РґР°С‚С‡РёРєР° С‚РµРјРїРµСЂР°С‚СѓСЂС‹  - 24 Р±Р°Р№С‚Р° */
 	res = twi_read_block_data(BMP085_ADDR, 0xAA, (u8 *) & bmp085_regs, 24);
 	if (res != SUCCESS) {
 	    PRINTF("Error get bmp085 calibr. coefs\r\n");
 	    break;
 	}
 
-	/* Мы прочитали задом наперед - поменяем байты */
+	/* РњС‹ РїСЂРѕС‡РёС‚Р°Р»Рё Р·Р°РґРѕРј РЅР°РїРµСЂРµРґ - РїРѕРјРµРЅСЏРµРј Р±Р°Р№С‚С‹ */
 	bmp085_regs.ac1 = byteswap2(bmp085_regs.ac1);
 	bmp085_regs.ac2 = byteswap2(bmp085_regs.ac2);
 	bmp085_regs.ac3 = byteswap2(bmp085_regs.ac3);
@@ -584,8 +584,8 @@ int bmp085_init(void)
 
 
 /**
- * Получить данные с датчика давления и температуры 
- * NB - после старта должно быть ожидание не менее 5 мс, иначе даные будут неверны!
+ * РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ СЃ РґР°С‚С‡РёРєР° РґР°РІР»РµРЅРёСЏ Рё С‚РµРјРїРµСЂР°С‚СѓСЂС‹ 
+ * NB - РїРѕСЃР»Рµ СЃС‚Р°СЂС‚Р° РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ РѕР¶РёРґР°РЅРёРµ РЅРµ РјРµРЅРµРµ 5 РјСЃ, РёРЅР°С‡Рµ РґР°РЅС‹Рµ Р±СѓРґСѓС‚ РЅРµРІРµСЂРЅС‹!
  */
 int bmp085_data_get(int *temp, int *press)
 {
@@ -597,10 +597,10 @@ int bmp085_data_get(int *temp, int *press)
     u8 data;
     int res = FAILURE;
     do {
-	/* В случае ошибке отобразить что датчик не работает */
+	/* Р’ СЃР»СѓС‡Р°Рµ РѕС€РёР±РєРµ РѕС‚РѕР±СЂР°Р·РёС‚СЊ С‡С‚Рѕ РґР°С‚С‡РёРє РЅРµ СЂР°Р±РѕС‚Р°РµС‚ */
 	*temp = -1;
 	*press = -1;
-	/* Старт измерений температуры! */
+	/* РЎС‚Р°СЂС‚ РёР·РјРµСЂРµРЅРёР№ С‚РµРјРїРµСЂР°С‚СѓСЂС‹! */
 	data = 0x2e;
 	res = twi_write_reg_value(BMP085_ADDR, 0xf4, data);
 	if (res != SUCCESS) {
@@ -608,48 +608,48 @@ int bmp085_data_get(int *temp, int *press)
 	    break;
 	}
 
-	/* ждем не менее 5 мс и читаем 2 байта температуры из F6 и F7 */
+	/* Р¶РґРµРј РЅРµ РјРµРЅРµРµ 5 РјСЃ Рё С‡РёС‚Р°РµРј 2 Р±Р°Р№С‚Р° С‚РµРјРїРµСЂР°С‚СѓСЂС‹ РёР· F6 Рё F7 */
 	delay_ms(10);
 	res = twi_read_block_data(BMP085_ADDR, 0xF6, (u8 *) & ut, 2);
 	if (res != SUCCESS) {
 	    PRINTF("Error get temp. 2 step\r\n");
 	    break;
 	}
-	/* Перевернем байты температуры */
+	/* РџРµСЂРµРІРµСЂРЅРµРј Р±Р°Р№С‚С‹ С‚РµРјРїРµСЂР°С‚СѓСЂС‹ */
 	ut = byteswap2(ut);
-	/* Старт измерение давления! */
+	/* РЎС‚Р°СЂС‚ РёР·РјРµСЂРµРЅРёРµ РґР°РІР»РµРЅРёСЏ! */
 	data = 0x34;
 	res = twi_write_reg_value(BMP085_ADDR, 0xf4, data);
 	if (res != SUCCESS) {
 	    PRINTF("Error get press. 1 step\r\n");
 	    break;
 	}
-	/* ждем не менее 5 мс и читаем из F6 и F7 */
+	/* Р¶РґРµРј РЅРµ РјРµРЅРµРµ 5 РјСЃ Рё С‡РёС‚Р°РµРј РёР· F6 Рё F7 */
 	delay_ms(10);
 	res = twi_read_block_data(BMP085_ADDR, 0xF6, (u8 *) & up, 2);
 	if (res != SUCCESS) {
 	    PRINTF("Error get press. 2 step\r\n");
 	    break;
 	}
-	/* Перевернем байты давления */
+	/* РџРµСЂРµРІРµСЂРЅРµРј Р±Р°Р№С‚С‹ РґР°РІР»РµРЅРёСЏ */
 	up = byteswap2(up);
 
-	/* Таких значений не может быть */
+	/* РўР°РєРёС… Р·РЅР°С‡РµРЅРёР№ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ */
 	if (up == 0 || ut == 0 || up == 0xffff || ut == 0xffff) {
 	    PRINTF("Data get error\r\n");
 	    break;
 	}
 
-	/* Далее все по даташиту Bosch расчет температуры */
+	/* Р”Р°Р»РµРµ РІСЃРµ РїРѕ РґР°С‚Р°С€РёС‚Сѓ Bosch СЂР°СЃС‡РµС‚ С‚РµРјРїРµСЂР°С‚СѓСЂС‹ */
 	x1 = (ut - bmp085_regs.ac6) * bmp085_regs.ac5 >> 15;
 	x2 = (bmp085_regs.mc << 11) / (x1 + bmp085_regs.md);
 	b5 = (x1 + x2);
 
-	/* температура * 10 */
+	/* С‚РµРјРїРµСЂР°С‚СѓСЂР° * 10 */
 	if (temp != NULL)
 	    *temp = (b5 + 8) >> 4;
 
-	/* расчет давления */
+	/* СЂР°СЃС‡РµС‚ РґР°РІР»РµРЅРёСЏ */
 	b6 = b5 - 4000;
 	x1 = (bmp085_regs.b2 * (b6 * b6 >> 12)) >> 11;
 	x2 = bmp085_regs.ac2 * b6 >> 11;
@@ -673,7 +673,7 @@ int bmp085_data_get(int *temp, int *press)
 
 
 
-/* Старт акселерометра */
+/* РЎС‚Р°СЂС‚ Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂР° */
 int lsm303_acc_start(void)
 {
     int res = FAILURE;
@@ -681,27 +681,27 @@ int lsm303_acc_start(void)
     u8 mode = 0x08;		/* Little endian, scale +- 2G, Hi res */
     u8 data;
     do {
-	/* Запустить акселерометр - включаем оси */
+	/* Р—Р°РїСѓСЃС‚РёС‚СЊ Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂ - РІРєР»СЋС‡Р°РµРј РѕСЃРё */
 	res = twi_write_reg_value(LSM303_ACC_ADDR, CTRL_REG1_A, axis);
 	if (res != SUCCESS) {
 	    PRINTF("Error set acc axis\r\n");
 	    break;
 	}
 
-	/* Проверяем что записали? или так сойдет... */
+	/* РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ Р·Р°РїРёСЃР°Р»Рё? РёР»Рё С‚Р°Рє СЃРѕР№РґРµС‚... */
 	res = twi_read_reg_value(LSM303_ACC_ADDR, CTRL_REG1_A, &data);
 	if (res != SUCCESS && data != axis) {
 	    PRINTF("Error check acc axis settings. Write 0x%02X read 0x%02X\r\n", axis, data);
 	    break;
 	}
 
-	/* Шкалы и режим работы */
+	/* РЁРєР°Р»С‹ Рё СЂРµР¶РёРј СЂР°Р±РѕС‚С‹ */
 	if (twi_write_reg_value(LSM303_ACC_ADDR, CTRL_REG4_A, mode) != SUCCESS) {
 	    PRINTF("Error set acc mode\r\n");
 	    break;
 	}
 
-	/* Проверяем что записали? или так сойдет... */
+	/* РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ Р·Р°РїРёСЃР°Р»Рё? РёР»Рё С‚Р°Рє СЃРѕР№РґРµС‚... */
 	res = twi_read_reg_value(LSM303_ACC_ADDR, CTRL_REG4_A, &data);
 	if (res != SUCCESS && data != mode) {
 	    PRINTF("Error check acc mode settings. Write 0x%02X read 0x%02X\r\n", mode, data);
@@ -715,7 +715,7 @@ int lsm303_acc_start(void)
 
 
 /**
- * Получить данные акселерометра - посмотреть по даташиту, там перепутаны оси!
+ * РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂР° - РїРѕСЃРјРѕС‚СЂРµС‚СЊ РїРѕ РґР°С‚Р°С€РёС‚Сѓ, С‚Р°Рј РїРµСЂРµРїСѓС‚Р°РЅС‹ РѕСЃРё!
  */
 int lsm303_get_acc_data(lsm303_data * acc_val)
 {
@@ -730,19 +730,19 @@ int lsm303_get_acc_data(lsm303_data * acc_val)
 	}
 
 
-	/* Читаем X побайтно */
+	/* Р§РёС‚Р°РµРј X РїРѕР±Р°Р№С‚РЅРѕ */
 	twi_read_reg_value(LSM303_ACC_ADDR, OUT_X_L_A, &lo);
 	twi_read_reg_value(LSM303_ACC_ADDR, OUT_X_H_A, &hi);
 	x = ((s16) ((u16) hi << 8) + lo) >> 4;
-	/* Читаем Y побайтно */
+	/* Р§РёС‚Р°РµРј Y РїРѕР±Р°Р№С‚РЅРѕ */
 	twi_read_reg_value(LSM303_ACC_ADDR, OUT_Y_L_A, &lo);
 	twi_read_reg_value(LSM303_ACC_ADDR, OUT_Y_H_A, &hi);
 	y = ((s16) ((u16) hi << 8) + lo) >> 4;
-	/* Читаем Z */
+	/* Р§РёС‚Р°РµРј Z */
 	twi_read_reg_value(LSM303_ACC_ADDR, OUT_Z_L_A, &lo);
 	twi_read_reg_value(LSM303_ACC_ADDR, OUT_Z_H_A, &hi);
 	z = ((s16) ((u16) hi << 8) + lo) >> 4;
-	/* Читаем 2 байта из регистра REG4A */
+	/* Р§РёС‚Р°РµРј 2 Р±Р°Р№С‚Р° РёР· СЂРµРіРёСЃС‚СЂР° REG4A */
 	twi_read_block_data(LSM303_ACC_ADDR, CTRL_REG4_A, ctrlx, 2);
 	/* Little Endian Mode or FIFO mode */
 	if (ctrlx[1] & 0x40) {
@@ -765,7 +765,7 @@ int lsm303_get_acc_data(lsm303_data * acc_val)
 	    }
 	}
 
-	/* Получить значения mG по осям */
+	/* РџРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёСЏ mG РїРѕ РѕСЃСЏРј */
 	acc_val->x = (int) x *sens;
 	acc_val->y = (int) y *sens;
 	acc_val->z = (int) z *sens;
@@ -774,7 +774,7 @@ int lsm303_get_acc_data(lsm303_data * acc_val)
     return res;
 }
 
-/* Read Acc STATUS register  - 0 возвращается или не прочитали или нет результата !!! */
+/* Read Acc STATUS register  - 0 РІРѕР·РІСЂР°С‰Р°РµС‚СЃСЏ РёР»Рё РЅРµ РїСЂРѕС‡РёС‚Р°Р»Рё РёР»Рё РЅРµС‚ СЂРµР·СѓР»СЊС‚Р°С‚Р° !!! */
 static u8 lsm303_get_acc_status(void)
 {
     u8 temp;
@@ -787,60 +787,60 @@ static u8 lsm303_get_acc_status(void)
 }
 
 /**
- * Старт компаса
+ * РЎС‚Р°СЂС‚ РєРѕРјРїР°СЃР°
  */
 int lsm303_comp_start(void)
 {
     int res = FAILURE;
-    u8 rate = 0x04;		/* Частота 1.5 Гц, + температурный датчик Off */
+    u8 rate = 0x04;		/* Р§Р°СЃС‚РѕС‚Р° 1.5 Р“С†, + С‚РµРјРїРµСЂР°С‚СѓСЂРЅС‹Р№ РґР°С‚С‡РёРє Off */
     u8 gain = 0x20;		/* gn2=0 gn1=0 gn0=1 */
-    u8 mode = 0x00;		/* Continiuos mode - проверить, что это правильный режим */
+    u8 mode = 0x00;		/* Continiuos mode - РїСЂРѕРІРµСЂРёС‚СЊ, С‡С‚Рѕ СЌС‚Рѕ РїСЂР°РІРёР»СЊРЅС‹Р№ СЂРµР¶РёРј */
     u8 data;
     do {
 
-	/* Установка компаса */
+	/* РЈСЃС‚Р°РЅРѕРІРєР° РєРѕРјРїР°СЃР° */
 	res = twi_write_reg_value(LSM303_COMP_ADDR, CRA_REG_M, rate);
 	if (res != SUCCESS) {
 	    PRINTF("Error set comp rate\r\n");
 	    break;
 	}
 
-	/* Проверяем что записали? или так сойдет... */
+	/* РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ Р·Р°РїРёСЃР°Р»Рё? РёР»Рё С‚Р°Рє СЃРѕР№РґРµС‚... */
 	res = twi_read_reg_value(LSM303_COMP_ADDR, CRA_REG_M, &data);
 	if (res != SUCCESS && data != rate) {
 	    PRINTF("Error check comp rate settings, data error. Write 0x%02X read 0x%02X\r\n", rate, data);
 	    break;
 	}
 
-	/* Шкала компаса */
+	/* РЁРєР°Р»Р° РєРѕРјРїР°СЃР° */
 	res = twi_write_reg_value(LSM303_COMP_ADDR, CRB_REG_M, gain);
 	if (res != SUCCESS) {
 	    PRINTF("Error set comp rate\r\n");
 	    break;
 	}
 
-	/* Проверяем что записали? или так сойдет... */
+	/* РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ Р·Р°РїРёСЃР°Р»Рё? РёР»Рё С‚Р°Рє СЃРѕР№РґРµС‚... */
 	res = twi_read_reg_value(LSM303_COMP_ADDR, CRB_REG_M, &data);
 	if (res != SUCCESS && data != gain) {
 	    PRINTF("Error check comp gain settings, gain error. Write 0x%02X read 0x%02X\r\n", gain, data);
 	    break;
 	}
 
-	/* Режим компаса */
+	/* Р РµР¶РёРј РєРѕРјРїР°СЃР° */
 	res = twi_write_reg_value(LSM303_COMP_ADDR, MR_REG_M, mode);
 	if (res != SUCCESS) {
 	    PRINTF("Error set comp rate\r\n");
 	    break;
 	}
 
-	/* Проверяем что записали? или так сойдет... */
+	/* РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ Р·Р°РїРёСЃР°Р»Рё? РёР»Рё С‚Р°Рє СЃРѕР№РґРµС‚... */
 	res = twi_read_reg_value(LSM303_COMP_ADDR, MR_REG_M, &data);
 	if (res != SUCCESS && data != mode) {
 	    PRINTF("Error check comp mode settings, gain error. Write 0x%02X read 0x%02X\r\n", mode, data);
 	    break;
 	}
 
-	PRINTF("Mode comp OK: Частота 1.5 Гц, + температурный датчик ON, gn2=0 gn1=0 gn0=1, Continiuos mode\r\n");
+	PRINTF("Mode comp OK: Р§Р°СЃС‚РѕС‚Р° 1.5 Р“С†, + С‚РµРјРїРµСЂР°С‚СѓСЂРЅС‹Р№ РґР°С‚С‡РёРє ON, gn2=0 gn1=0 gn0=1, Continiuos mode\r\n");
     }
     while (0);
     return res;
@@ -861,8 +861,8 @@ u8 lsm303_get_comp_status(void)
 }
 
 /**
- * Получить данные компаса - посмотреть по даташиту, там перепутаны оси!
- * Проверить endian - у компаса хранятся со старшего в отличие от акселерометра!
+ * РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ РєРѕРјРїР°СЃР° - РїРѕСЃРјРѕС‚СЂРµС‚СЊ РїРѕ РґР°С‚Р°С€РёС‚Сѓ, С‚Р°Рј РїРµСЂРµРїСѓС‚Р°РЅС‹ РѕСЃРё!
+ * РџСЂРѕРІРµСЂРёС‚СЊ endian - Сѓ РєРѕРјРїР°СЃР° С…СЂР°РЅСЏС‚СЃСЏ СЃРѕ СЃС‚Р°СЂС€РµРіРѕ РІ РѕС‚Р»РёС‡РёРµ РѕС‚ Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂР°!
  */
 int lsm303_get_comp_data(lsm303_data * data)
 {
@@ -875,7 +875,7 @@ int lsm303_get_comp_data(lsm303_data * data)
 	    break;
 	}
 
-	/* Читаем X побайтно */
+	/* Р§РёС‚Р°РµРј X РїРѕР±Р°Р№С‚РЅРѕ */
 	res = twi_read_reg_value(LSM303_COMP_ADDR, OUT_X_H_M, &hi);
 	if (res != SUCCESS) {
 	    break;
@@ -911,7 +911,7 @@ int lsm303_get_comp_data(lsm303_data * data)
 	}
 
 	y = ((s32) ((u16) hi << 8) + lo);
-	/* Прочитаем регистр усиления для магнитного поля */
+	/* РџСЂРѕС‡РёС‚Р°РµРј СЂРµРіРёСЃС‚СЂ СѓСЃРёР»РµРЅРёСЏ РґР»СЏ РјР°РіРЅРёС‚РЅРѕРіРѕ РїРѕР»СЏ */
 	res = twi_read_reg_value(LSM303_COMP_ADDR, CRB_REG_M, &gain);
 	if (res != SUCCESS) {
 	    break;
@@ -919,37 +919,37 @@ int lsm303_get_comp_data(lsm303_data * data)
 
 	switch (gain) {
 
-	    /*!< Full scale = ±1.9 Gauss */
+	    /*!< Full scale = В±1.9 Gauss */
 	case LSM303_FS_1_9_GA:
 	    sens_xy = 855;
 	    sens_z = 760;
 	    break;
-	    /*!< Full scale = ±2.5 Gauss */
+	    /*!< Full scale = В±2.5 Gauss */
 	case LSM303_FS_2_5_GA:
 	    sens_xy = 670;
 	    sens_z = 600;
 	    break;
-	    /*!< Full scale = ±4.0 Gauss */
+	    /*!< Full scale = В±4.0 Gauss */
 	case LSM303_FS_4_0_GA:
 	    sens_xy = 450;
 	    sens_z = 400;
 	    break;
-	    /*!< Full scale = ±4.7 Gauss */
+	    /*!< Full scale = В±4.7 Gauss */
 	case LSM303_FS_4_7_GA:
 	    sens_xy = 400;
 	    sens_z = 355;
 	    break;
-	    /*!< Full scale = ±5.6 Gauss */
+	    /*!< Full scale = В±5.6 Gauss */
 	case LSM303_FS_5_6_GA:
 	    sens_xy = 330;
 	    sens_z = 295;
 	    break;
-	    /*!< Full scale = ±8.1 Gauss */
+	    /*!< Full scale = В±8.1 Gauss */
 	case LSM303_FS_8_1_GA:
 	    sens_xy = 230;
 	    sens_z = 205;
 	    break;
-	    /*!< Full scale = ±1.3 Gauss */
+	    /*!< Full scale = В±1.3 Gauss */
 	case LSM303_FS_1_3_GA:
 	default:
 	    break;
