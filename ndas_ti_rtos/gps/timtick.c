@@ -1,13 +1,13 @@
 /****************************************************************************************
- *	Подстройки всех таймеров по GPS, ведение времени 
- *      и установка обработчиков старта и стопа
+ *	РџРѕРґСЃС‚СЂРѕР№РєРё РІСЃРµС… С‚Р°Р№РјРµСЂРѕРІ РїРѕ GPS, РІРµРґРµРЅРёРµ РІСЂРµРјРµРЅРё 
+ *      Рё СѓСЃС‚Р°РЅРѕРІРєР° РѕР±СЂР°Р±РѕС‚С‡РёРєРѕРІ СЃС‚Р°СЂС‚Р° Рё СЃС‚РѕРїР°
  *****************************************************************************************/
 #include "timtick.h"
 #include "led.h"
 
 #define         TIMER_COEF      (1953)
 
-/* Точный таймер VCXO */
+/* РўРѕС‡РЅС‹Р№ С‚Р°Р№РјРµСЂ VCXO */
 #define         PREC_TIMER_FREQ              80000000
 #define         PREC_TIMER_MODE              PIN_MODE_7
 #define         PREC_TIMER_PIN               PIN_50
@@ -16,13 +16,13 @@
 #define         PREC_TIMER_INT               INT_TIMERA0A
 
 
-/* "Простой" таймер для подсчета времени если GPS не работает  */
+/* "РџСЂРѕСЃС‚РѕР№" С‚Р°Р№РјРµСЂ РґР»СЏ РїРѕРґСЃС‡РµС‚Р° РІСЂРµРјРµРЅРё РµСЃР»Рё GPS РЅРµ СЂР°Р±РѕС‚Р°РµС‚  */
 #define		SIMPLE_TIMER_BASE		TIMERA3_BASE
 #define         SIMPLE_TIMER_PRCM               PRCM_TIMERA3
 #define         SIMPLE_TIMER_INT		INT_TIMERA3A
 
 
-/* Вход для подсчета PPS - gpio22  */
+/* Р’С…РѕРґ РґР»СЏ РїРѕРґСЃС‡РµС‚Р° PPS - gpio22  */
 #define         PPS_DRDY_PIN            PIN_15
 #define         PPS_DRDY_MODE           PIN_MODE_0
 #define         PPS_DRDY_BASE           GPIOA2_BASE
@@ -33,24 +33,24 @@
 #define         PPS_PRCM                PRCM_GPIOA2
 
 
-/* Ведение календаря + флаги синхронизации и внутрение часы для синхронизации */
+/* Р’РµРґРµРЅРёРµ РєР°Р»РµРЅРґР°СЂСЏ + С„Р»Р°РіРё СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё Рё РІРЅСѓС‚СЂРµРЅРёРµ С‡Р°СЃС‹ РґР»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё */
 static struct {
-    s32 sec;			/* Секунды с 1970 года */
-    u32 sample;			/* Сколько нащелкал таймер. Буквально фаза, если брать из прерывания по PPS */
+    s32 sec;			/* РЎРµРєСѓРЅРґС‹ СЃ 1970 РіРѕРґР° */
+    u32 sample;			/* РЎРєРѕР»СЊРєРѕ РЅР°С‰РµР»РєР°Р» С‚Р°Р№РјРµСЂ. Р‘СѓРєРІР°Р»СЊРЅРѕ С„Р°Р·Р°, РµСЃР»Рё Р±СЂР°С‚СЊ РёР· РїСЂРµСЂС‹РІР°РЅРёСЏ РїРѕ PPS */
     u32 prev_sample;
     u32 freq;
     i32 tick;
-    s64 ms100;			/* В таймере щелкаем по 100 миллисекунд - т.е. 10 раз в секунду  */
-    void (*call_back_func) (u32);	/* Указатель на функцыю, которую будем вызывать из прерывания таймера  */
+    s64 ms100;			/* Р’ С‚Р°Р№РјРµСЂРµ С‰РµР»РєР°РµРј РїРѕ 100 РјРёР»Р»РёСЃРµРєСѓРЅРґ - С‚.Рµ. 10 СЂР°Р· РІ СЃРµРєСѓРЅРґСѓ  */
+    void (*call_back_func) (u32);	/* РЈРєР°Р·Р°С‚РµР»СЊ РЅР° С„СѓРЅРєС†С‹СЋ, РєРѕС‚РѕСЂСѓСЋ Р±СѓРґРµРј РІС‹Р·С‹РІР°С‚СЊ РёР· РїСЂРµСЂС‹РІР°РЅРёСЏ С‚Р°Р№РјРµСЂР°  */
     bool force_sync;
-    bool phase_ok;		/* Таймер синхорнизирован OK */
-    bool time_ok;		/* полностью подстроен */
+    bool phase_ok;		/* РўР°Р№РјРµСЂ СЃРёРЅС…РѕСЂРЅРёР·РёСЂРѕРІР°РЅ OK */
+    bool time_ok;		/* РїРѕР»РЅРѕСЃС‚СЊСЋ РїРѕРґСЃС‚СЂРѕРµРЅ */
     bool ttt;
 } timer_tick_struct;
 
 
 /**
- * Неточный таймер - запускается в самом начале работы, т.к. у нас нет RTC
+ * РќРµС‚РѕС‡РЅС‹Р№ С‚Р°Р№РјРµСЂ - Р·Р°РїСѓСЃРєР°РµС‚СЃСЏ РІ СЃР°РјРѕРј РЅР°С‡Р°Р»Рµ СЂР°Р±РѕС‚С‹, С‚.Рє. Сѓ РЅР°СЃ РЅРµС‚ RTC
  */
 static void timer_simple_isr(void)
 {
@@ -59,38 +59,38 @@ static void timer_simple_isr(void)
     ulInts = MAP_TimerIntStatus(SIMPLE_TIMER_BASE, true);	/* Clear the timer interrupt. */
     MAP_TimerIntClear(SIMPLE_TIMER_BASE, ulInts);
 
-    /* увеличиваем секунды */
+    /* СѓРІРµР»РёС‡РёРІР°РµРј СЃРµРєСѓРЅРґС‹ */
     timer_tick_struct.sec++;
 }
 
 
 /**
- * Инициализация неточных часов
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РЅРµС‚РѕС‡РЅС‹С… С‡Р°СЃРѕРІ
  */
 void timer_simple_init(void)
 {
-    /* Поставим время компиляции в начале, пока нет RTC и плохо работает батарейка GPS */
+    /* РџРѕСЃС‚Р°РІРёРј РІСЂРµРјСЏ РєРѕРјРїРёР»СЏС†РёРё РІ РЅР°С‡Р°Р»Рµ, РїРѕРєР° РЅРµС‚ RTC Рё РїР»РѕС…Рѕ СЂР°Р±РѕС‚Р°РµС‚ Р±Р°С‚Р°СЂРµР№РєР° GPS */
     timer_tick_struct.sec = get_comp_time();
 
-    /* Разрешим тактирование */
+    /* Р Р°Р·СЂРµС€РёРј С‚Р°РєС‚РёСЂРѕРІР°РЅРёРµ */
     MAP_PRCMPeripheralClkEnable(SIMPLE_TIMER_PRCM, PRCM_RUN_MODE_CLK);
 
-    /* Сбросить */
+    /* РЎР±СЂРѕСЃРёС‚СЊ */
     MAP_PRCMPeripheralReset(SIMPLE_TIMER_PRCM);
 
-    /* Configure the timer - счет вверх */
+    /* Configure the timer - СЃС‡РµС‚ РІРІРµСЂС… */
     MAP_TimerConfigure(SIMPLE_TIMER_BASE, TIMER_CFG_PERIODIC_UP);
 
-    /* Прескалер в 0 */
+    /* РџСЂРµСЃРєР°Р»РµСЂ РІ 0 */
     MAP_TimerPrescaleSet(SIMPLE_TIMER_BASE, TIMER_A, 0);
 
     /* Enable timerout event interrupt */
     MAP_TimerIntEnable(SIMPLE_TIMER_BASE, TIMER_TIMA_TIMEOUT);
 
-    /* Регистрируем прерывания  */
+    /* Р РµРіРёСЃС‚СЂРёСЂСѓРµРј РїСЂРµСЂС‹РІР°РЅРёСЏ  */
     osi_InterruptRegister(SIMPLE_TIMER_INT, timer_simple_isr, INT_PRIORITY_LVL_4);
 
-    /* До чего считать - до 1 секунды  */
+    /* Р”Рѕ С‡РµРіРѕ СЃС‡РёС‚Р°С‚СЊ - РґРѕ 1 СЃРµРєСѓРЅРґС‹  */
     MAP_TimerLoadSet(SIMPLE_TIMER_BASE, TIMER_A, SYSCLK);
 
     /* Enable Timer */
@@ -98,7 +98,7 @@ void timer_simple_init(void)
 }
 
 /**
- * Остановить таймер если не используем его больше
+ * РћСЃС‚Р°РЅРѕРІРёС‚СЊ С‚Р°Р№РјРµСЂ РµСЃР»Рё РЅРµ РёСЃРїРѕР»СЊР·СѓРµРј РµРіРѕ Р±РѕР»СЊС€Рµ
  */
 void timer_simple_stop(void)
 {
@@ -109,43 +109,43 @@ void timer_simple_stop(void)
 
 
 
-/* Прерывание PPS для подсчета и настройки частоты */
+/* РџСЂРµСЂС‹РІР°РЅРёРµ PPS РґР»СЏ РїРѕРґСЃС‡РµС‚Р° Рё РЅР°СЃС‚СЂРѕР№РєРё С‡Р°СЃС‚РѕС‚С‹ */
 static void pps_func_isr(void)
 {
-    timer_tick_struct.sample = HWREG(PREC_TIMER_BASE + TIMER_O_TAR);	/* считываем значение счетчика как можно быстрее */
+    timer_tick_struct.sample = HWREG(PREC_TIMER_BASE + TIMER_O_TAR);	/* СЃС‡РёС‚С‹РІР°РµРј Р·РЅР°С‡РµРЅРёРµ СЃС‡РµС‚С‡РёРєР° РєР°Рє РјРѕР¶РЅРѕ Р±С‹СЃС‚СЂРµРµ */
 
 
-    /* Сдвигаем фазу таймера. Расчет уточнить! 
-     * Пролог этого ISR - 12 тактов, предыдущая команда ~ 4 такта
-     * Проверка флага ~ 4 такта. Т.е. нужно сдвинуть фазу так, чтобы в
-     * счетчике была величина соответсвующая 20 тактам или 250 нс.
-     * 51200 тиков "нашего" таймера - это 0.1 секунды
-     * 1 тик - 1.95 us. Так что можо смело ставить 0
+    /* РЎРґРІРёРіР°РµРј С„Р°Р·Сѓ С‚Р°Р№РјРµСЂР°. Р Р°СЃС‡РµС‚ СѓС‚РѕС‡РЅРёС‚СЊ! 
+     * РџСЂРѕР»РѕРі СЌС‚РѕРіРѕ ISR - 12 С‚Р°РєС‚РѕРІ, РїСЂРµРґС‹РґСѓС‰Р°СЏ РєРѕРјР°РЅРґР° ~ 4 С‚Р°РєС‚Р°
+     * РџСЂРѕРІРµСЂРєР° С„Р»Р°РіР° ~ 4 С‚Р°РєС‚Р°. Рў.Рµ. РЅСѓР¶РЅРѕ СЃРґРІРёРЅСѓС‚СЊ С„Р°Р·Сѓ С‚Р°Рє, С‡С‚РѕР±С‹ РІ
+     * СЃС‡РµС‚С‡РёРєРµ Р±С‹Р»Р° РІРµР»РёС‡РёРЅР° СЃРѕРѕС‚РІРµС‚СЃРІСѓСЋС‰Р°СЏ 20 С‚Р°РєС‚Р°Рј РёР»Рё 250 РЅСЃ.
+     * 51200 С‚РёРєРѕРІ "РЅР°С€РµРіРѕ" С‚Р°Р№РјРµСЂР° - СЌС‚Рѕ 0.1 СЃРµРєСѓРЅРґС‹
+     * 1 С‚РёРє - 1.95 us. РўР°Рє С‡С‚Рѕ РјРѕР¶Рѕ СЃРјРµР»Рѕ СЃС‚Р°РІРёС‚СЊ 0
      */
     if (timer_tick_struct.force_sync) {
 	HWREG(PREC_TIMER_BASE + TIMER_O_TAV) = 0;
-	timer_tick_struct.ms100 = 0;	/* Будем синхорнизировать только секунды */
+	timer_tick_struct.ms100 = 0;	/* Р‘СѓРґРµРј СЃРёРЅС…РѕСЂРЅРёР·РёСЂРѕРІР°С‚СЊ С‚РѕР»СЊРєРѕ СЃРµРєСѓРЅРґС‹ */
 	timer_tick_struct.force_sync = false;
 	timer_tick_struct.phase_ok = true;
     }
 
-    MAP_GPIOIntClear(PPS_DRDY_BASE, PPS_DRDY_GPIO);	/* Чистим прерывания  */
+    MAP_GPIOIntClear(PPS_DRDY_BASE, PPS_DRDY_GPIO);	/* Р§РёСЃС‚РёРј РїСЂРµСЂС‹РІР°РЅРёСЏ  */
 /*
-	timer_tick_struct.sample = timer_tick_struct.sample << 8;	// сдвигаем на 8, чтобы нормально переворачивалось через 0
-	timer_tick_struct.freq = ((timer_tick_struct.sample - timer_tick_struct.prev_sample) >> 8);	// сдвигаем обратно       
+	timer_tick_struct.sample = timer_tick_struct.sample << 8;	// СЃРґРІРёРіР°РµРј РЅР° 8, С‡С‚РѕР±С‹ РЅРѕСЂРјР°Р»СЊРЅРѕ РїРµСЂРµРІРѕСЂР°С‡РёРІР°Р»РѕСЃСЊ С‡РµСЂРµР· 0
+	timer_tick_struct.freq = ((timer_tick_struct.sample - timer_tick_struct.prev_sample) >> 8);	// СЃРґРІРёРіР°РµРј РѕР±СЂР°С‚РЅРѕ       
 	timer_tick_struct.prev_sample = timer_tick_struct.sample;
 */
 
     u32 s1;
     s1 = timer_tick_struct.sample << 8;
-    timer_tick_struct.freq = ((s1 - timer_tick_struct.prev_sample) >> 8);	// сдвигаем обратно               
+    timer_tick_struct.freq = ((s1 - timer_tick_struct.prev_sample) >> 8);	// СЃРґРІРёРіР°РµРј РѕР±СЂР°С‚РЅРѕ               
     timer_tick_struct.prev_sample = s1;
 
     timer_tick_struct.tick++;
 }
 
 /**
- * Сдвинуть фазу таймера
+ * РЎРґРІРёРЅСѓС‚СЊ С„Р°Р·Сѓ С‚Р°Р№РјРµСЂР°
  */
 void timer_shift_phase(void)
 {
@@ -153,7 +153,7 @@ void timer_shift_phase(void)
 }
 
 /**
- * счет 100 мс интервалов
+ * СЃС‡РµС‚ 100 РјСЃ РёРЅС‚РµСЂРІР°Р»РѕРІ
  */
 static void timer_tick_isr(void)
 {
@@ -164,14 +164,14 @@ static void timer_tick_isr(void)
 
     timer_tick_struct.ms100++;
 
-    /* увеличиваем секунды */
+    /* СѓРІРµР»РёС‡РёРІР°РµРј СЃРµРєСѓРЅРґС‹ */
     if (timer_tick_struct.ms100 == 10) {
 	timer_tick_struct.ms100 = 0;
 
-	/* Синхронизируем время в статусе */
+	/* РЎРёРЅС…СЂРѕРЅРёР·РёСЂСѓРµРј РІСЂРµРјСЏ РІ СЃС‚Р°С‚СѓСЃРµ */
 	timer_tick_struct.sec++;
 
-	/* Вызываем обработчик, если он установлен */
+	/* Р’С‹Р·С‹РІР°РµРј РѕР±СЂР°Р±РѕС‚С‡РёРє, РµСЃР»Рё РѕРЅ СѓСЃС‚Р°РЅРѕРІР»РµРЅ */
 	if (timer_tick_struct.call_back_func != NULL) {
 	    u32 sec;
 	    sec = timer_tick_struct.sec;
@@ -182,22 +182,22 @@ static void timer_tick_isr(void)
 
 
 
-/* Настроить GPIO и Прерывания для ноги PIN15 */
+/* РќР°СЃС‚СЂРѕРёС‚СЊ GPIO Рё РџСЂРµСЂС‹РІР°РЅРёСЏ РґР»СЏ РЅРѕРіРё PIN15 */
 void timer_pps_init(void)
 {
     /* Enable Peripheral Clocks  */
     MAP_PRCMPeripheralClkEnable(PPS_PRCM, PRCM_RUN_MODE_CLK);
 
-    /* Ногу DRDY (PIN_15/gpio22 на вход - прицепить так же прерывания к ней */
+    /* РќРѕРіСѓ DRDY (PIN_15/gpio22 РЅР° РІС…РѕРґ - РїСЂРёС†РµРїРёС‚СЊ С‚Р°Рє Р¶Рµ РїСЂРµСЂС‹РІР°РЅРёСЏ Рє РЅРµР№ */
     MAP_PinTypeGPIO(PPS_DRDY_PIN, PPS_DRDY_MODE, false);
     MAP_GPIODirModeSet(PPS_DRDY_BASE, PPS_DRDY_BIT, GPIO_DIR_MODE_IN);
 
-    /* Set GPIO interrupt type - посмотреть на что реагировать - падающий или восходящий! */
+    /* Set GPIO interrupt type - РїРѕСЃРјРѕС‚СЂРµС‚СЊ РЅР° С‡С‚Рѕ СЂРµР°РіРёСЂРѕРІР°С‚СЊ - РїР°РґР°СЋС‰РёР№ РёР»Рё РІРѕСЃС…РѕРґСЏС‰РёР№! */
     MAP_GPIOIntTypeSet(PPS_DRDY_BASE, PPS_DRDY_GPIO, GPIO_RISING_EDGE);
 
-    osi_InterruptRegister(PPS_DRDY_GROUP_INT, pps_func_isr, INT_PRIORITY_LVL_2);	/* Регистрируем прерывания */
+    osi_InterruptRegister(PPS_DRDY_GROUP_INT, pps_func_isr, INT_PRIORITY_LVL_2);	/* Р РµРіРёСЃС‚СЂРёСЂСѓРµРј РїСЂРµСЂС‹РІР°РЅРёСЏ */
 
-    /* Чистим флаги */
+    /* Р§РёСЃС‚РёРј С„Р»Р°РіРё */
     MAP_GPIOIntClear(PPS_DRDY_BASE, PPS_DRDY_GPIO);
 
     /* Enable Interrupt */
@@ -207,7 +207,7 @@ void timer_pps_init(void)
 }
 
 /**
- * Счет клоков VCXO
+ * РЎС‡РµС‚ РєР»РѕРєРѕРІ VCXO
  */
 void timer_counter_init(void)
 {
@@ -220,7 +220,7 @@ void timer_counter_init(void)
     MAP_PinTypeTimer(PREC_TIMER_PIN, PREC_TIMER_MODE);
     MAP_PinConfigSet(PREC_TIMER_PIN, PIN_TYPE_STD_PD, PIN_STRENGTH_6MA);
 
-    // Прескалер
+    // РџСЂРµСЃРєР°Р»РµСЂ
     MAP_TimerPrescaleSet(PREC_TIMER_BASE, TIMER_A, 0xFF);
     MAP_TimerPrescaleMatchSet(PREC_TIMER_BASE, TIMER_A, 0xFF);
 
@@ -229,10 +229,10 @@ void timer_counter_init(void)
     MAP_TimerMatchSet(PREC_TIMER_BASE, TIMER_A, 0xFFFF);
 
 
-    // Configure the timer in Input Edge-Count Mode - режим 9.3.2.2
+    // Configure the timer in Input Edge-Count Mode - СЂРµР¶РёРј 9.3.2.2
     MAP_TimerConfigure(PREC_TIMER_BASE, TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_CAP_COUNT_UP);
 
-    // Считаем импульсы по фронту
+    // РЎС‡РёС‚Р°РµРј РёРјРїСѓР»СЊСЃС‹ РїРѕ С„СЂРѕРЅС‚Сѓ
     MAP_TimerControlEvent(PREC_TIMER_BASE, TIMER_A, TIMER_EVENT_BOTH_EDGES);
 
     TimerValueSet(PREC_TIMER_BASE, TIMER_A, 0);
@@ -241,7 +241,7 @@ void timer_counter_init(void)
 
 
 /**
- * Отключаем счет PPS
+ * РћС‚РєР»СЋС‡Р°РµРј СЃС‡РµС‚ PPS
  */
 void timer_pps_exit(void)
 {
@@ -254,7 +254,7 @@ void timer_pps_exit(void)
 
 
 /**
- * Настройка интервального таймера уже подстроенного генератора 
+ * РќР°СЃС‚СЂРѕР№РєР° РёРЅС‚РµСЂРІР°Р»СЊРЅРѕРіРѕ С‚Р°Р№РјРµСЂР° СѓР¶Рµ РїРѕРґСЃС‚СЂРѕРµРЅРЅРѕРіРѕ РіРµРЅРµСЂР°С‚РѕСЂР° 
  */
 void timer_tick_init(void)
 {
@@ -266,29 +266,29 @@ void timer_tick_init(void)
     MAP_PinTypeTimer(PREC_TIMER_PIN, PREC_TIMER_MODE);
     MAP_PinConfigSet(PREC_TIMER_PIN, PIN_TYPE_STD_PD, PIN_STRENGTH_6MA);
 
-    // Прескалер
+    // РџСЂРµСЃРєР°Р»РµСЂ
     MAP_TimerPrescaleSet(PREC_TIMER_BASE, TIMER_A, 0);
     MAP_TimerPrescaleMatchSet(PREC_TIMER_BASE, TIMER_A, 0);
 
-    // Configure the timer in Input Edge-Count Mode - режим 9.3.2.2
+    // Configure the timer in Input Edge-Count Mode - СЂРµР¶РёРј 9.3.2.2
     MAP_TimerConfigure(PREC_TIMER_BASE, TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_CAP_COUNT_UP /* | TIMER_CFG_PERIODIC_UP */ );
 
-    // Считаем импульсы по фронту
+    // РЎС‡РёС‚Р°РµРј РёРјРїСѓР»СЊСЃС‹ РїРѕ С„СЂРѕРЅС‚Сѓ
     MAP_TimerControlEvent(PREC_TIMER_BASE, TIMER_A, TIMER_EVENT_POS_EDGE);
 
-    /* считаем до 0.1 сек  */
+    /* СЃС‡РёС‚Р°РµРј РґРѕ 0.1 СЃРµРє  */
     TimerValueSet(PREC_TIMER_BASE, TIMER_A, 0);
 
     ////vvvv:
     MAP_TimerMatchSet(PREC_TIMER_BASE, TIMER_A, 51200 - 1);
 
-    /* До чего считать - до 0.1 секунды  */
+    /* Р”Рѕ С‡РµРіРѕ СЃС‡РёС‚Р°С‚СЊ - РґРѕ 0.1 СЃРµРєСѓРЅРґС‹  */
     MAP_TimerLoadSet(PREC_TIMER_BASE, TIMER_A, 51200 - 1);
 
     /* Enable timerout event interrupt */
     MAP_TimerIntEnable(PREC_TIMER_BASE, TIMER_CAPA_MATCH);
 
-    /* Регистрируем прерывания */
+    /* Р РµРіРёСЃС‚СЂРёСЂСѓРµРј РїСЂРµСЂС‹РІР°РЅРёСЏ */
     osi_InterruptRegister(INT_TIMERA0A, timer_tick_isr, INT_PRIORITY_LVL_3);
 
     /* Enable Timer */
@@ -296,7 +296,7 @@ void timer_tick_init(void)
 }
 
 /**
- * Установить функцию, это так же означает что таймер 1 запущен! 
+ * РЈСЃС‚Р°РЅРѕРІРёС‚СЊ С„СѓРЅРєС†РёСЋ, СЌС‚Рѕ С‚Р°Рє Р¶Рµ РѕР·РЅР°С‡Р°РµС‚ С‡С‚Рѕ С‚Р°Р№РјРµСЂ 1 Р·Р°РїСѓС‰РµРЅ! 
  */
 void timer_set_callback(void *ptr)
 {
@@ -305,7 +305,7 @@ void timer_set_callback(void *ptr)
 
 
 /**
- * Убрать callback функцию 
+ * РЈР±СЂР°С‚СЊ callback С„СѓРЅРєС†РёСЋ 
  */
 void timer_del_callback(void)
 {
@@ -314,7 +314,7 @@ void timer_del_callback(void)
 
 
 /**
- * Если стоит callback
+ * Р•СЃР»Рё СЃС‚РѕРёС‚ callback
  */
 bool timer_is_callback(void)
 {
@@ -322,21 +322,21 @@ bool timer_is_callback(void)
 }
 
 
-/* Вернуть секунды */
+/* Р’РµСЂРЅСѓС‚СЊ СЃРµРєСѓРЅРґС‹ */
 u32 timer_get_sec_ticks(void)
 {
     return timer_tick_struct.sec;
 }
 
-/* Записать секунды */
+/* Р—Р°РїРёСЃР°С‚СЊ СЃРµРєСѓРЅРґС‹ */
 void timer_set_sec_ticks(s32 sec)
 {
-    /* Вставить критическую секцию или семафор */
+    /* Р’СЃС‚Р°РІРёС‚СЊ РєСЂРёС‚РёС‡РµСЃРєСѓСЋ СЃРµРєС†РёСЋ РёР»Рё СЃРµРјР°С„РѕСЂ */
     timer_tick_struct.sec = sec;
 /*	timer_tick_struct.ms100 = 0;       */
 }
 
-/* Есьт точное время? */
+/* Р•СЃСЊС‚ С‚РѕС‡РЅРѕРµ РІСЂРµРјСЏ? */
 bool timer_is_sync(void)
 {
     return (timer_tick_struct.time_ok);
@@ -350,8 +350,8 @@ void timer_time_ok(void)
 
 
 /** 
- * Получить тики в миллисекундах 
- * 1 тик частоты 80 МГц - 12.5 нс
+ * РџРѕР»СѓС‡РёС‚СЊ С‚РёРєРё РІ РјРёР»Р»РёСЃРµРєСѓРЅРґР°С… 
+ * 1 С‚РёРє С‡Р°СЃС‚РѕС‚С‹ 80 РњР“С† - 12.5 РЅСЃ
  */
 s64 timer_get_msec_ticks(void)
 {
@@ -359,8 +359,8 @@ s64 timer_get_msec_ticks(void)
 }
 
 /** 
- * Вернуть наносекунды "точных часов"
- * 1 тик частоты 1953 нс
+ * Р’РµСЂРЅСѓС‚СЊ РЅР°РЅРѕСЃРµРєСѓРЅРґС‹ "С‚РѕС‡РЅС‹С… С‡Р°СЃРѕРІ"
+ * 1 С‚РёРє С‡Р°СЃС‚РѕС‚С‹ 1953 РЅСЃ
  */
 s64 timer_get_long_time(void)
 {
@@ -368,7 +368,7 @@ s64 timer_get_long_time(void)
 
     if (timer_tick_struct.time_ok) {
 
-	/*  Время по "точным часам" */
+	/*  Р’СЂРµРјСЏ РїРѕ "С‚РѕС‡РЅС‹Рј С‡Р°СЃР°Рј" */
 	time = ((s64) timer_tick_struct.sec * TIMER_NS_DIVIDER)
 	    + ((s64) timer_tick_struct.ms100 * TIMER_NS_DIVIDER / 10)
 	    + (s64) HWREG(PREC_TIMER_BASE + TIMER_O_TAR) * TIMER_COEF;
@@ -376,7 +376,7 @@ s64 timer_get_long_time(void)
 	time = ((s64) timer_tick_struct.sec * TIMER_NS_DIVIDER + (s64) MAP_TimerValueGet(SIMPLE_TIMER_BASE, TIMER_A) * 25 / 2);
     }
 
-    /* Получаем наносекунды из формулы ns = число тиков * 12.5 + секунды * 10e9 */
+    /* РџРѕР»СѓС‡Р°РµРј РЅР°РЅРѕСЃРµРєСѓРЅРґС‹ РёР· С„РѕСЂРјСѓР»С‹ ns = С‡РёСЃР»Рѕ С‚РёРєРѕРІ * 12.5 + СЃРµРєСѓРЅРґС‹ * 10e9 */
     return time;
 }
 
@@ -397,14 +397,14 @@ u32 timer_get_sample(void)
 
 
 /**
- * Получить фазу относительно сигнала PPS и вычислить дрифт
- * Считаем, что если "наш" таймер запаздывает относительно PPS
- * то его значение близко к 51200, если опережает - то близко к 0
- * разбиваем значение на половине и считаем, 
- * если < 25600 - дрифт (+) - таймер спешит
- * если > 25600 - дрифт (-) - таймер отстает
- * Этим методом дрифт можно вычислить только до 640 мкс
- * потом добавить расчет дробных долей секунды
+ * РџРѕР»СѓС‡РёС‚СЊ С„Р°Р·Сѓ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ СЃРёРіРЅР°Р»Р° PPS Рё РІС‹С‡РёСЃР»РёС‚СЊ РґСЂРёС„С‚
+ * РЎС‡РёС‚Р°РµРј, С‡С‚Рѕ РµСЃР»Рё "РЅР°С€" С‚Р°Р№РјРµСЂ Р·Р°РїР°Р·РґС‹РІР°РµС‚ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ PPS
+ * С‚Рѕ РµРіРѕ Р·РЅР°С‡РµРЅРёРµ Р±Р»РёР·РєРѕ Рє 51200, РµСЃР»Рё РѕРїРµСЂРµР¶Р°РµС‚ - С‚Рѕ Р±Р»РёР·РєРѕ Рє 0
+ * СЂР°Р·Р±РёРІР°РµРј Р·РЅР°С‡РµРЅРёРµ РЅР° РїРѕР»РѕРІРёРЅРµ Рё СЃС‡РёС‚Р°РµРј, 
+ * РµСЃР»Рё < 25600 - РґСЂРёС„С‚ (+) - С‚Р°Р№РјРµСЂ СЃРїРµС€РёС‚
+ * РµСЃР»Рё > 25600 - РґСЂРёС„С‚ (-) - С‚Р°Р№РјРµСЂ РѕС‚СЃС‚Р°РµС‚
+ * Р­С‚РёРј РјРµС‚РѕРґРѕРј РґСЂРёС„С‚ РјРѕР¶РЅРѕ РІС‹С‡РёСЃР»РёС‚СЊ С‚РѕР»СЊРєРѕ РґРѕ 640 РјРєСЃ
+ * РїРѕС‚РѕРј РґРѕР±Р°РІРёС‚СЊ СЂР°СЃС‡РµС‚ РґСЂРѕР±РЅС‹С… РґРѕР»РµР№ СЃРµРєСѓРЅРґС‹
  */
 s32 timer_get_drift(void)
 {
@@ -413,10 +413,10 @@ s32 timer_get_drift(void)
     int sign = 1;
 
     if (timer_tick_struct.sample > 25600) {
-	sign = -1;		/* минус */
+	sign = -1;		/* РјРёРЅСѓСЃ */
     }
 
-   /* ns = число тиков * 12.5 + секунды * 10e9 */
+   /* ns = С‡РёСЃР»Рѕ С‚РёРєРѕРІ * 12.5 + СЃРµРєСѓРЅРґС‹ * 10e9 */
     return (timer_tick_struct.sample * 25 / 2) * sign;
 #endif    
 }
