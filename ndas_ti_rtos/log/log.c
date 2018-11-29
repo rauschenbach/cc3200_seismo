@@ -1,4 +1,4 @@
-/* Сервисные функции: ведение лога, запись на SD карту */
+/* РЎРµСЂРІРёСЃРЅС‹Рµ С„СѓРЅРєС†РёРё: РІРµРґРµРЅРёРµ Р»РѕРіР°, Р·Р°РїРёСЃСЊ РЅР° SD РєР°СЂС‚Сѓ */
 #include <utils.h>
 #include <ff.h>
 #include <fs.h>
@@ -15,29 +15,29 @@
 
 
 #define   	MAX_FILE_SIZE		256
-#define   	MAX_START_NUMBER	100	/* Максимальное число запусков */
-#define	  	MAX_TIME_STRLEN		26	/* Длина строки со временем  */
-#define   	MAX_LOG_FILE_LEN	134217728	/* 128 Мбайт */
-#define   	MAX_FILE_NAME_LEN	31	/* Длина файла включая имя директории с '\0' */
+#define   	MAX_START_NUMBER	100	/* РњР°РєСЃРёРјР°Р»СЊРЅРѕРµ С‡РёСЃР»Рѕ Р·Р°РїСѓСЃРєРѕРІ */
+#define	  	MAX_TIME_STRLEN		26	/* Р”Р»РёРЅР° СЃС‚СЂРѕРєРё СЃРѕ РІСЂРµРјРµРЅРµРј  */
+#define   	MAX_LOG_FILE_LEN	134217728	/* 128 РњР±Р°Р№С‚ */
+#define   	MAX_FILE_NAME_LEN	31	/* Р”Р»РёРЅР° С„Р°Р№Р»Р° РІРєР»СЋС‡Р°СЏ РёРјСЏ РґРёСЂРµРєС‚РѕСЂРёРё СЃ '\0' */
 #define		LOCK_FILE_NAME		"lock.fil"
 #define		PARAM_FILE_NAME		"recparam.ini"
-#define 	ERROR_LOG_NAME		"error.log"	/* Файл ошибок  */
-#define 	LOADER_FILE_NAME	"ndas.bin"	/* имя файла программы */
-#define 	PROGRAM_FILE_NAME	"/sys/mcuimg.bin"	/* имя файла программы в файловой системе FLASH */
-#define 	BOOT_LOG_NAME		"boot.log"	/* Файл лога загрузки */
+#define 	ERROR_LOG_NAME		"error.log"	/* Р¤Р°Р№Р» РѕС€РёР±РѕРє  */
+#define 	LOADER_FILE_NAME	"ndas.bin"	/* РёРјСЏ С„Р°Р№Р»Р° РїСЂРѕРіСЂР°РјРјС‹ */
+#define 	PROGRAM_FILE_NAME	"/sys/mcuimg.bin"	/* РёРјСЏ С„Р°Р№Р»Р° РїСЂРѕРіСЂР°РјРјС‹ РІ С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјРµ FLASH */
+#define 	BOOT_LOG_NAME		"boot.log"	/* Р¤Р°Р№Р» Р»РѕРіР° Р·Р°РіСЂСѓР·РєРё */
 
 
 /************************************************************************
- *      Эти статические переменные не видимы в других файлах 
- * 	отображаются или указателем SRAM (USE_THE_LOADER)
- * 	или используются в секции данных  
+ *      Р­С‚Рё СЃС‚Р°С‚РёС‡РµСЃРєРёРµ РїРµСЂРµРјРµРЅРЅС‹Рµ РЅРµ РІРёРґРёРјС‹ РІ РґСЂСѓРіРёС… С„Р°Р№Р»Р°С… 
+ * 	РѕС‚РѕР±СЂР°Р¶Р°СЋС‚СЃСЏ РёР»Рё СѓРєР°Р·Р°С‚РµР»РµРј SRAM (USE_THE_LOADER)
+ * 	РёР»Рё РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ РІ СЃРµРєС†РёРё РґР°РЅРЅС‹С…  
  ************************************************************************/
-static FATFS fatfs;		/* File system object - можно убрать из global? нет! */
-static DIR dir;			/* Директория где храница все файло - можно убрать из global? */
+static FATFS fatfs;		/* File system object - РјРѕР¶РЅРѕ СѓР±СЂР°С‚СЊ РёР· global? РЅРµС‚! */
+static DIR dir;			/* Р”РёСЂРµРєС‚РѕСЂРёСЏ РіРґРµ С…СЂР°РЅРёС†Р° РІСЃРµ С„Р°Р№Р»Рѕ - РјРѕР¶РЅРѕ СѓР±СЂР°С‚СЊ РёР· global? */
 static FIL log_file;		/* File object */
-static FIL adc_file;		/* File object для АЦП */
-static FIL boot_file;		/* File object для АЦП */
-static ADC_HEADER adc_hdr;	/* Заголовок перед данными АЦП - 80 байт */
+static FIL adc_file;		/* File object РґР»СЏ РђР¦Рџ */
+static FIL boot_file;		/* File object РґР»СЏ РђР¦Рџ */
+static ADC_HEADER adc_hdr;	/* Р—Р°РіРѕР»РѕРІРѕРє РїРµСЂРµРґ РґР°РЅРЅС‹РјРё РђР¦Рџ - 80 Р±Р°Р№С‚ */
 
 static FATFS *pFatfs = &fatfs;
 static DIR *pDir = &dir;
@@ -49,7 +49,7 @@ static ADC_HEADER *pAdc_hdr = &adc_hdr;
 
 
 /**
- * Для записи времени в лог - получить время, если таймер1 не запущен, то от RTC
+ * Р”Р»СЏ Р·Р°РїРёСЃРё РІСЂРµРјРµРЅРё РІ Р»РѕРі - РїРѕР»СѓС‡РёС‚СЊ РІСЂРµРјСЏ, РµСЃР»Рё С‚Р°Р№РјРµСЂ1 РЅРµ Р·Р°РїСѓС‰РµРЅ, С‚Рѕ РѕС‚ RTC
  */
 static void time_to_str(char *str)
 {
@@ -58,7 +58,7 @@ static void time_to_str(char *str)
     char sym;
     int stat = CLOCK_RTC_TIME;
 
-    msec = timer_get_msec_ticks();	/* Получаем время от таймера */
+    msec = timer_get_msec_ticks();	/* РџРѕР»СѓС‡Р°РµРј РІСЂРµРјСЏ РѕС‚ С‚Р°Р№РјРµСЂР° */
 #if 0
     stat = get_clock_status();
 #endif
@@ -70,9 +70,9 @@ static void time_to_str(char *str)
     else if (stat == CLOCK_GPS_TIME)
 	sym = 'P';
     else
-	sym = 'N';		/* Нет времени */
+	sym = 'N';		/* РќРµС‚ РІСЂРµРјРµРЅРё */
 
-    /* Записываем дату в формате: P: 09-07-2013 - 13:11:39.871  */
+    /* Р—Р°РїРёСЃС‹РІР°РµРј РґР°С‚Сѓ РІ С„РѕСЂРјР°С‚Рµ: P: 09-07-2013 - 13:11:39.871  */
     if (sec_to_td(msec / TIMER_MS_DIVIDER, &t) != -1) {
 	sprintf(str, "%c %02d-%02d-%04d %02d:%02d:%02d.%03d ", sym, t.day, t.mon, t.year, t.hour, t.min, t.sec, (u32) (msec % TIMER_MS_DIVIDER));
     } else {
@@ -81,7 +81,7 @@ static void time_to_str(char *str)
 }
 
 /**
- * Вывод на экран, для отладки - если нет сбора данных
+ * Р’С‹РІРѕРґ РЅР° СЌРєСЂР°РЅ, РґР»СЏ РѕС‚Р»Р°РґРєРё - РµСЃР»Рё РЅРµС‚ СЃР±РѕСЂР° РґР°РЅРЅС‹С…
  */
 int log_term_printf(const char *fmt, ...)
 {
@@ -90,13 +90,13 @@ int log_term_printf(const char *fmt, ...)
     va_list list;
     RUNTIME_STATE_t t;
 
-    /* Получить биты */
+    /* РџРѕР»СѓС‡РёС‚СЊ Р±РёС‚С‹ */
     status_get_runtime_state(&t);
 
-    /* Если запущены измерения или режим работы по заданию */
+    /* Р•СЃР»Рё Р·Р°РїСѓС‰РµРЅС‹ РёР·РјРµСЂРµРЅРёСЏ РёР»Рё СЂРµР¶РёРј СЂР°Р±РѕС‚С‹ РїРѕ Р·Р°РґР°РЅРёСЋ */
     if (!t.acqis_running /*&& GNS_NORMAL_MODE != get_gns_work_mode() */ ) {
 
-	/* Получаем текущее время - MAX_TIME_STRLEN символов с пробелом - всегда пишем */
+	/* РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РµРµ РІСЂРµРјСЏ - MAX_TIME_STRLEN СЃРёРјРІРѕР»РѕРІ СЃ РїСЂРѕР±РµР»РѕРј - РІСЃРµРіРґР° РїРёС€РµРј */
 	time_to_str(buf);
 	va_start(list, fmt);
 	ret = vsnprintf(buf + MAX_TIME_STRLEN, sizeof(buf), fmt, list);
@@ -114,7 +114,7 @@ int log_term_printf(const char *fmt, ...)
     return ret;
 }
 
-/* Вывод без времени */
+/* Р’С‹РІРѕРґ Р±РµР· РІСЂРµРјРµРЅРё */
 int log_term_out(const char *fmt, ...)
 {
     char buf[256];
@@ -122,14 +122,14 @@ int log_term_out(const char *fmt, ...)
     va_list list;
     RUNTIME_STATE_t t;
 
-    /* Получить биты */
+    /* РџРѕР»СѓС‡РёС‚СЊ Р±РёС‚С‹ */
     status_get_runtime_state(&t);
 
-    /* Отладка если НЕ запущены измерения и НЕ в режиме Normal */
+    /* РћС‚Р»Р°РґРєР° РµСЃР»Рё РќР• Р·Р°РїСѓС‰РµРЅС‹ РёР·РјРµСЂРµРЅРёСЏ Рё РќР• РІ СЂРµР¶РёРјРµ Normal */
     if (!t.acqis_running /*&& GNS_NORMAL_MODE != get_gns_work_mode() */ ) {
 
 
-	/* Получаем текущее время - MAX_TIME_STRLEN символов с пробелом - всегда пишем */
+	/* РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РµРµ РІСЂРµРјСЏ - MAX_TIME_STRLEN СЃРёРјРІРѕР»РѕРІ СЃ РїСЂРѕР±РµР»РѕРј - РІСЃРµРіРґР° РїРёС€РµРј */
 	time_to_str(buf);
 	va_start(list, fmt);
 	ret = vsnprintf(buf, sizeof(buf), fmt, list);
@@ -150,19 +150,19 @@ int log_term_out(const char *fmt, ...)
 
 
 /**
- * Инициализация файловой системы
- * При монтировании читаем данные с FLASH
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјС‹
+ * РџСЂРё РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё С‡РёС‚Р°РµРј РґР°РЅРЅС‹Рµ СЃ FLASH
  */
 int log_mount_fs(void)
 {
     int res;
     sd_card_mux_config();
-    res = f_mount(pFatfs, "0", 1);	/* Монтируем ФС */
+    res = f_mount(pFatfs, "0", 1);	/* РњРѕРЅС‚РёСЂСѓРµРј Р¤РЎ */
     return res;
 }
 
 /**
- * Карта монтирована или нет?
+ * РљР°СЂС‚Р° РјРѕРЅС‚РёСЂРѕРІР°РЅР° РёР»Рё РЅРµС‚?
  */
 bool log_check_mounted(void)
 {
@@ -171,40 +171,40 @@ bool log_check_mounted(void)
 
 
 /**
- * Проверка наличия лок-файла на SD - для определения-стоит ли ждать WUSB 2 минуты
+ * РџСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ Р»РѕРє-С„Р°Р№Р»Р° РЅР° SD - РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ-СЃС‚РѕРёС‚ Р»Рё Р¶РґР°С‚СЊ WUSB 2 РјРёРЅСѓС‚С‹
  */
 int log_check_lock_file(void)
 {
     FIL lock_file;
     FRESULT res;		/* Result code */
 
-    /* Открываем существующий файл */
+    /* РћС‚РєСЂС‹РІР°РµРј СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ С„Р°Р№Р» */
     if (f_open(&lock_file, LOCK_FILE_NAME, FA_READ | FA_OPEN_EXISTING)) {
-	return RES_NO_LOCK_FILE;	/* Если файл не существует! */
+	return RES_NO_LOCK_FILE;	/* Р•СЃР»Рё С„Р°Р№Р» РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚! */
     }
 
-    /* Если файл существует - удалим его */
+    /* Р•СЃР»Рё С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚ - СѓРґР°Р»РёРј РµРіРѕ */
     res = f_unlink(LOCK_FILE_NAME);
     if (res) {
-	return RES_DEL_LOCK_ERR;	/* Не удалось */
+	return RES_DEL_LOCK_ERR;	/* РќРµ СѓРґР°Р»РѕСЃСЊ */
     }
-    return RES_NO_ERROR;	/* Если файл существует */
+    return RES_NO_ERROR;	/* Р•СЃР»Рё С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚ */
 }
 
 
 /**
- * Записать в лог загрузчика
+ * Р—Р°РїРёСЃР°С‚СЊ РІ Р»РѕРі Р·Р°РіСЂСѓР·С‡РёРєР°
  */
 int log_write_boot_file(char *fmt, ...)
 {
     char str[256];
     FRESULT res;		/* Result code */
-    unsigned bw;		/* Прочитано или записано байт  */
+    unsigned bw;		/* РџСЂРѕС‡РёС‚Р°РЅРѕ РёР»Рё Р·Р°РїРёСЃР°РЅРѕ Р±Р°Р№С‚  */
     int i, ret = 0;
     va_list p_vargs;		/* return value from vsnprintf  */
 
-    /* Получаем текущее время - MAX_TIME_STRLEN символов с пробелом - всегда пишем */
-    time_to_str(str);		// Получить время всегда
+    /* РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РµРµ РІСЂРµРјСЏ - MAX_TIME_STRLEN СЃРёРјРІРѕР»РѕРІ СЃ РїСЂРѕР±РµР»РѕРј - РІСЃРµРіРґР° РїРёС€РµРј */
+    time_to_str(str);		// РџРѕР»СѓС‡РёС‚СЊ РІСЂРµРјСЏ РІСЃРµРіРґР°
     va_start(p_vargs, fmt);
     i = vsnprintf(str + MAX_TIME_STRLEN, sizeof(str), fmt, p_vargs);
     va_end(p_vargs);
@@ -217,7 +217,7 @@ int log_write_boot_file(char *fmt, ...)
 	return RES_WRITE_BOOTFILE_ERR;
     }
 
-    /* Обязательно запишем! */
+    /* РћР±СЏР·Р°С‚РµР»СЊРЅРѕ Р·Р°РїРёС€РµРј! */
     res = f_sync(pBootfile);
     if (res) {
 	return RES_WRITE_BOOTFILE_ERR;
@@ -227,7 +227,7 @@ int log_write_boot_file(char *fmt, ...)
 }
 
 /**
- * Закрыть лог загрузчика
+ * Р—Р°РєСЂС‹С‚СЊ Р»РѕРі Р·Р°РіСЂСѓР·С‡РёРєР°
  */
 int log_close_boot_file(int r)
 {
@@ -246,59 +246,59 @@ int log_close_boot_file(int r)
 
 
 /**
- * Открыть лог загрузчика
+ * РћС‚РєСЂС‹С‚СЊ Р»РѕРі Р·Р°РіСЂСѓР·С‡РёРєР°
  */
 int log_open_boot_file(void)
 {
     int ret, n;
 
-    /* Файл монтирован, есть файловая система на SD карте. Открыли boot */
+    /* Р¤Р°Р№Р» РјРѕРЅС‚РёСЂРѕРІР°РЅ, РµСЃС‚СЊ С„Р°Р№Р»РѕРІР°СЏ СЃРёСЃС‚РµРјР° РЅР° SD РєР°СЂС‚Рµ. РћС‚РєСЂС‹Р»Рё boot */
     ret = f_open(pBootfile, BOOT_LOG_NAME, FA_WRITE | FA_READ | FA_OPEN_ALWAYS);
     if (ret) {
 	PRINTF("ERROR:Can't open file %s\n", BOOT_LOG_NAME);
 	return RES_NO_LOCK_FILE;
     }
 
-    /* Определим размер */
+    /* РћРїСЂРµРґРµР»РёРј СЂР°Р·РјРµСЂ */
     n = f_size(pBootfile);
     if (n > MAX_LOG_FILE_LEN) {
 	f_truncate(pBootfile);
 	n = 0;
     }
 
-    /* Переставим указатель файла */
+    /* РџРµСЂРµСЃС‚Р°РІРёРј СѓРєР°Р·Р°С‚РµР»СЊ С„Р°Р№Р»Р° */
     f_lseek(pBootfile, n);
     return 0;
 }
 
 /**
- * Если на SD карте есть файл с программой - открыть его и прошить на внутреннюю SPI FLASH 
+ * Р•СЃР»Рё РЅР° SD РєР°СЂС‚Рµ РµСЃС‚СЊ С„Р°Р№Р» СЃ РїСЂРѕРіСЂР°РјРјРѕР№ - РѕС‚РєСЂС‹С‚СЊ РµРіРѕ Рё РїСЂРѕС€РёС‚СЊ РЅР° РІРЅСѓС‚СЂРµРЅРЅСЋСЋ SPI FLASH 
  */
 int log_check_loader_file(void)
 {
     FIL file;
     int ret, hdl, offset = 0;
-    unsigned bw;		/* Прочитано или записано байт  */
+    unsigned bw;		/* РџСЂРѕС‡РёС‚Р°РЅРѕ РёР»Рё Р·Р°РїРёСЃР°РЅРѕ Р±Р°Р№С‚  */
     unsigned long MaxSize = 128 * 1024;
     unsigned long token;
     long lRetVal;
     u32 mode;
-    u8 buf[MAX_FILE_SIZE];	/* Буфер для записи файла - 256 */
+    u8 buf[MAX_FILE_SIZE];	/* Р‘СѓС„РµСЂ РґР»СЏ Р·Р°РїРёСЃРё С„Р°Р№Р»Р° - 256 */
 
-    /* для BOOT лога  */
+    /* РґР»СЏ BOOT Р»РѕРіР°  */
     log_open_boot_file();
 
-    /* Открываем существующий файл */
+    /* РћС‚РєСЂС‹РІР°РµРј СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ С„Р°Р№Р» */
     if (f_open(&file, LOADER_FILE_NAME, FA_READ | FA_OPEN_EXISTING)) {
 	log_write_boot_file("WARN: File %s does not exist on SD card\r\n", LOADER_FILE_NAME);
 	log_close_boot_file(0);
-	return RES_NO_LOCK_FILE;	// если файла нет - то и нет ошибки!
+	return RES_NO_LOCK_FILE;	// РµСЃР»Рё С„Р°Р№Р»Р° РЅРµС‚ - С‚Рѕ Рё РЅРµС‚ РѕС€РёР±РєРё!
     }
     PRINTF("INFO: File %s on SD card open OK\r\n", LOADER_FILE_NAME);
     log_write_boot_file("INFO: File %s on SD card open OK\r\n", LOADER_FILE_NAME);
 
     do {
-	/* Файл существует, открываем файл на FLASH и пытаемся его удалить. Или сначала переименовать / записать/ удалить / снова переименовать? */
+	/* Р¤Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚, РѕС‚РєСЂС‹РІР°РµРј С„Р°Р№Р» РЅР° FLASH Рё РїС‹С‚Р°РµРјСЃСЏ РµРіРѕ СѓРґР°Р»РёС‚СЊ. РР»Рё СЃРЅР°С‡Р°Р»Р° РїРµСЂРµРёРјРµРЅРѕРІР°С‚СЊ / Р·Р°РїРёСЃР°С‚СЊ/ СѓРґР°Р»РёС‚СЊ / СЃРЅРѕРІР° РїРµСЂРµРёРјРµРЅРѕРІР°С‚СЊ? */
 	mode = FS_MODE_OPEN_CREATE(MaxSize, _FS_FILE_OPEN_FLAG_COMMIT | _FS_FILE_PUBLIC_WRITE);
 	lRetVal = sl_FsOpen((unsigned char *) PROGRAM_FILE_NAME, mode, &token, (_i32 *) & hdl);
 	if (lRetVal < 0) {
@@ -325,13 +325,13 @@ int log_check_loader_file(void)
 
 	PRINTF("INFO: File %s on SPI Flash was created OK\r\n", PROGRAM_FILE_NAME);
 
-	// Читаем с SD карты и пишем на FLASH   
+	// Р§РёС‚Р°РµРј СЃ SD РєР°СЂС‚С‹ Рё РїРёС€РµРј РЅР° FLASH   
 	do {
 	    ret = f_read(&file, buf, MAX_FILE_SIZE, &bw);
 	    if (ret == FR_OK) {
-		// Пишем на FLASH столько прочитали
+		// РџРёС€РµРј РЅР° FLASH СЃС‚РѕР»СЊРєРѕ РїСЂРѕС‡РёС‚Р°Р»Рё
 		sl_FsWrite(hdl, offset, buf, bw);
-		offset += bw;	// меняем смещение
+		offset += bw;	// РјРµРЅСЏРµРј СЃРјРµС‰РµРЅРёРµ
 	    } else {
 		PRINTF("WARN: Nothing to read from SD\r\n");
 		break;
@@ -340,22 +340,22 @@ int log_check_loader_file(void)
 	PRINTF("INFO: %d bytes were written onto SPI Flash\r\n", offset);
 	log_write_boot_file("INFO: %d bytes were written onto SPI Flash\r\n", offset);
 
-	// Закрыть файл на FLASH
+	// Р—Р°РєСЂС‹С‚СЊ С„Р°Р№Р» РЅР° FLASH
 	sl_FsClose(hdl, 0, 0, 0);
 
-	// удалим на SD
+	// СѓРґР°Р»РёРј РЅР° SD
 	if (f_unlink(LOADER_FILE_NAME)) {
 	    PRINTF("ERROR:Can't delete file %s on SD\r\n", LOADER_FILE_NAME);
-	    return RES_CLOSE_LOADER_ERR;	/* Не удалось */
+	    return RES_CLOSE_LOADER_ERR;	/* РќРµ СѓРґР°Р»РѕСЃСЊ */
 	} else {
 	    PRINTF("INFO: Delete file %s on SD OK\r\n", LOADER_FILE_NAME);
 	    log_write_boot_file("INFO: Delete file %s on SD OK\r\n", LOADER_FILE_NAME);
 	    log_close_boot_file(1);
-	    return RES_NO_ERROR;	/* Если файл существует */
+	    return RES_NO_ERROR;	/* Р•СЃР»Рё С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚ */
 	}
     } while (0);
 
-    /* Закроем файл - не должны сюда попасть! */
+    /* Р—Р°РєСЂРѕРµРј С„Р°Р№Р» - РЅРµ РґРѕР»Р¶РЅС‹ СЃСЋРґР° РїРѕРїР°СЃС‚СЊ! */
     if (f_close(&file)) {
 	return RES_CLOSE_LOADER_ERR;
     }
@@ -365,44 +365,44 @@ int log_check_loader_file(void)
 
 
 /**
- * Проверка наличия файла регистрации на SD
+ * РџСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ С„Р°Р№Р»Р° СЂРµРіРёСЃС‚СЂР°С†РёРё РЅР° SD
  */
 int log_check_reg_file(void)
 {
     FIL file;
 
-    /* Открываем существующий файл */
+    /* РћС‚РєСЂС‹РІР°РµРј СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ С„Р°Р№Р» */
     if (f_open(&file, PARAM_FILE_NAME, FA_READ | FA_OPEN_EXISTING)) {
 	return RES_OPEN_PARAM_ERR;
     }
 
-    /* Закроем файл */
+    /* Р—Р°РєСЂРѕРµРј С„Р°Р№Р» */
     if (f_close(&file)) {
 	return RES_CLOSE_PARAM_ERR;
     }
-    return RES_NO_ERROR;	/* Если файл существует */
+    return RES_NO_ERROR;	/* Р•СЃР»Рё С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚ */
 }
 
 
 /**
- * Запись строки в лог файл, возвращаем сколько записали. С временем ВСЕГДА!
- * Режем по 10 мБайт?
+ * Р—Р°РїРёСЃСЊ СЃС‚СЂРѕРєРё РІ Р»РѕРі С„Р°Р№Р», РІРѕР·РІСЂР°С‰Р°РµРј СЃРєРѕР»СЊРєРѕ Р·Р°РїРёСЃР°Р»Рё. РЎ РІСЂРµРјРµРЅРµРј Р’РЎР•Р“Р”Рђ!
+ * Р РµР¶РµРј РїРѕ 10 РјР‘Р°Р№С‚?
  */
 int log_write_log_file(char *fmt, ...)
 {
     char str[256];
     FRESULT res;		/* Result code */
-    unsigned bw;		/* Прочитано или записано байт  */
+    unsigned bw;		/* РџСЂРѕС‡РёС‚Р°РЅРѕ РёР»Рё Р·Р°РїРёСЃР°РЅРѕ Р±Р°Р№С‚  */
     int i, ret = 0;
     va_list p_vargs;		/* return value from vsnprintf  */
 
-    /* Не монтировано (нет фс - работаем от PC), или с карточкой проблемы */
+    /* РќРµ РјРѕРЅС‚РёСЂРѕРІР°РЅРѕ (РЅРµС‚ С„СЃ - СЂР°Р±РѕС‚Р°РµРј РѕС‚ PC), РёР»Рё СЃ РєР°СЂС‚РѕС‡РєРѕР№ РїСЂРѕР±Р»РµРјС‹ */
     if (pLogfile->fs == NULL) {
 	return RES_MOUNT_ERR;
     }
 
-    /* Получаем текущее время - MAX_TIME_STRLEN символов с пробелом - всегда пишем */
-    time_to_str(str);		// Получить время всегда
+    /* РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РµРµ РІСЂРµРјСЏ - MAX_TIME_STRLEN СЃРёРјРІРѕР»РѕРІ СЃ РїСЂРѕР±РµР»РѕРј - РІСЃРµРіРґР° РїРёС€РµРј */
+    time_to_str(str);		// РџРѕР»СѓС‡РёС‚СЊ РІСЂРµРјСЏ РІСЃРµРіРґР°
     va_start(p_vargs, fmt);
     i = vsnprintf(str + MAX_TIME_STRLEN, sizeof(str), fmt, p_vargs);
 
@@ -411,17 +411,17 @@ int log_write_log_file(char *fmt, ...)
 	return RES_FORMAT_ERR;
 
 
-    // Заменим переносы строки на UNIX (не с начала!)
+    // Р—Р°РјРµРЅРёРј РїРµСЂРµРЅРѕСЃС‹ СЃС‚СЂРѕРєРё РЅР° UNIX (РЅРµ СЃ РЅР°С‡Р°Р»Р°!)
     for (i = MAX_TIME_STRLEN + 4; i < sizeof(str) - 3; i++) {
 	if (str[i] == 0x0d || str[i] == 0x0a) {
-	    str[i] = 0x0d;	// перевод строки
+	    str[i] = 0x0d;	// РїРµСЂРµРІРѕРґ СЃС‚СЂРѕРєРё
 	    str[i + 1] = 0x0a;	// Windows
 	    str[i + 2] = 0;
 	    break;
 	}
     }
 
-    /* Отключать запись по irq, когда мы пишем в log */
+    /* РћС‚РєР»СЋС‡Р°С‚СЊ Р·Р°РїРёСЃСЊ РїРѕ irq, РєРѕРіРґР° РјС‹ РїРёС€РµРј РІ log */
 //vvv:
 
     res = f_write(pLogfile, str, strlen(str), &bw);
@@ -429,20 +429,20 @@ int log_write_log_file(char *fmt, ...)
 	return RES_WRITE_LOG_ERR;
     }
 
-    /* Обязательно запишем! */
+    /* РћР±СЏР·Р°С‚РµР»СЊРЅРѕ Р·Р°РїРёС€РµРј! */
     res = f_sync(pLogfile);
     if (res) {
 	return RES_SYNC_LOG_ERR;
     }
 
-    /* Включать запись по irq */
+    /* Р’РєР»СЋС‡Р°С‚СЊ Р·Р°РїРёСЃСЊ РїРѕ irq */
 ////vvvvv:
     return ret;
 }
 
 
 /**
- * Закрыть лог-файл
+ * Р—Р°РєСЂС‹С‚СЊ Р»РѕРі-С„Р°Р№Р»
  */
 int log_close_log_file(void)
 {
@@ -457,48 +457,48 @@ int log_close_log_file(void)
 
 
 /**
- * Создаем заголовок - он будет использоваться для файла данных 
- * Вызывается из файла main
- * структуру будем переделывать!!!
+ * РЎРѕР·РґР°РµРј Р·Р°РіРѕР»РѕРІРѕРє - РѕРЅ Р±СѓРґРµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ РґР»СЏ С„Р°Р№Р»Р° РґР°РЅРЅС‹С… 
+ * Р’С‹Р·С‹РІР°РµС‚СЃСЏ РёР· С„Р°Р№Р»Р° main
+ * СЃС‚СЂСѓРєС‚СѓСЂСѓ Р±СѓРґРµРј РїРµСЂРµРґРµР»С‹РІР°С‚СЊ!!!
  */
 void log_create_adc_header(GPS_DATA_t * par)
 {
     if (par != NULL) {
 #if defined		ENABLE_NEW_SIVY
-	strncpy(pAdc_hdr->DataHeader, "SeismicDat1\0", 12);	/* Заголовок данных SeismicDat1\0 - новый Sivy */
-	pAdc_hdr->HeaderSize = sizeof(ADC_HEADER);	/* Размер заголовка     */
-	pAdc_hdr->GPSTime = par->time;	/* Время синхронизации: наносекунды */
+	strncpy(pAdc_hdr->DataHeader, "SeismicDat1\0", 12);	/* Р—Р°РіРѕР»РѕРІРѕРє РґР°РЅРЅС‹С… SeismicDat1\0 - РЅРѕРІС‹Р№ Sivy */
+	pAdc_hdr->HeaderSize = sizeof(ADC_HEADER);	/* Р Р°Р·РјРµСЂ Р·Р°РіРѕР»РѕРІРєР°     */
+	pAdc_hdr->GPSTime = par->time;	/* Р’СЂРµРјСЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё: РЅР°РЅРѕСЃРµРєСѓРЅРґС‹ */
 
-///vvvv:        pAdc_hdr->Drift = par->tAcc;    /* vvvvvvv: Дрифт от точных часов GPS: миллисекунды или Accuraty */
+///vvvv:        pAdc_hdr->Drift = par->tAcc;    /* vvvvvvv: Р”СЂРёС„С‚ РѕС‚ С‚РѕС‡РЅС‹С… С‡Р°СЃРѕРІ GPS: РјРёР»Р»РёСЃРµРєСѓРЅРґС‹ РёР»Рё Accuraty */
 
 	pAdc_hdr->Drift = timer_get_drift();
-	pAdc_hdr->lat = par->lat;	/* широта: 55417872 = 5541.7872N */
-	pAdc_hdr->lon = par->lon;	/* долгота:37213760 = 3721.3760E */
+	pAdc_hdr->lat = par->lat;	/* С€РёСЂРѕС‚Р°: 55417872 = 5541.7872N */
+	pAdc_hdr->lon = par->lon;	/* РґРѕР»РіРѕС‚Р°:37213760 = 3721.3760E */
 #else
-	char str[MAX_TIME_STRLEN];	// 26 байт
+	char str[MAX_TIME_STRLEN];	// 26 Р±Р°Р№С‚
 	TIME_DATE data;
 	long t0;
 	u8 ind;
 
 	t0 = par->time / TIMER_NS_DIVIDER;
-	sec_to_td(t0, &data);	/* время синхронизации сюда */
-	strncpy(pAdc_hdr->DataHeader, "SeismicData\0", 12);	/* Дата ID  */
-	pAdc_hdr->HeaderSize = sizeof(ADC_HEADER);	/* Размер заголовка     */
+	sec_to_td(t0, &data);	/* РІСЂРµРјСЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё СЃСЋРґР° */
+	strncpy(pAdc_hdr->DataHeader, "SeismicData\0", 12);	/* Р”Р°С‚Р° ID  */
+	pAdc_hdr->HeaderSize = sizeof(ADC_HEADER);	/* Р Р°Р·РјРµСЂ Р·Р°РіРѕР»РѕРІРєР°     */
 
-	///vvv: pAdc_hdr->Drift = par->drift * 32768;     /* Дрифт настоящий - выведем в миллисекундах по формуле */
+	///vvv: pAdc_hdr->Drift = par->drift * 32768;     /* Р”СЂРёС„С‚ РЅР°СЃС‚РѕСЏС‰РёР№ - РІС‹РІРµРґРµРј РІ РјРёР»Р»РёСЃРµРєСѓРЅРґР°С… РїРѕ С„РѕСЂРјСѓР»Рµ */
 
-	mem_copy(&pAdc_hdr->GPSTime, &data, sizeof(TIME_DATE));	/* Время получения дрифта по GPS */
-	pAdc_hdr->NumberSV = 3;	/* Число спутников: пусть будет 3 */
-	pAdc_hdr->params.coord.comp = true;	/* Строка компаса  */
+	mem_copy(&pAdc_hdr->GPSTime, &data, sizeof(TIME_DATE));	/* Р’СЂРµРјСЏ РїРѕР»СѓС‡РµРЅРёСЏ РґСЂРёС„С‚Р° РїРѕ GPS */
+	pAdc_hdr->NumberSV = 3;	/* Р§РёСЃР»Рѕ СЃРїСѓС‚РЅРёРєРѕРІ: РїСѓСЃС‚СЊ Р±СѓРґРµС‚ 3 */
+	pAdc_hdr->params.coord.comp = true;	/* РЎС‚СЂРѕРєР° РєРѕРјРїР°СЃР°  */
 
-	/* Координаты чудес - где мы находимся */
+	/* РљРѕРѕСЂРґРёРЅР°С‚С‹ С‡СѓРґРµСЃ - РіРґРµ РјС‹ РЅР°С…РѕРґРёРјСЃСЏ */
 	if (par->lat == par->lon == 0) {
 	    ind = 90;
 	} else {
 	    ind = 12;		// +554177+03721340000009
 	}
 
-	/* Исправлено странное копирование */
+	/* РСЃРїСЂР°РІР»РµРЅРѕ СЃС‚СЂР°РЅРЅРѕРµ РєРѕРїРёСЂРѕРІР°РЅРёРµ */
 	snprintf(str, sizeof(str), "%c%06d%c%07d%06d%02d", (par->lat >= 0) ? '+' : '-', abs(par->lat / 100), (par->lon >= 0) ? '+' : '-', abs(par->lon / 100),
 		 0, ind);
 	mem_copy(pAdc_hdr->params.coord.pos, str, sizeof(pAdc_hdr->params.coord.pos));
@@ -511,26 +511,26 @@ void log_create_adc_header(GPS_DATA_t * par)
 
 
 /**
- * Изменим заголовок. Вызывается из файла ADS1282
- * Нужно узнать координаты, номер платы и прочее
+ * РР·РјРµРЅРёРј Р·Р°РіРѕР»РѕРІРѕРє. Р’С‹Р·С‹РІР°РµС‚СЃСЏ РёР· С„Р°Р№Р»Р° ADS1282
+ * РќСѓР¶РЅРѕ СѓР·РЅР°С‚СЊ РєРѕРѕСЂРґРёРЅР°С‚С‹, РЅРѕРјРµСЂ РїР»Р°С‚С‹ Рё РїСЂРѕС‡РµРµ
  */
 void log_fill_adc_header(char sps, u8 bitmap, u8 size)
 {
     u32 block;
 
-    pAdc_hdr->ConfigWord = sps + 1;	/* 8 миллисекунд (частота 125 Гц + 3 байт */
-    pAdc_hdr->ChannelBitMap = bitmap;	/* Будет 1.2.3.4 канала */
-    pAdc_hdr->SampleBytes = size;	/* Размер 1 сампла со всех работающих АЦП сразу */
-    block = 7500 * (1 << sps);	/* Столько самплов будет за 1 минуту (SPSxxx * 60) */
+    pAdc_hdr->ConfigWord = sps + 1;	/* 8 РјРёР»Р»РёСЃРµРєСѓРЅРґ (С‡Р°СЃС‚РѕС‚Р° 125 Р“С† + 3 Р±Р°Р№С‚ */
+    pAdc_hdr->ChannelBitMap = bitmap;	/* Р‘СѓРґРµС‚ 1.2.3.4 РєР°РЅР°Р»Р° */
+    pAdc_hdr->SampleBytes = size;	/* Р Р°Р·РјРµСЂ 1 СЃР°РјРїР»Р° СЃРѕ РІСЃРµС… СЂР°Р±РѕС‚Р°СЋС‰РёС… РђР¦Рџ СЃСЂР°Р·Сѓ */
+    block = 7500 * (1 << sps);	/* РЎС‚РѕР»СЊРєРѕ СЃР°РјРїР»РѕРІ Р±СѓРґРµС‚ Р·Р° 1 РјРёРЅСѓС‚Сѓ (SPSxxx * 60) */
 
 #if defined		ENABLE_NEW_SIVY
-    pAdc_hdr->BlockSamples = block;	/* В новом Sivy размер блока  - 4 байт */
+    pAdc_hdr->BlockSamples = block;	/* Р’ РЅРѕРІРѕРј Sivy СЂР°Р·РјРµСЂ Р±Р»РѕРєР°  - 4 Р±Р°Р№С‚ */
 #else
 
     pAdc_hdr->BlockSamples = block & 0xffff;
     pAdc_hdr->params.coord.rsvd0 = (block >> 16) & 0xff;
-    pAdc_hdr->Board = 777;	/* Номер платы ставим свой */
-    pAdc_hdr->Rev = 2;		/* Номер ревизии д.б. 2 */
+    pAdc_hdr->Board = 777;	/* РќРѕРјРµСЂ РїР»Р°С‚С‹ СЃС‚Р°РІРёРј СЃРІРѕР№ */
+    pAdc_hdr->Rev = 2;		/* РќРѕРјРµСЂ СЂРµРІРёР·РёРё Рґ.Р±. 2 */
 #endif
 
     log_write_log_file("INFO: Fill ADS1282 header\n");
@@ -538,36 +538,36 @@ void log_fill_adc_header(char sps, u8 bitmap, u8 size)
 
 
 /**
- * Для изменения даных сенсоров. Подсчитать координаты и напряжения.
- * Заполняется раз в минуту
+ * Р”Р»СЏ РёР·РјРµРЅРµРЅРёСЏ РґР°РЅС‹С… СЃРµРЅСЃРѕСЂРѕРІ. РџРѕРґСЃС‡РёС‚Р°С‚СЊ РєРѕРѕСЂРґРёРЅР°С‚С‹ Рё РЅР°РїСЂСЏР¶РµРЅРёСЏ.
+ * Р—Р°РїРѕР»РЅСЏРµС‚СЃСЏ СЂР°Р· РІ РјРёРЅСѓС‚Сѓ
  */
 void log_change_adc_header(SENSOR_DATE_t * sens)
 {
     if (sens != NULL) {
 #if defined		ENABLE_NEW_SIVY
-	pAdc_hdr->power_reg = sens->voltage;	/* Напряжение питания, U mv */
+	pAdc_hdr->power_reg = sens->voltage;	/* РќР°РїСЂСЏР¶РµРЅРёРµ РїРёС‚Р°РЅРёСЏ, U mv */
 	pAdc_hdr->curr_reg = 0;
 	pAdc_hdr->power_mod = 0;
 	pAdc_hdr->curr_mod = 0;
 
-	pAdc_hdr->temper_reg = sens->temper;	/* Температура регистратора, десятые доли градуса */
-	pAdc_hdr->humid_reg = sens->humid;	/* Влажность */
-	pAdc_hdr->press_reg = sens->press;	/* Давление внутри сферы */
+	pAdc_hdr->temper_reg = sens->temper;	/* РўРµРјРїРµСЂР°С‚СѓСЂР° СЂРµРіРёСЃС‚СЂР°С‚РѕСЂР°, РґРµСЃСЏС‚С‹Рµ РґРѕР»Рё РіСЂР°РґСѓСЃР° */
+	pAdc_hdr->humid_reg = sens->humid;	/* Р’Р»Р°Р¶РЅРѕСЃС‚СЊ */
+	pAdc_hdr->press_reg = sens->press;	/* Р”Р°РІР»РµРЅРёРµ РІРЅСѓС‚СЂРё СЃС„РµСЂС‹ */
 	pAdc_hdr->pitch = sens->pitch;
 	pAdc_hdr->roll = sens->roll;
 	pAdc_hdr->head = sens->head;
 #else
 	int temp;
-	/* Пересчитываем по формулам DataFormatProposal */
-	pAdc_hdr->Bat = (int) sens->voltage * 1024 / 50000;	/* Будем считать что батарея 12 вольт */
+	/* РџРµСЂРµСЃС‡РёС‚С‹РІР°РµРј РїРѕ С„РѕСЂРјСѓР»Р°Рј DataFormatProposal */
+	pAdc_hdr->Bat = (int) sens->voltage * 1024 / 50000;	/* Р‘СѓРґРµРј СЃС‡РёС‚Р°С‚СЊ С‡С‚Рѕ Р±Р°С‚Р°СЂРµСЏ 12 РІРѕР»СЊС‚ */
 
-	/* Если нету датчика */
+	/* Р•СЃР»Рё РЅРµС‚Сѓ РґР°С‚С‡РёРєР° */
 	if (sens->temper == 0 && sens->press == 0) {
-	    temp = 200;		/* 20 градусов */
+	    temp = 200;		/* 20 РіСЂР°РґСѓСЃРѕРІ */
 	} else {
 	    temp = sens->temper;
 	}
-	pAdc_hdr->Temp = ((temp + 600) * 1024 / 5000);	/* Будем считать что температура * 10 */
+	pAdc_hdr->Temp = ((temp + 600) * 1024 / 5000);	/* Р‘СѓРґРµРј СЃС‡РёС‚Р°С‚СЊ С‡С‚Рѕ С‚РµРјРїРµСЂР°С‚СѓСЂР° * 10 */
 
 #endif
     }
@@ -576,20 +576,20 @@ void log_change_adc_header(SENSOR_DATE_t * sens)
 
 
 /**
- * Создавать заголовок каждый час, далее - в нем будет изменяться только время
- * Здесь же открыть файл для записи значений полученный с АЦП
+ * РЎРѕР·РґР°РІР°С‚СЊ Р·Р°РіРѕР»РѕРІРѕРє РєР°Р¶РґС‹Р№ С‡Р°СЃ, РґР°Р»РµРµ - РІ РЅРµРј Р±СѓРґРµС‚ РёР·РјРµРЅСЏС‚СЊСЃСЏ С‚РѕР»СЊРєРѕ РІСЂРµРјСЏ
+ * Р—РґРµСЃСЊ Р¶Рµ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» РґР»СЏ Р·Р°РїРёСЃРё Р·РЅР°С‡РµРЅРёР№ РїРѕР»СѓС‡РµРЅРЅС‹Р№ СЃ РђР¦Рџ
  *
- * Профилировать эту функцию!!!!! 
+ * РџСЂРѕС„РёР»РёСЂРѕРІР°С‚СЊ СЌС‚Сѓ С„СѓРЅРєС†РёСЋ!!!!! 
  */
 int log_create_hour_data_file(u64 ns)
 {
-    char name[32];		/* Имя файла */
+    char name[32];		/* РРјСЏ С„Р°Р№Р»Р° */
     struct tm date;
     int res;			/* Result code */
     u32 sec = ns / TIMER_NS_DIVIDER;
 
     do {
-	/* Если уже есть окрытый файл - закроем его и создадим новый  */
+	/* Р•СЃР»Рё СѓР¶Рµ РµСЃС‚СЊ РѕРєСЂС‹С‚С‹Р№ С„Р°Р№Р» - Р·Р°РєСЂРѕРµРј РµРіРѕ Рё СЃРѕР·РґР°РґРёРј РЅРѕРІС‹Р№  */
 	if (pAdcfile->fs) {
 	    if ((res = f_close(pAdcfile)) != 0) {
 		res = RES_CLOSE_DATA_ERR;
@@ -597,65 +597,65 @@ int log_create_hour_data_file(u64 ns)
 	    }
 	}
 
-	/* Получили время в нашем формате - это нужно для названия */
+	/* РџРѕР»СѓС‡РёР»Рё РІСЂРµРјСЏ РІ РЅР°С€РµРј С„РѕСЂРјР°С‚Рµ - СЌС‚Рѕ РЅСѓР¶РЅРѕ РґР»СЏ РЅР°Р·РІР°РЅРёСЏ */
 	if (sec_to_tm(sec, &date) != -1) {
 	    GNS_PARAM_STRUCT par;
-	    get_gns_start_params(&par);	/* Получили параметры  */
+	    get_gns_start_params(&par);	/* РџРѕР»СѓС‡РёР»Рё РїР°СЂР°РјРµС‚СЂС‹  */
 
 
-	    /* Название файла по времени: год-месяц-день-часы.минуты */
+	    /* РќР°Р·РІР°РЅРёРµ С„Р°Р№Р»Р° РїРѕ РІСЂРµРјРµРЅРё: РіРѕРґ-РјРµСЃСЏС†-РґРµРЅСЊ-С‡Р°СЃС‹.РјРёРЅСѓС‚С‹ */
 	    snprintf(name, MAX_FILE_NAME_LEN, "%s/%02d%02d%02d%02d.%02d",
 		     &par.gns_dir_name[0], ((date.tm_year - 100) > 0) ? (date.tm_year - 100) : 0, date.tm_mon + 1, date.tm_mday, date.tm_hour, date.tm_min);
 
-	    /* Откроем новый */
+	    /* РћС‚РєСЂРѕРµРј РЅРѕРІС‹Р№ */
 	    res = f_open(pAdcfile, name, FA_WRITE | FA_CREATE_ALWAYS);
 	    if (res) {
 		res = RES_OPEN_DATA_ERR;
 		break;
 	    }
-	    res = RES_NO_ERROR;	/* Все OK */
+	    res = RES_NO_ERROR;	/* Р’СЃРµ OK */
 	} else {
 	    res = RES_FORMAT_TIME_ERR;
 	}
     } while (0);
-    return res;			/* Все OK */
+    return res;			/* Р’СЃРµ OK */
 }
 
 
 /**
- * Подготовить и сбросывать каждую минуту заголовок на SD карту и  делать F_SYNC!
- * В заголовке меняем только время а также получаем время GPS 
- * Профилировать эту функцию!!!!! 
+ * РџРѕРґРіРѕС‚РѕРІРёС‚СЊ Рё СЃР±СЂРѕСЃС‹РІР°С‚СЊ РєР°Р¶РґСѓСЋ РјРёРЅСѓС‚Сѓ Р·Р°РіРѕР»РѕРІРѕРє РЅР° SD РєР°СЂС‚Сѓ Рё  РґРµР»Р°С‚СЊ F_SYNC!
+ * Р’ Р·Р°РіРѕР»РѕРІРєРµ РјРµРЅСЏРµРј С‚РѕР»СЊРєРѕ РІСЂРµРјСЏ Р° С‚Р°РєР¶Рµ РїРѕР»СѓС‡Р°РµРј РІСЂРµРјСЏ GPS 
+ * РџСЂРѕС„РёР»РёСЂРѕРІР°С‚СЊ СЌС‚Сѓ С„СѓРЅРєС†РёСЋ!!!!! 
  */
 int log_write_adc_header_to_file(u64 ns)
 {
-    unsigned bw;		/* Прочитано или записано байт  */
+    unsigned bw;		/* РџСЂРѕС‡РёС‚Р°РЅРѕ РёР»Рё Р·Р°РїРёСЃР°РЅРѕ Р±Р°Р№С‚  */
     FRESULT res;		/* Result code */
 
 #if defined		ENABLE_NEW_SIVY
-    pAdc_hdr->SampleTime = ns;	/* Время сампла, наносекунды */
-    pAdc_hdr->GPSTime = status_get_gps_time();	/* Время GPS в наносекундах */
+    pAdc_hdr->SampleTime = ns;	/* Р’СЂРµРјСЏ СЃР°РјРїР»Р°, РЅР°РЅРѕСЃРµРєСѓРЅРґС‹ */
+    pAdc_hdr->GPSTime = status_get_gps_time();	/* Р’СЂРµРјСЏ GPS РІ РЅР°РЅРѕСЃРµРєСѓРЅРґР°С… */
 #else
     TIME_DATE date;
 
     u64 msec = ns / TIMER_US_DIVIDER;
-    mem_copy(&pAdc_hdr->SedisTime, &msec, 8);	/* Пишем миллисекунду начала измерений во время Sedis */
+    mem_copy(&pAdc_hdr->SedisTime, &msec, 8);	/* РџРёС€РµРј РјРёР»Р»РёСЃРµРєСѓРЅРґСѓ РЅР°С‡Р°Р»Р° РёР·РјРµСЂРµРЅРёР№ РІРѕ РІСЂРµРјСЏ Sedis */
 
-    sec_to_td(msec / TIMER_MS_DIVIDER, &date);	/* Получили секунды и время в нашем формате */
-    mem_copy(&pAdc_hdr->SampleTime, &date, sizeof(TIME_DATE));	/* Записали время начала записи данных */
+    sec_to_td(msec / TIMER_MS_DIVIDER, &date);	/* РџРѕР»СѓС‡РёР»Рё СЃРµРєСѓРЅРґС‹ Рё РІСЂРµРјСЏ РІ РЅР°С€РµРј С„РѕСЂРјР°С‚Рµ */
+    mem_copy(&pAdc_hdr->SampleTime, &date, sizeof(TIME_DATE));	/* Р—Р°РїРёСЃР°Р»Рё РІСЂРµРјСЏ РЅР°С‡Р°Р»Р° Р·Р°РїРёСЃРё РґР°РЅРЅС‹С… */
 
-    sec_to_td(status_get_gps_time() / TIMER_NS_DIVIDER, &date);	/* Получили секунды и время в нашем формате */
-    mem_copy(&pAdc_hdr->GPSTime, &date, sizeof(TIME_DATE));	/* Записали время GPS */
+    sec_to_td(status_get_gps_time() / TIMER_NS_DIVIDER, &date);	/* РџРѕР»СѓС‡РёР»Рё СЃРµРєСѓРЅРґС‹ Рё РІСЂРµРјСЏ РІ РЅР°С€РµРј С„РѕСЂРјР°С‚Рµ */
+    mem_copy(&pAdc_hdr->GPSTime, &date, sizeof(TIME_DATE));	/* Р—Р°РїРёСЃР°Р»Рё РІСЂРµРјСЏ GPS */
 
 #endif
 
-    /* Скинем в файл заголовок */
+    /* РЎРєРёРЅРµРј РІ С„Р°Р№Р» Р·Р°РіРѕР»РѕРІРѕРє */
     res = f_write(pAdcfile, pAdc_hdr, sizeof(ADC_HEADER), &bw);
     if (res) {
 	return RES_WRITE_HEADER_ERR;
     }
 
-    /* Обязательно запишем! не потеряем файл если выдернем SD карту */
+    /* РћР±СЏР·Р°С‚РµР»СЊРЅРѕ Р·Р°РїРёС€РµРј! РЅРµ РїРѕС‚РµСЂСЏРµРј С„Р°Р№Р» РµСЃР»Рё РІС‹РґРµСЂРЅРµРј SD РєР°СЂС‚Сѓ */
     res = f_sync(pAdcfile);
     if (res) {
 	return RES_SYNC_HEADER_ERR;
@@ -665,47 +665,47 @@ int log_write_adc_header_to_file(u64 ns)
 }
 
 /**
- * Для проверки - запись числа прерываний
+ * Р”Р»СЏ РїСЂРѕРІРµСЂРєРё - Р·Р°РїРёСЃСЊ С‡РёСЃР»Р° РїСЂРµСЂС‹РІР°РЅРёР№
  */
 void log_change_num_irq_to_header(u64 num)
 {
 #if defined		ENABLE_NEW_SIVY
-    pAdc_hdr->rsvd0 = (u32) num;	/* Пока пишем на место rsvd0 */
+    pAdc_hdr->rsvd0 = (u32) num;	/* РџРѕРєР° РїРёС€РµРј РЅР° РјРµСЃС‚Рѕ rsvd0 */
 #else
-    pAdc_hdr->params.dword[6] = (u32) num;	/* Пока пишем на это место */
+    pAdc_hdr->params.dword[6] = (u32) num;	/* РџРѕРєР° РїРёС€РµРј РЅР° СЌС‚Рѕ РјРµСЃС‚Рѕ */
 #endif
 }
 
 
 /**
- * Запись в файл данных АЦП: данные и размер в байтах
- * Sync делаем раз в минуту!
- * Профилировать эту функцию!!!!! 
+ * Р—Р°РїРёСЃСЊ РІ С„Р°Р№Р» РґР°РЅРЅС‹С… РђР¦Рџ: РґР°РЅРЅС‹Рµ Рё СЂР°Р·РјРµСЂ РІ Р±Р°Р№С‚Р°С…
+ * Sync РґРµР»Р°РµРј СЂР°Р· РІ РјРёРЅСѓС‚Сѓ!
+ * РџСЂРѕС„РёР»РёСЂРѕРІР°С‚СЊ СЌС‚Сѓ С„СѓРЅРєС†РёСЋ!!!!! 
  */
 int log_write_adc_data_to_file(void *data, int len)
 {
-    unsigned bw;		/* Прочитано или записано байт  */
+    unsigned bw;		/* РџСЂРѕС‡РёС‚Р°РЅРѕ РёР»Рё Р·Р°РїРёСЃР°РЅРѕ Р±Р°Р№С‚  */
     FRESULT res;		/* Result code */
 
     res = f_write(pAdcfile, (char *) data, len, &bw);
     if (res) {
 	return RES_WRITE_DATA_ERR;
     }
-    return RES_NO_ERROR;	/* Записали OK */
+    return RES_NO_ERROR;	/* Р—Р°РїРёСЃР°Р»Рё OK */
 }
 
 
 /**
- * Закрыть файл АЦП-перед этим сбросим буферы на диск 
+ * Р—Р°РєСЂС‹С‚СЊ С„Р°Р№Р» РђР¦Рџ-РїРµСЂРµРґ СЌС‚РёРј СЃР±СЂРѕСЃРёРј Р±СѓС„РµСЂС‹ РЅР° РґРёСЃРє 
  */
 int log_close_data_file(void)
 {
     FRESULT res;		/* Result code */
 
-    if (pAdcfile->fs == NULL)	// нет файла еще
+    if (pAdcfile->fs == NULL)	// РЅРµС‚ С„Р°Р№Р»Р° РµС‰Рµ
 	return RES_CLOSE_DATA_ERR;
 
-    /* Обязательно запишем */
+    /* РћР±СЏР·Р°С‚РµР»СЊРЅРѕ Р·Р°РїРёС€РµРј */
     res = f_sync(pAdcfile);
     if (res) {
 	return RES_CLOSE_DATA_ERR;
@@ -715,20 +715,20 @@ int log_close_data_file(void)
     if (res) {
 	return RES_CLOSE_DATA_ERR;
     }
-    return FR_OK;		/* Все нормально! */
+    return FR_OK;		/* Р’СЃРµ РЅРѕСЂРјР°Р»СЊРЅРѕ! */
 }
 
 
 /**
- * Открыть ini-файл регистрации-пока примитивный разбор,
- * параметр: указатель на даные - параметры запуска  
- * возврат:  успех (0) или нет (-1)
- * Возвращаем заполненную структуру наверх
+ * РћС‚РєСЂС‹С‚СЊ ini-С„Р°Р№Р» СЂРµРіРёСЃС‚СЂР°С†РёРё-РїРѕРєР° РїСЂРёРјРёС‚РёРІРЅС‹Р№ СЂР°Р·Р±РѕСЂ,
+ * РїР°СЂР°РјРµС‚СЂ: СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РґР°РЅС‹Рµ - РїР°СЂР°РјРµС‚СЂС‹ Р·Р°РїСѓСЃРєР°  
+ * РІРѕР·РІСЂР°С‚:  СѓСЃРїРµС… (0) РёР»Рё РЅРµС‚ (-1)
+ * Р’РѕР·РІСЂР°С‰Р°РµРј Р·Р°РїРѕР»РЅРµРЅРЅСѓСЋ СЃС‚СЂСѓРєС‚СѓСЂСѓ РЅР°РІРµСЂС…
  */
 int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 {
-    int n, ret = RES_NO_ERROR;	/* ret - результат выполнения */
-    char buf[8];		/* Название домашней директории */
+    int n, ret = RES_NO_ERROR;	/* ret - СЂРµР·СѓР»СЊС‚Р°С‚ РІС‹РїРѕР»РЅРµРЅРёСЏ */
+    char buf[8];		/* РќР°Р·РІР°РЅРёРµ РґРѕРјР°С€РЅРµР№ РґРёСЂРµРєС‚РѕСЂРёРё */
     char temp;
     char str[32];
     struct tm dir_time;
@@ -737,35 +737,35 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 
 #if 10
     do {
-	/* Прочитаем АДРЕС нашей платы */
+	/* РџСЂРѕС‡РёС‚Р°РµРј РђР”Р Р•РЎ РЅР°С€РµР№ РїР»Р°С‚С‹ */
 	n = ini_gets("Station", "GNS Number", "1", str, sizeof(str), PARAM_FILE_NAME);
 	reg->gns_addr = atoi(str);	///ini_getl("Station", "GNS number", 1, PARAM_FILE_NAME);
 
 
-	/* времени начала регистрации */
+	/* РІСЂРµРјРµРЅРё РЅР°С‡Р°Р»Р° СЂРµРіРёСЃС‚СЂР°С†РёРё */
 	reg->gns_start_time = ini_gettime("Times", "Start recording", 0, PARAM_FILE_NAME);
 
-	/* Время начала подстройки (просыпания) будет ЗА 10 минут до этого  */
+	/* Р’СЂРµРјСЏ РЅР°С‡Р°Р»Р° РїРѕРґСЃС‚СЂРѕР№РєРё (РїСЂРѕСЃС‹РїР°РЅРёСЏ) Р±СѓРґРµС‚ Р—Рђ 10 РјРёРЅСѓС‚ РґРѕ СЌС‚РѕРіРѕ  */
 	reg->gns_wakeup_time = (int) (reg->gns_start_time) - 120;
 
-	/* Время окончания регистрации */
+	/* Р’СЂРµРјСЏ РѕРєРѕРЅС‡Р°РЅРёСЏ СЂРµРіРёСЃС‚СЂР°С†РёРё */
 	reg->gns_finish_time = ini_gettime("Times", "End recording", 0, PARAM_FILE_NAME);
 
-	/* 3. перевести в секунды времени начала пережига */
+	/* 3. РїРµСЂРµРІРµСЃС‚Рё РІ СЃРµРєСѓРЅРґС‹ РІСЂРµРјРµРЅРё РЅР°С‡Р°Р»Р° РїРµСЂРµР¶РёРіР° */
 	reg->gns_burn_time = ini_gettime("Times", "Burn wire start", 0, PARAM_FILE_NAME);
 
-	/* 4 цифры на число 125, 250, 500, 1000, 2000, 4000 */
+	/* 4 С†РёС„СЂС‹ РЅР° С‡РёСЃР»Рѕ 125, 250, 500, 1000, 2000, 4000 */
 	n = ini_gets("ADC", "Sampling rate", "125", str, sizeof(str), PARAM_FILE_NAME);
 	reg->gns_adc_freq = atoi(str);
 
-	/* Ошибка в задании частоты */
+	/* РћС€РёР±РєР° РІ Р·Р°РґР°РЅРёРё С‡Р°СЃС‚РѕС‚С‹ */
 	if ((reg->gns_adc_freq != 125) && (reg->gns_adc_freq != 250) && (reg->gns_adc_freq != 500)
 	    && (reg->gns_adc_freq != 1000) && (reg->gns_adc_freq != 2000) && (reg->gns_adc_freq != 4000)) {
 	    ret = RES_FREQ_PARAM_ERR;
 	    break;
 	}
 
-	/* Мультиплексор */
+	/* РњСѓР»СЊС‚РёРїР»РµРєСЃРѕСЂ */
 	n = ini_gets("ADC", "Mux", "Normal", str, sizeof(str), PARAM_FILE_NAME);
 	if (strnicmp(str, "short", 5) == 0) {
 	    reg->gns_mux = 1;
@@ -780,7 +780,7 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 	}
 
 
-	/* Тест-сигнал */
+	/* РўРµСЃС‚-СЃРёРіРЅР°Р» */
 	n = ini_gets("ADC", "Test signal", "external", str, sizeof(str), PARAM_FILE_NAME);
 	if (strnicmp(str, "internal", 8) == 0) {
 	    reg->gns_test_sign = 1;
@@ -789,7 +789,7 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 	}
 
 
-	/* Частота тест-сигнала */
+	/* Р§Р°СЃС‚РѕС‚Р° С‚РµСЃС‚-СЃРёРіРЅР°Р»Р° */
 	n = ini_gets("ADC", "Test freq", "none", str, sizeof(str), PARAM_FILE_NAME);
 	if (strnicmp(str, "freq_0", 6) == 0) {
 	    reg->gns_test_freq = 0;
@@ -801,7 +801,7 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 	    reg->gns_test_freq = 2;
 	}
 
-	/* Что у нас записано в потреблении? */
+	/* Р§С‚Рѕ Сѓ РЅР°СЃ Р·Р°РїРёСЃР°РЅРѕ РІ РїРѕС‚СЂРµР±Р»РµРЅРёРё? */
 	n = ini_gets("ADC", "Power consumption", "Hi", str, sizeof(str), PARAM_FILE_NAME);
 	if (strnicmp(str, "Hi", 2) == 0) {
 	    reg->gns_adc_consum = 1;
@@ -812,7 +812,7 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 	    break;
 	}
 
-	/* 2 цифры на число PGA0 */
+	/* 2 С†РёС„СЂС‹ РЅР° С‡РёСЃР»Рѕ PGA0 */
 	n = ini_gets("ADC", "PGA0", "1", str, sizeof(str), PARAM_FILE_NAME);
 	temp = atoi(str);
 	if ((temp != 1) && (temp != 2) && (temp != 4)
@@ -822,7 +822,7 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 	}
 	reg->gns_adc_pga[0] = temp;
 
-	/* 2 цифры на число PGA1 */
+	/* 2 С†РёС„СЂС‹ РЅР° С‡РёСЃР»Рѕ PGA1 */
 	n = ini_gets("ADC", "PGA1", "1", str, sizeof(str), PARAM_FILE_NAME);
 	temp = atoi(str);
 	if ((temp != 1) && (temp != 2) && (temp != 4)
@@ -832,7 +832,7 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 	}
 	reg->gns_adc_pga[1] = temp;
 
-	/* 2 цифры на число PGA2 */
+	/* 2 С†РёС„СЂС‹ РЅР° С‡РёСЃР»Рѕ PGA2 */
 	n = ini_gets("ADC", "PGA2", "1", str, sizeof(str), PARAM_FILE_NAME);
 	temp = atoi(str);
 	if ((temp != 1) && (temp != 2) && (temp != 4)
@@ -842,7 +842,7 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 	}
 	reg->gns_adc_pga[2] = temp;
 
-	/* 2 цифры на число PGA3 */
+	/* 2 С†РёС„СЂС‹ РЅР° С‡РёСЃР»Рѕ PGA3 */
 	n = ini_gets("ADC", "PGA3", "1", str, sizeof(str), PARAM_FILE_NAME);
 	temp = atoi(str);
 	if ((temp != 1) && (temp != 2) && (temp != 4)
@@ -851,16 +851,16 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 	    break;
 	}
 	reg->gns_adc_pga[3] = temp;
-	// остальные неиспользуемые = 1
+	// РѕСЃС‚Р°Р»СЊРЅС‹Рµ РЅРµРёСЃРїРѕР»СЊР·СѓРµРјС‹Рµ = 1
 	reg->gns_adc_pga[4] = reg->gns_adc_pga[5] = reg->gns_adc_pga[6] = reg->gns_adc_pga[7] = 1;
 
-	/* Используемые каналы АЦП. Справа налево */
+	/* РСЃРїРѕР»СЊР·СѓРµРјС‹Рµ РєР°РЅР°Р»С‹ РђР¦Рџ. РЎРїСЂР°РІР° РЅР°Р»РµРІРѕ */
 	n = ini_gets("ADC", "Channels ON", "1111", str, sizeof(str), PARAM_FILE_NAME);
-	/* 4 цифры на число */
+	/* 4 С†РёС„СЂС‹ РЅР° С‡РёСЃР»Рѕ */
 	reg->gns_adc_bitmap = 0;
 	strncpy(buf, str, 5);
 
-	/* Смотрим ПО выключеию  */
+	/* РЎРјРѕС‚СЂРёРј РџРћ РІС‹РєР»СЋС‡РµРёСЋ  */
 	if (buf[0] != '0') {
 	    reg->gns_adc_bitmap |= 8;
 	}
@@ -875,49 +875,49 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 	}
 
 
-	/* Режим работы станции */
+	/* Р РµР¶РёРј СЂР°Р±РѕС‚С‹ СЃС‚Р°РЅС†РёРё */
 	n = ini_gets("WorkMode", "Mode", "COM", str, sizeof(str), PARAM_FILE_NAME);
 	if (n >= 3) {
 
 	    if (strnicmp(str, "Normal", 3) == 0) {
 		reg->gns_work_mode = GNS_NORMAL_MODE;
 	    } else {
-		reg->gns_work_mode = GNS_CMD_MODE;	/* командный режим  */
+		reg->gns_work_mode = GNS_CMD_MODE;	/* РєРѕРјР°РЅРґРЅС‹Р№ СЂРµР¶РёРј  */
 	    }
 	}
 
-	/* В любом режиме определить имя станции */
+	/* Р’ Р»СЋР±РѕРј СЂРµР¶РёРјРµ РѕРїСЂРµРґРµР»РёС‚СЊ РёРјСЏ СЃС‚Р°РЅС†РёРё */
 	//if (reg->gns_work_mode == GNS_CMD_MODE) {
 
-	/* Что у нас записано в названии AP? */
+	/* Р§С‚Рѕ Сѓ РЅР°СЃ Р·Р°РїРёСЃР°РЅРѕ РІ РЅР°Р·РІР°РЅРёРё AP? */
 	n = ini_gets("Network", "SSID name", "Test", str, sizeof(str), PARAM_FILE_NAME);
 	if (n > 1 && n < 32) {
 	    strncpy(reg->gns_ssid_name, str, strlen(str));
 	}
 
-	/* Пароль AP? */
+	/* РџР°СЂРѕР»СЊ AP? */
 	n = ini_gets("Network", "Security key", "Test", str, sizeof(str), PARAM_FILE_NAME);
 	if (n >= 4) {
 	    strncpy(reg->gns_ssid_pass, str, strlen(str));
 	}
 
-	/* Тип шифрования */
+	/* РўРёРї С€РёС„СЂРѕРІР°РЅРёСЏ */
 	reg->gns_ssid_sec_type = ini_getl("Network", "Security type", 0, PARAM_FILE_NAME);
 
-	/* Номер порта UDP */
+	/* РќРѕРјРµСЂ РїРѕСЂС‚Р° UDP */
 	reg->gns_server_udp_port = ini_getl("Network", "UDP port", 1000, PARAM_FILE_NAME);
 
-	/* Номер порта TCP */
+	/* РќРѕРјРµСЂ РїРѕСЂС‚Р° TCP */
 	reg->gns_server_tcp_port = ini_getl("Network", "TCP port", 1000, PARAM_FILE_NAME);
 
 	//}
 
 
-	/* Сначала читаем директории, если она открывается - значит существует - 8 байт */
+	/* РЎРЅР°С‡Р°Р»Р° С‡РёС‚Р°РµРј РґРёСЂРµРєС‚РѕСЂРёРё, РµСЃР»Рё РѕРЅР° РѕС‚РєСЂС‹РІР°РµС‚СЃСЏ - Р·РЅР°С‡РёС‚ СЃСѓС‰РµСЃС‚РІСѓРµС‚ - 8 Р±Р°Р№С‚ */
 	sprintf(str, "GNS%04d", reg->gns_addr);
 	if (f_opendir(pDir, str)) {	/* Open the directory */
 
-	    /* Не удалось создать папку с названием станции! */
+	    /* РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ РїР°РїРєСѓ СЃ РЅР°Р·РІР°РЅРёРµРј СЃС‚Р°РЅС†РёРё! */
 	    if (f_mkdir(str)) {
 		ret = RES_MKDIR_PARAM_ERR;
 		break;
@@ -925,13 +925,13 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 	}
 
 
-	/* Создаем папку с названием времени запуска */
+	/* РЎРѕР·РґР°РµРј РїР°РїРєСѓ СЃ РЅР°Р·РІР°РЅРёРµРј РІСЂРµРјРµРЅРё Р·Р°РїСѓСЃРєР° */
 	int reset = 0;
 	sec_to_tm(reg->gns_start_time, &dir_time);
 
-	    if (reset == PRCM_WDT_RESET) {	/* Причина ресета - WDT */
+	    if (reset == PRCM_WDT_RESET) {	/* РџСЂРёС‡РёРЅР° СЂРµСЃРµС‚Р° - WDT */
 
-		/* Сначала читаем директории, если она открывается - значит существует */
+		/* РЎРЅР°С‡Р°Р»Р° С‡РёС‚Р°РµРј РґРёСЂРµРєС‚РѕСЂРёРё, РµСЃР»Рё РѕРЅР° РѕС‚РєСЂС‹РІР°РµС‚СЃСЏ - Р·РЅР°С‡РёС‚ СЃСѓС‰РµСЃС‚РІСѓРµС‚ */
 		for (n = MAX_START_NUMBER - 1; n >= 0; n--) {
 		    sprintf(reg->gns_dir_name, "%s/%02d%02d%02d%02d",
 			    str,
@@ -939,14 +939,14 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 			     (dir_time.tm_mon + 1) % MAX_START_NUMBER,
 			      dir_time.tm_mday % MAX_START_NUMBER, n % MAX_START_NUMBER);
 
-		    res = f_opendir(pDir, reg->gns_dir_name);	/* Open the directory - самую последнюю */
+		    res = f_opendir(pDir, reg->gns_dir_name);	/* Open the directory - СЃР°РјСѓСЋ РїРѕСЃР»РµРґРЅСЋСЋ */
 		    if (res == FR_OK) {
 			break;
 		    }
 		}
 	    } else {
 
-		/* Сначала читаем директории, если она открывается - значит существует */
+		/* РЎРЅР°С‡Р°Р»Р° С‡РёС‚Р°РµРј РґРёСЂРµРєС‚РѕСЂРёРё, РµСЃР»Рё РѕРЅР° РѕС‚РєСЂС‹РІР°РµС‚СЃСЏ - Р·РЅР°С‡РёС‚ СЃСѓС‰РµСЃС‚РІСѓРµС‚ */
 		for (n = MAX_START_NUMBER - 1; n >= 0; n--) {
 		    sprintf(reg->gns_dir_name, "%s/%02d%02d%02d%02d",
 			    str,
@@ -971,7 +971,7 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 		    break;
 		}
 
-		/* Создать папку с названием: число и номер запуска */
+		/* РЎРѕР·РґР°С‚СЊ РїР°РїРєСѓ СЃ РЅР°Р·РІР°РЅРёРµРј: С‡РёСЃР»Рѕ Рё РЅРѕРјРµСЂ Р·Р°РїСѓСЃРєР° */
 		if ((res = f_mkdir(reg->gns_dir_name))) {
 		    ret = RES_MKDIR_PARAM_ERR;
 		    break;
@@ -979,24 +979,24 @@ int log_read_reg_file(GNS_PARAM_STRUCT * reg)
 	    }
 
 
-	    /* Открыть файл лога в этой директории всегда, создать если нет!  */
+	    /* РћС‚РєСЂС‹С‚СЊ С„Р°Р№Р» Р»РѕРіР° РІ СЌС‚РѕР№ РґРёСЂРµРєС‚РѕСЂРёРё РІСЃРµРіРґР°, СЃРѕР·РґР°С‚СЊ РµСЃР»Рё РЅРµС‚!  */
 	    sprintf(str, "%s/GNS110.log", reg->gns_dir_name);
 	    if ((res = f_open(pLogfile, str, FA_WRITE | FA_READ | FA_OPEN_ALWAYS))) {
 		ret = RES_CREATE_LOG_ERR;
 		break;
 	    }
 
-	    /* Определим размер */
+	    /* РћРїСЂРµРґРµР»РёРј СЂР°Р·РјРµСЂ */
 	    n = f_size(pLogfile);
 	    if (n >= MAX_LOG_FILE_LEN)
 		f_truncate(pLogfile);
 
-	    /* Переставим указатель файла */
+	    /* РџРµСЂРµСЃС‚Р°РІРёРј СѓРєР°Р·Р°С‚РµР»СЊ С„Р°Р№Р»Р° */
 	    f_lseek(pLogfile, n);
 
 	}
 	while (0);
 
 #endif
-	return ret;		/* Все получили - успех или неудача! */
+	return ret;		/* Р’СЃРµ РїРѕР»СѓС‡РёР»Рё - СѓСЃРїРµС… РёР»Рё РЅРµСѓРґР°С‡Р°! */
     }
