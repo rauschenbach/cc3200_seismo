@@ -20,20 +20,20 @@
 
 
 /************************************************************************
- * 	Статические переменные
- * 	отображаются или указателем SRAM (USE_THE_LOADER)
- * 	или используются в секции данных  
+ * 	РЎС‚Р°С‚РёС‡РµСЃРєРёРµ РїРµСЂРµРјРµРЅРЅС‹Рµ
+ * 	РѕС‚РѕР±СЂР°Р¶Р°СЋС‚СЃСЏ РёР»Рё СѓРєР°Р·Р°С‚РµР»РµРј SRAM (USE_THE_LOADER)
+ * 	РёР»Рё РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ РІ СЃРµРєС†РёРё РґР°РЅРЅС‹С…  
  ************************************************************************/
 static NAV_PVT_Payload nav_pvt_load;
 static GPS_COUNT_STRUCT_t gps_cnt;
-static NAV_PVT_Payload *pGpsNav = &nav_pvt_load;	/* Навигационная информация  */
-static GPS_COUNT_STRUCT_t *pGpsCnt = &gps_cnt;	/* Счетчики приема */
+static NAV_PVT_Payload *pGpsNav = &nav_pvt_load;	/* РќР°РІРёРіР°С†РёРѕРЅРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ  */
+static GPS_COUNT_STRUCT_t *pGpsCnt = &gps_cnt;	/* РЎС‡РµС‚С‡РёРєРё РїСЂРёРµРјР° */
 
 
 static long gps_time_sec;
 
 /************************************************************************
- * Константы, у нас нет внутреннего ROM поэтому эти данные пишутся в SRAM
+ * РљРѕРЅСЃС‚Р°РЅС‚С‹, Сѓ РЅР°СЃ РЅРµС‚ РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ ROM РїРѕСЌС‚РѕРјСѓ СЌС‚Рё РґР°РЅРЅС‹Рµ РїРёС€СѓС‚СЃСЏ РІ SRAM
  ************************************************************************/
 /* Enable NAV-PVT output */
 static const u8 CFG_MSG_Message[] = {
@@ -71,12 +71,12 @@ static void vGpsDataTask(void *);
 static void gps_parse_data(u8);
 static void gps_rx_end(void);
 
-/* Запустить задачу GPS */
+/* Р—Р°РїСѓСЃС‚РёС‚СЊ Р·Р°РґР°С‡Сѓ GPS */
 int gps_create_task(void)
 {
 	int ret;
 
-	/* Создаем задачу, которая будет передавать данные */
+	/* РЎРѕР·РґР°РµРј Р·Р°РґР°С‡Сѓ, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ РїРµСЂРµРґР°РІР°С‚СЊ РґР°РЅРЅС‹Рµ */
 	ret = osi_TaskCreate(vGpsDataTask, "GpsTask", OSI_STACK_SIZE, NULL, GPS_TASK_PRIORITY, NULL);
 	if (ret != OSI_OK) {
 		PRINTF("Create GpsTask error!\r\n");
@@ -90,7 +90,7 @@ int gps_create_task(void)
 
 
 /**
- * Инициализация GPS
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ GPS
  */
 int gps_init(void)
 {
@@ -127,20 +127,20 @@ int gps_init(void)
 
 
 /**
- * Задача опроса GPS модуля
+ * Р—Р°РґР°С‡Р° РѕРїСЂРѕСЃР° GPS РјРѕРґСѓР»СЏ
  */
 static void vGpsDataTask(void *par)
 {
 	int res;
 
-	/* почему не работает без static в первом варианте??? */
+	/* РїРѕС‡РµРјСѓ РЅРµ СЂР°Р±РѕС‚Р°РµС‚ Р±РµР· static РІ РїРµСЂРІРѕРј РІР°СЂРёР°РЅС‚Рµ??? */
 	s16 n = 0;
 	/*static */ u8 buf[4];
 
 
 	while (true) {
 
-		/* Ждем */
+		/* Р–РґРµРј */
 		if (Osi_twi_obj_lock() == OSI_OK) {
 
 			do {
@@ -150,7 +150,7 @@ static void vGpsDataTask(void *par)
 						//      PRINTF("%c", a);
 						gps_parse_data(buf[i]);
 					}
-					/* Делаем сброс */
+					/* Р”РµР»Р°РµРј СЃР±СЂРѕСЃ */
 					if (res < 0) {
 						log_write_log_file("Reset module\r\n");
 						gps_init();
@@ -166,23 +166,23 @@ static void vGpsDataTask(void *par)
 }
 
 /**
- * Стоп прием - сбросить счетчики
+ * РЎС‚РѕРї РїСЂРёРµРј - СЃР±СЂРѕСЃРёС‚СЊ СЃС‡РµС‚С‡РёРєРё
  */
 static void gps_rx_end(void)
 {
-	pGpsCnt->ind = 0;	/* Один байт приняли */
-	pGpsCnt->cnt = 0;	/* Счетчик пакетов - первый байт приняли */
+	pGpsCnt->ind = 0;	/* РћРґРёРЅ Р±Р°Р№С‚ РїСЂРёРЅСЏР»Рё */
+	pGpsCnt->cnt = 0;	/* РЎС‡РµС‚С‡РёРє РїР°РєРµС‚РѕРІ - РїРµСЂРІС‹Р№ Р±Р°Р№С‚ РїСЂРёРЅСЏР»Рё */
 	pGpsCnt->hdr = 0;
 }
 
 /**
- * Разбор данных
+ * Р Р°Р·Р±РѕСЂ РґР°РЅРЅС‹С…
  */
 static void gps_parse_data(u8 rx_byte)
 {
 	if (pGpsCnt->ind == 0 && rx_byte == 0xb5) {
-		pGpsCnt->ind = 1;	/* Один байт приняли */
-		pGpsCnt->cnt = 1;	/* Счетчик пакетов - первый байт приняли */
+		pGpsCnt->ind = 1;	/* РћРґРёРЅ Р±Р°Р№С‚ РїСЂРёРЅСЏР»Рё */
+		pGpsCnt->cnt = 1;	/* РЎС‡РµС‚С‡РёРє РїР°РєРµС‚РѕРІ - РїРµСЂРІС‹Р№ Р±Р°Р№С‚ РїСЂРёРЅСЏР»Рё */
 		pGpsCnt->hdr = rx_byte;
 	} else {
 		if (pGpsCnt->cnt == 1) {
@@ -206,7 +206,7 @@ static void gps_parse_data(u8 rx_byte)
 		pGpsCnt->cnt++;
 		if (pGpsCnt->cnt >= 0x54) {
 			struct tm t0;
-			t0.tm_isdst = 0;	/* Обязательно - иначе будет гулять час */
+			t0.tm_isdst = 0;	/* РћР±СЏР·Р°С‚РµР»СЊРЅРѕ - РёРЅР°С‡Рµ Р±СѓРґРµС‚ РіСѓР»СЏС‚СЊ С‡Р°СЃ */
 			t0.tm_hour = pGpsNav->hour;
 			t0.tm_min = pGpsNav->min;
 			t0.tm_sec = pGpsNav->sec;
@@ -217,7 +217,7 @@ static void gps_parse_data(u8 rx_byte)
 			status_set_gps_data(gps_time_sec, pGpsNav->lat, pGpsNav->lon, 
                                             pGpsNav->hAcc, pGpsNav->numSV, pGpsNav->fixType == 3 ? true : false);
 
-			/* Пишем разницу между PPS и первым импульсом таймера  */
+			/* РџРёС€РµРј СЂР°Р·РЅРёС†Сѓ РјРµР¶РґСѓ PPS Рё РїРµСЂРІС‹Рј РёРјРїСѓР»СЊСЃРѕРј С‚Р°Р№РјРµСЂР°  */
 			status_set_drift(timer_get_drift());
 			gps_rx_end();
                         
@@ -227,7 +227,7 @@ static void gps_parse_data(u8 rx_byte)
 
 
 /**
- * Количество доступных байт в модуле на данный момент
+ * РљРѕР»РёС‡РµСЃС‚РІРѕ РґРѕСЃС‚СѓРїРЅС‹С… Р±Р°Р№С‚ РІ РјРѕРґСѓР»Рµ РЅР° РґР°РЅРЅС‹Р№ РјРѕРјРµРЅС‚
  */
 u16 gps_check_avail_bytes(void)
 {
@@ -255,7 +255,7 @@ u16 gps_check_avail_bytes(void)
 }
 
 /**
- *  Прочитать буфер данных
+ *  РџСЂРѕС‡РёС‚Р°С‚СЊ Р±СѓС„РµСЂ РґР°РЅРЅС‹С…
  */
 int gps_read_data_string(u8 * data, u16 len)
 {
@@ -270,7 +270,7 @@ int gps_read_data_string(u8 * data, u16 len)
 
 	do {
 		/* Write the register address to be read from.
-		 * Stop bit implicitly assumed to be 0. - какой может быть? */
+		 * Stop bit implicitly assumed to be 0. - РєР°РєРѕР№ РјРѕР¶РµС‚ Р±С‹С‚СЊ? */
 		if (TWI_IF_Write(NEO7_DEVICE_ADDR, &reg, 1, 0) != SUCCESS) {
 			//PRINTF("ERROR: I2C Write\n\r");
 			//break;
@@ -287,14 +287,14 @@ int gps_read_data_string(u8 * data, u16 len)
 
 
 /**
- * Записать буфер данных
+ * Р—Р°РїРёСЃР°С‚СЊ Р±СѓС„РµСЂ РґР°РЅРЅС‹С…
  */
 int gps_write_data_string(u8 * data, u16 len)
 {
 	int res = -1;
 
 	/* Write the register address to be read from.
-	 * Stop bit implicitly assumed to be 0. - какой может быть? */
+	 * Stop bit implicitly assumed to be 0. - РєР°РєРѕР№ РјРѕР¶РµС‚ Р±С‹С‚СЊ? */
 	if (TWI_IF_Write(NEO7_DEVICE_ADDR, data, len, 0) == SUCCESS) {
 		res = 0;
 	}
@@ -302,7 +302,7 @@ int gps_write_data_string(u8 * data, u16 len)
 }
 
 /**
- * Для отладки - вывести даные GPS
+ * Р”Р»СЏ РѕС‚Р»Р°РґРєРё - РІС‹РІРµСЃС‚Рё РґР°РЅС‹Рµ GPS
  */
 void gps_print_data(void)
 {
@@ -313,7 +313,7 @@ void gps_print_data(void)
 }
 
 /**
- * Выдать время GPS
+ * Р’С‹РґР°С‚СЊ РІСЂРµРјСЏ GPS
  */
 long gps_get_gps_time(void)
 {
