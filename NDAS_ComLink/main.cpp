@@ -33,7 +33,7 @@
 static myLangID lang;
 
 extern get_dsp_status(void *);
-CRITICAL_SECTION cs; // Будет extern в другом Файле 
+CRITICAL_SECTION cs; // Р‘СѓРґРµС‚ extern РІ РґСЂСѓРіРѕРј Р¤Р°Р№Р»Рµ 
 TfrmMain *frmMain;
 //---------------------------------------------------------------------------
 __fastcall TfrmMain::TfrmMain(TComponent * Owner):TForm(Owner), index(0),
@@ -44,7 +44,7 @@ run_ok(false), MyThread(NULL), enable_log(true), big_timer(0), first_run(true), 
 }
 
 //---------------------------------------------------------------------------
-// Послать команду, прочитать ответ
+// РџРѕСЃР»Р°С‚СЊ РєРѕРјР°РЅРґСѓ, РїСЂРѕС‡РёС‚Р°С‚СЊ РѕС‚РІРµС‚
 int __fastcall TfrmMain::Querry(String name, u8 * send, int tx, u8 * recv, int rx, int *baud)
 {
     int i;
@@ -78,7 +78,7 @@ int __fastcall TfrmMain::Querry(String name, u8 * send, int tx, u8 * recv, int r
 	    }
 	}
     }
-    return (int) num;		// сколько прочитали
+    return (int) num;		// СЃРєРѕР»СЊРєРѕ РїСЂРѕС‡РёС‚Р°Р»Рё
 }
 
 //---------------------------------------------------------------------------
@@ -90,11 +90,11 @@ void __fastcall TfrmMain::btnCloseClick(TObject * Sender)
 }
 
 //---------------------------------------------------------------------------
-// Запуск самотестирования
+// Р—Р°РїСѓСЃРє СЃР°РјРѕС‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ
 void __fastcall TfrmMain::btnTestClick(TObject * Sender)
 {
     WriteCommandThread *thread;
-    first_run = false;		// запустили
+    first_run = false;		// Р·Р°РїСѓСЃС‚РёР»Рё
 
     LogOut("Begin SelfTest...wait!");
 
@@ -105,7 +105,7 @@ void __fastcall TfrmMain::btnTestClick(TObject * Sender)
 }
 
 //---------------------------------------------------------------------------
-// Вывеcти в Memo
+// Р’С‹РІРµcС‚Рё РІ Memo
 void __fastcall TfrmMain::PrintLog(String text, u8 * buf, int len)
 {
     int i;
@@ -118,7 +118,7 @@ void __fastcall TfrmMain::PrintLog(String text, u8 * buf, int len)
 }
 
 //---------------------------------------------------------------------------
-// Вывод в лог
+// Р’С‹РІРѕРґ РІ Р»РѕРі
 void __fastcall TfrmMain::LogOut(char *text, bool log_only)
 {
     int i, len;
@@ -129,11 +129,11 @@ void __fastcall TfrmMain::LogOut(char *text, bool log_only)
     unsigned long bw;
 
     str = TimeString() + text;
-    // Скопируем в буфер
+    // РЎРєРѕРїРёСЂСѓРµРј РІ Р±СѓС„РµСЂ
     memset(buf, 0, sizeof(buf));
     memcpy(buf, str.c_str(), str.Length());
 
-    // Уберем перевод строки
+    // РЈР±РµСЂРµРј РїРµСЂРµРІРѕРґ СЃС‚СЂРѕРєРё
     for (i = 0; i < str.Length(); i++) {
 	if (buf[i] == '\x0D' || buf[i] == '\x0A') {
 	    buf[i] = 0;
@@ -148,13 +148,13 @@ void __fastcall TfrmMain::LogOut(char *text, bool log_only)
     if (log_fd != INVALID_HANDLE_VALUE && old != String(text)) {
 	old = String(text);
 	WriteFile(log_fd, buf, strlen(buf), &bw, NULL);
-	WriteFile(log_fd, crlf, strlen(crlf), &bw, NULL);	// Добавлять перевод строки
+	WriteFile(log_fd, crlf, strlen(crlf), &bw, NULL);	// Р”РѕР±Р°РІР»СЏС‚СЊ РїРµСЂРµРІРѕРґ СЃС‚СЂРѕРєРё
     }
 */
 }
 
 //---------------------------------------------------------------------------
-// Вывеcти время компьютера
+// Р’С‹РІРµcС‚Рё РІСЂРµРјСЏ РєРѕРјРїСЊСЋС‚РµСЂР°
 void __fastcall TfrmMain::TimeUTC(void)
 {
     int i;
@@ -168,8 +168,8 @@ void __fastcall TfrmMain::TimeUTC(void)
 }
 
 //---------------------------------------------------------------------------
-// Вывести время
-// Если время различается более чем на 30 секунд - моргать статусом
+// Р’С‹РІРµСЃС‚Рё РІСЂРµРјСЏ
+// Р•СЃР»Рё РІСЂРµРјСЏ СЂР°Р·Р»РёС‡Р°РµС‚СЃСЏ Р±РѕР»РµРµ С‡РµРј РЅР° 30 СЃРµРєСѓРЅРґ - РјРѕСЂРіР°С‚СЊ СЃС‚Р°С‚СѓСЃРѕРј
 void __fastcall TfrmMain::TimeGNS110(long t)
 {
     char str[128];
@@ -184,14 +184,14 @@ void __fastcall TfrmMain::TimeGNS110(long t)
 //---------------------------------------------------------------------------
 
 
-// При открытии программы создаем LOG - файл
+// РџСЂРё РѕС‚РєСЂС‹С‚РёРё РїСЂРѕРіСЂР°РјРјС‹ СЃРѕР·РґР°РµРј LOG - С„Р°Р№Р»
 void __fastcall TfrmMain::FormActivate(TObject * Sender)
 {
     char str[256];
     time_t t0;
     TIME_DATE td;
 
-    // 2 секции
+    // 2 СЃРµРєС†РёРё
     InitializeCriticalSection(&time_cs);
 
     InitializeCriticalSection(&cs);
@@ -207,9 +207,9 @@ void __fastcall TfrmMain::FormActivate(TObject * Sender)
 
 
     menuSave->Enabled = true;
-    StartTime = t0;		// Время запуска программы сохраним
+    StartTime = t0;		// Р’СЂРµРјСЏ Р·Р°РїСѓСЃРєР° РїСЂРѕРіСЂР°РјРјС‹ СЃРѕС…СЂР°РЅРёРј
 
-    // Открываем log файл
+    // РћС‚РєСЂС‹РІР°РµРј log С„Р°Р№Р»
     sec_to_td(t0, &td);
 /*
     CreateDirectory("LOGS", NULL);
@@ -218,16 +218,16 @@ void __fastcall TfrmMain::FormActivate(TObject * Sender)
 */
     sprintf(str, "Run program NDAS ComLink\r\n");
     LogOut(str);
-    tmFind->Enabled = true;	// Таймер поиска станций
+    tmFind->Enabled = true;	// РўР°Р№РјРµСЂ РїРѕРёСЃРєР° СЃС‚Р°РЅС†РёР№
 }
 
 //---------------------------------------------------------------------------
-// Поиск портов
+// РџРѕРёСЃРє РїРѕСЂС‚РѕРІ
 void __fastcall TfrmMain::TerminateAllThreads(void)
 {
-    TerminateScope();		// Останавливаем устройство и чистим буфер
+    TerminateScope();		// РћСЃС‚Р°РЅР°РІР»РёРІР°РµРј СѓСЃС‚СЂРѕР№СЃС‚РІРѕ Рё С‡РёСЃС‚РёРј Р±СѓС„РµСЂ
 
-    // Выключаем поток
+    // Р’С‹РєР»СЋС‡Р°РµРј РїРѕС‚РѕРє
     if (MyThread != NULL) {
 	MyThread->WaitFor();
 	delete MyThread;
@@ -237,7 +237,7 @@ void __fastcall TfrmMain::TerminateAllThreads(void)
         cbPortName->Clear();
         reset_num_station();
     }
-    // закроем порт
+    // Р·Р°РєСЂРѕРµРј РїРѕСЂС‚
     PortClose();
     tmFind->Enabled = true;
 }
@@ -254,7 +254,7 @@ void __fastcall TfrmMain::FormResize(TObject * Sender)
     h = this->Height;
     d = 5;
 
-    // 1-я вкладка
+    // 1-СЏ РІРєР»Р°РґРєР°
     if (gbCounts->Visible) {
 	gbParams->Width = w / 6 - d;
 	gbTimes->Width = w / 6 - d;
@@ -267,7 +267,7 @@ void __fastcall TfrmMain::FormResize(TObject * Sender)
 	gbEnviron->Width = w / 4 * 2 + d;
     }
 
-    // нижняя часть
+    // РЅРёР¶РЅСЏСЏ С‡Р°СЃС‚СЊ
     if (gbAdc->Visible) {
 	gbStatus0->Width = w / 6 - d;
 	gbStatus1->Width = w / 6 - d;
@@ -287,7 +287,7 @@ void __fastcall TfrmMain::FormResize(TObject * Sender)
 }
 
 //---------------------------------------------------------------------------
-// Запрос на выход из программы
+// Р—Р°РїСЂРѕСЃ РЅР° РІС‹С…РѕРґ РёР· РїСЂРѕРіСЂР°РјРјС‹
 void __fastcall TfrmMain::FormCloseQuery(TObject * Sender, bool & CanClose)
 {
     int res;
@@ -323,9 +323,9 @@ void __fastcall TfrmMain::FormDestroy(TObject * Sender)
 }
 
 //---------------------------------------------------------------------------
-// Нажатие кнопки Старт
-// Что выбрано?
-// Запустить выбранную станцию
+// РќР°Р¶Р°С‚РёРµ РєРЅРѕРїРєРё РЎС‚Р°СЂС‚
+// Р§С‚Рѕ РІС‹Р±СЂР°РЅРѕ?
+// Р—Р°РїСѓСЃС‚РёС‚СЊ РІС‹Р±СЂР°РЅРЅСѓСЋ СЃС‚Р°РЅС†РёСЋ
 void __fastcall TfrmMain::sbRunModuleClick(TObject * Sender)
 {
     String met;
@@ -336,14 +336,14 @@ void __fastcall TfrmMain::sbRunModuleClick(TObject * Sender)
 
     gns_num = frmMain->port_set[cbPortName->ItemIndex].gns_name;
 
-    // Если нашел станции
+    // Р•СЃР»Рё РЅР°С€РµР» СЃС‚Р°РЅС†РёРё
     if (cbPortName->ItemIndex >= 0 && bEndThread) {
 	tmFind->Enabled = false;
 	cbPortName->Enabled = false;
 	sbRunModule->Down = true;
 	EnableControl();
 	met = "Connect to recorder " + met;
-    } else if (!bEndThread) {	// остановить станцию
+    } else if (!bEndThread) {	// РѕСЃС‚Р°РЅРѕРІРёС‚СЊ СЃС‚Р°РЅС†РёСЋ
 	bEndThread = true;
 	TerminateAllThreads();
 	cbPortName->Enabled = true;
@@ -354,7 +354,7 @@ void __fastcall TfrmMain::sbRunModuleClick(TObject * Sender)
 }
 
 //---------------------------------------------------------------------------
-// Разрешим кнопки
+// Р Р°Р·СЂРµС€РёРј РєРЅРѕРїРєРё
 void __fastcall TfrmMain::EnableControl(void)
 {
     int num, baud;
@@ -375,16 +375,16 @@ void __fastcall TfrmMain::EnableControl(void)
 
     bEndThread = false;
     MyThread = new ReadPortThread(false);
-    MyThread->Priority = tpHighest;	// самый выше!
+    MyThread->Priority = tpHighest;	// СЃР°РјС‹Р№ РІС‹С€Рµ!
 
     run_ok = true;
 }
 
 //---------------------------------------------------------------------------
-// Всегда выводить время UTC
+// Р’СЃРµРіРґР° РІС‹РІРѕРґРёС‚СЊ РІСЂРµРјСЏ UTC
 void __fastcall TfrmMain::timIdleTimer(TObject * Sender)
 {
-    // Раз в секунду
+    // Р Р°Р· РІ СЃРµРєСѓРЅРґСѓ
     if (big_timer % 10 == 0) {
 	TimeUTC();
         }
@@ -394,15 +394,15 @@ void __fastcall TfrmMain::timIdleTimer(TObject * Sender)
 }
 
 //---------------------------------------------------------------------------
-// Стоп измерения
+// РЎС‚РѕРї РёР·РјРµСЂРµРЅРёСЏ
 void __fastcall TfrmMain::btnStopClick(TObject * Sender)
 {
     TerminateScope();
 }
 
 //---------------------------------------------------------------------------
-// Прекратить рисование
-// Останавливаем устройство и чистим буфер
+// РџСЂРµРєСЂР°С‚РёС‚СЊ СЂРёСЃРѕРІР°РЅРёРµ
+// РћСЃС‚Р°РЅР°РІР»РёРІР°РµРј СѓСЃС‚СЂРѕР№СЃС‚РІРѕ Рё С‡РёСЃС‚РёРј Р±СѓС„РµСЂ
 void __fastcall TfrmMain::TerminateScope(void)
 {
     if (run_ok && enable_measure) {
@@ -421,21 +421,21 @@ void __fastcall TfrmMain::TerminateScope(void)
 }
 
 //---------------------------------------------------------------------------
-// очистить вывод-иначе невозможно работать!
+// РѕС‡РёСЃС‚РёС‚СЊ РІС‹РІРѕРґ-РёРЅР°С‡Рµ РЅРµРІРѕР·РјРѕР¶РЅРѕ СЂР°Р±РѕС‚Р°С‚СЊ!
 void __fastcall TfrmMain::sbInfoDblClick(TObject * Sender)
 {
     memoLog->Clear();
 }
 
 //---------------------------------------------------------------------------
-// Поиск станций
+// РџРѕРёСЃРє СЃС‚Р°РЅС†РёР№
 void __fastcall TfrmMain::tmFindTimer(TObject * Sender)
 {
     if (get_num_station() > 0) {
 	tmFind->Enabled = false;
-	sbRunModule->Enabled = true;	// Разблокируем кнопку подклбючения
+	sbRunModule->Enabled = true;	// Р Р°Р·Р±Р»РѕРєРёСЂСѓРµРј РєРЅРѕРїРєСѓ РїРѕРґРєР»Р±СЋС‡РµРЅРёСЏ
     } else {
-	if (!no_enter()) {	// Запуск потока
+	if (!no_enter()) {	// Р—Р°РїСѓСЃРє РїРѕС‚РѕРєР°
 	    sbRunModule->Enabled = false;
 	    sbRunModule->Down = false;
 	    FindStationsThread *thread = new FindStationsThread(false);
@@ -445,7 +445,7 @@ void __fastcall TfrmMain::tmFindTimer(TObject * Sender)
 }
 
 //---------------------------------------------------------------------------
-// Вывести статус!
+// Р’С‹РІРµСЃС‚Рё СЃС‚Р°С‚СѓСЃ!
 void __fastcall TfrmMain::ShowStatus(void *v)
 {
     char str[128];
@@ -459,7 +459,7 @@ void __fastcall TfrmMain::ShowStatus(void *v)
     if (v != NULL) {
 	status = (STATUS_h *) v;
 //////////////////////////////////////////////////////////////////////////////////////////
-//                      углы и температура 0
+//                      СѓРіР»С‹ Рё С‚РµРјРїРµСЂР°С‚СѓСЂР° 0
 //////////////////////////////////////////////////////////////////////////////////////////
 	float p, r, h, T, P;
 	p = status->sens_date.pitch / 10.0;
@@ -476,8 +476,8 @@ void __fastcall TfrmMain::ShowStatus(void *v)
 	pnPressure->Caption = (status->sens_date.press == -1)?  String("-") : FloatToStrF(P, ffFixed, 6, 1);
         pnSupplyV->Caption = (status->sens_date.voltage == -1)?  String("-") : FloatToStrF(status->sens_date.voltage / 1000.0, ffFixed, 2, 2);
 
-        // время
-//  	TimeGNS110(status->current_DSP_time / 1000000000UL);	/* Время RTC прибора */
+        // РІСЂРµРјСЏ
+//  	TimeGNS110(status->current_DSP_time / 1000000000UL);	/* Р’СЂРµРјСЏ RTC РїСЂРёР±РѕСЂР° */
 
 //        ShowPortCounts(&status->uart_counts);
 
@@ -492,41 +492,41 @@ void __fastcall TfrmMain::ShowStatus(void *v)
 	} else {
 	    lbStatus0_1->Font->Color = clGray;
 	}
-        //  ошибка в команде
+        //  РѕС€РёР±РєР° РІ РєРѕРјР°РЅРґРµ
 	if (status->runtime_state.cmd_error) {
 	    lbStatus0_2->Font->Color = clRed;
 	} else {
 	    lbStatus0_2->Font->Color = clGray;
 	}
-        // Не найден файл регистрации
+        // РќРµ РЅР°Р№РґРµРЅ С„Р°Р№Р» СЂРµРіРёСЃС‚СЂР°С†РёРё
 	if (status->init_state.no_reg_file) {
 	    lbStatus0_3->Font->Color = clRed;
 	} else {
 	    lbStatus0_3->Font->Color = clGray;
 	}
 
-        // неисправен регистратор
+        // РЅРµРёСЃРїСЂР°РІРµРЅ СЂРµРіРёСЃС‚СЂР°С‚РѕСЂ
 	if (status->init_state.reg_fault) {
 	    lbStatus0_4->Font->Color = clRed;
 	} else {
 	    lbStatus0_4->Font->Color = clGray;
 	}
 
-        // переполнение памяти
+        // РїРµСЂРµРїРѕР»РЅРµРЅРёРµ РїР°РјСЏС‚Рё
 	if (status->runtime_state.mem_ovr) {
 	    lbStatus0_5->Font->Color = clBlue;
 	} else {
 	    lbStatus0_5->Font->Color = clGray;
 	}
 
-	// GNS включен во время измерений
+	// GNS РІРєР»СЋС‡РµРЅ РІРѕ РІСЂРµРјСЏ РёР·РјРµСЂРµРЅРёР№
 	if (status->runtime_state.acqis_running) {
 	    lbStatus0_6->Font->Color = clGreen;
 	} else {
 	    lbStatus0_6->Font->Color = clGray;
 	}
 
-        /* Самотестирование  */
+        /* РЎР°РјРѕС‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ  */
        	if (status->init_state.self_test_on) {
 	    lbStatus0_7->Font->Color = clBlue;
 	} else {
@@ -549,7 +549,7 @@ void __fastcall TfrmMain::ShowStatus(void *v)
         lbSV->Caption = IntToStr(status->current_GPS_data.numSV);
         pnDrift->Caption = IntToStr(status->current_GPS_data.tAcc);
 
-	// Самотестирование
+	// РЎР°РјРѕС‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ
 
         // RTC
         if(status->test_state.rtc_ok) {
@@ -558,28 +558,28 @@ void __fastcall TfrmMain::ShowStatus(void *v)
         	lbStatus1_0->Font->Color = clRed;
         }
 
-        // Давление
+        // Р”Р°РІР»РµРЅРёРµ
         if(status->test_state.press_ok) {
         	lbStatus1_1->Font->Color = clGreen;
         } else {
         	lbStatus1_1->Font->Color = clRed;
         }
 
-        // ускорение
+        // СѓСЃРєРѕСЂРµРЅРёРµ
         if(status->test_state.acc_ok) {
         	lbStatus1_2->Font->Color = clGreen;
         } else {
         	lbStatus1_2->Font->Color = clRed;
         }
 
-        // магнетометр
+        // РјР°РіРЅРµС‚РѕРјРµС‚СЂ
         if(status->test_state.comp_ok) {
         	lbStatus1_3->Font->Color = clGreen;
         } else {
         	lbStatus1_3->Font->Color = clRed;
         }
 
-        // Модуль влажности
+        // РњРѕРґСѓР»СЊ РІР»Р°Р¶РЅРѕСЃС‚Рё
         if(status->test_state.hum_ok) {
         	lbStatus1_4->Font->Color = clGreen;
         } else {
@@ -610,7 +610,7 @@ void __fastcall TfrmMain::ShowStatus(void *v)
 //    sbInfo->Panels->Items[0]->Text = String("Test: ") + IntToHex(status->current_GPS_data.time, 8);
     sbInfo->Panels->Items[0]->Text = String("Test:  ") + IntToStr((s64)status->current_GPS_data.time) + String("    ");
     
-    } else {			// Обнулим все
+    } else {			// РћР±РЅСѓР»РёРј РІСЃРµ
 
 	pnSupplyV->Color = clBtnFace;
 	pnSupplyV->Font->Color = clWindowText;
@@ -628,7 +628,7 @@ void __fastcall TfrmMain::ShowStatus(void *v)
 	lbStatus0_6->Font->Color = clGray;
 	lbStatus0_7->Font->Color = clGray;
 
-	// Самотестирование
+	// РЎР°РјРѕС‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ
 	lbStatus1_0->Font->Color = clGray;
 	lbStatus1_1->Font->Color = clGray;
 	lbStatus1_2->Font->Color = clGray;
@@ -638,7 +638,7 @@ void __fastcall TfrmMain::ShowStatus(void *v)
 	lbStatus1_6->Font->Color = clGray;
 	lbStatus1_7->Font->Color = clGray;
 
-	// Прочие устройства
+	// РџСЂРѕС‡РёРµ СѓСЃС‚СЂРѕР№СЃС‚РІР°
 	lbStatus2_0->Font->Color = clGray;
 //      lbStatus2_1->Font->Color = clGray;
 	lbStatus2_2->Font->Color = clGray;
@@ -659,7 +659,7 @@ void __fastcall TfrmMain::ShowStatus(void *v)
 	lbRele7->Font->Color = clGray;
 
 
-	// Причина сброса
+	// РџСЂРёС‡РёРЅР° СЃР±СЂРѕСЃР°
 	lbStatusReset_0->Font->Color = clGray;
 	lbStatusReset_1->Font->Color = clGray;
 	lbStatusReset_2->Font->Color = clGray;
@@ -667,7 +667,7 @@ void __fastcall TfrmMain::ShowStatus(void *v)
 	lbStatusReset_4->Font->Color = clGray;
 	lbStatusReset_5->Font->Color = clGray;
 
-	// среда
+	// СЃСЂРµРґР°
 	pnSupplyV->Caption = "";
 	pnSupplyV->Color = clBtnFace;
 	pnSupplyV->Font->Color = clWindowText;
@@ -702,7 +702,7 @@ void __fastcall TfrmMain::ShowStatus(void *v)
     }
 }
 //---------------------------------------------------------------------------
-// Счетчики обмена свои
+// РЎС‡РµС‚С‡РёРєРё РѕР±РјРµРЅР° СЃРІРѕРё
 void __fastcall TfrmMain::ShowMyCounts(void* v)
 {
     UART_COUNTS_t *counts;
@@ -721,10 +721,10 @@ void __fastcall TfrmMain::ShowWorkTime(void *v)
 {
 }
 ////////////////////////////////////////////////////////////////////////////////
-//           Команды, отвечающие на сообщения SendMessage,PostMessage
+//           РљРѕРјР°РЅРґС‹, РѕС‚РІРµС‡Р°СЋС‰РёРµ РЅР° СЃРѕРѕР±С‰РµРЅРёСЏ SendMessage,PostMessage
 ////////////////////////////////////////////////////////////////////////////////
-// Вывести счетчики обмена свои и gns110
-// Качество связи индикатором
+// Р’С‹РІРµСЃС‚Рё СЃС‡РµС‚С‡РёРєРё РѕР±РјРµРЅР° СЃРІРѕРё Рё gns110
+// РљР°С‡РµСЃС‚РІРѕ СЃРІСЏР·Рё РёРЅРґРёРєР°С‚РѕСЂРѕРј
 void __fastcall TfrmMain::CMShowPortCounts(TMessage & Message)
 {
 	ShowPortCounts((void *) Message.WParam);
@@ -743,14 +743,14 @@ void __fastcall TfrmMain::CMShowWorkTime(TMessage & Message)
 }
 
 //---------------------------------------------------------------------------
-// Принимаем сообщение и отрисовываем статус
+// РџСЂРёРЅРёРјР°РµРј СЃРѕРѕР±С‰РµРЅРёРµ Рё РѕС‚СЂРёСЃРѕРІС‹РІР°РµРј СЃС‚Р°С‚СѓСЃ
 void __fastcall TfrmMain::CMShowStatus(TMessage & Message)
 {
     ShowStatus((void *) Message.WParam);
 }
 
 //---------------------------------------------------------------------------
-// Счетчики обмена
+// РЎС‡РµС‚С‡РёРєРё РѕР±РјРµРЅР°
 void __fastcall TfrmMain::ShowPortCounts(void* v)
 {
     UART_COUNTS_t *counts;
@@ -767,10 +767,10 @@ void __fastcall TfrmMain::ShowPortCounts(void* v)
 
 
 //---------------------------------------------------------------------------
-// Нет данных - сообщение от читающего потока
+// РќРµС‚ РґР°РЅРЅС‹С… - СЃРѕРѕР±С‰РµРЅРёРµ РѕС‚ С‡РёС‚Р°СЋС‰РµРіРѕ РїРѕС‚РѕРєР°
 void __fastcall TfrmMain::CMNoData(TMessage & Message)
 {
-    // Ждем, что порт выключен
+    // Р–РґРµРј, С‡С‚Рѕ РїРѕСЂС‚ РІС‹РєР»СЋС‡РµРЅ
     bEndThread = true;
     TerminateAllThreads();
 }
@@ -782,7 +782,7 @@ void __fastcall TfrmMain::Splitter1Moved(TObject * Sender)
 }
 
 //---------------------------------------------------------------------------
-// Выводим, в зависимости от частоты!
+// Р’С‹РІРѕРґРёРј, РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‡Р°СЃС‚РѕС‚С‹!
 void __fastcall TfrmMain::CMReadData(TMessage & Message)
 {
     ADS131_DATA_h *pack;
@@ -790,7 +790,7 @@ void __fastcall TfrmMain::CMReadData(TMessage & Message)
     int sec, msec;
     u16 sps;
     int i;
-    double freq_s = 125.0; // всегда 125
+    double freq_s = 125.0; // РІСЃРµРіРґР° 125
 
     pack = (ADS131_DATA_h *) Message.WParam;
 
@@ -824,21 +824,21 @@ void __fastcall TfrmMain::CMReadData(TMessage & Message)
 }
 
 //---------------------------------------------------------------------------
-// Число точек на экране осцилографа
+// Р§РёСЃР»Рѕ С‚РѕС‡РµРє РЅР° СЌРєСЂР°РЅРµ РѕСЃС†РёР»РѕРіСЂР°С„Р°
 void __fastcall TfrmMain::cbTimeLimitChange(TObject * Sender)
 {
     int points;
     int net;
 
-    // число точек на экране
+    // С‡РёСЃР»Рѕ С‚РѕС‡РµРє РЅР° СЌРєСЂР°РЅРµ
     points = cbTimeLimit->ItemIndex == 0 ? 1000 : cbTimeLimit->ItemIndex == 1 ?
 	2000 : cbTimeLimit->ItemIndex == 2 ? 5000 : cbTimeLimit->ItemIndex == 3 ? 10000 : 20000;
     slsDisplay->SizeLimit = points;
 }
 
 //---------------------------------------------------------------------------
-// Теперь приявязать к времени диcкретизации!
-// первести секунды в часы минуты секунды
+// РўРµРїРµСЂСЊ РїСЂРёСЏРІСЏР·Р°С‚СЊ Рє РІСЂРµРјРµРЅРё РґРёcРєСЂРµС‚РёР·Р°С†РёРё!
+// РїРµСЂРІРµСЃС‚Рё СЃРµРєСѓРЅРґС‹ РІ С‡Р°СЃС‹ РјРёРЅСѓС‚С‹ СЃРµРєСѓРЅРґС‹
 void __fastcall TfrmMain::SLScope1XAxisCustomLabel(TObject * Sender, Real SampleValue, AnsiString & AxisLabel)
 {
     char str[32];
@@ -873,7 +873,7 @@ void __fastcall TfrmMain::btnGpsOnClick(TObject * Sender)
 }
 
 //---------------------------------------------------------------------------
-// Записать параметры и запустить старт
+// Р—Р°РїРёСЃР°С‚СЊ РїР°СЂР°РјРµС‚СЂС‹ Рё Р·Р°РїСѓСЃС‚РёС‚СЊ СЃС‚Р°СЂС‚
 void __fastcall TfrmMain::btnStartThreadClick(TObject *Sender)
 {
     WriteCommandThread *thread;
@@ -886,13 +886,13 @@ void __fastcall TfrmMain::btnStartThreadClick(TObject *Sender)
     cbTimeLimitChange(this);
 }
 //---------------------------------------------------------------------------
-// Записать параметры
+// Р—Р°РїРёСЃР°С‚СЊ РїР°СЂР°РјРµС‚СЂС‹
 void __fastcall TfrmMain::btnWriteParamsClick(TObject *Sender)
 {
     memset(&adcp, 0, sizeof(adcp));
 
-    adcp.sample_rate = cbAdcFreq->ItemIndex;	/* частота  */
-    adcp.test_signal = cbMux->ItemIndex;  /* Тестовый сигнал */
+    adcp.sample_rate = cbAdcFreq->ItemIndex;	/* С‡Р°СЃС‚РѕС‚Р°  */
+    adcp.test_signal = cbMux->ItemIndex;  /* РўРµСЃС‚РѕРІС‹Р№ СЃРёРіРЅР°Р» */
 
 
     adcp.adc_board_1.board_active = 1;
