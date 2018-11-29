@@ -1,5 +1,5 @@
 /***************************************************************************************
- * 				Сокеты и UDP и TCP одновременно
+ * 				РЎРѕРєРµС‚С‹ Рё UDP Рё TCP РѕРґРЅРѕРІСЂРµРјРµРЅРЅРѕ
  ***************************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -30,30 +30,30 @@
 
 
 
-#define		UART_RX_TIMEOUT		100	/* 100 миллисекунд таймаут приема - высокий пока */
-#define 	UART_BAUD_RATE		115200	/* Скорость порта для обмена с PC  */
+#define		UART_RX_TIMEOUT		100	/* 100 РјРёР»Р»РёСЃРµРєСѓРЅРґ С‚Р°Р№РјР°СѓС‚ РїСЂРёРµРјР° - РІС‹СЃРѕРєРёР№ РїРѕРєР° */
+#define 	UART_BAUD_RATE		115200	/* РЎРєРѕСЂРѕСЃС‚СЊ РїРѕСЂС‚Р° РґР»СЏ РѕР±РјРµРЅР° СЃ PC  */
 #define         UART_TASK_SLEEP         1
 
 /************************************************************************
- * 	Статические переменные
- * 	отображаются или указателем SRAM (USE_THE_LOADER)
- * 	или используются в секции данных  
+ * 	РЎС‚Р°С‚РёС‡РµСЃРєРёРµ РїРµСЂРµРјРµРЅРЅС‹Рµ
+ * 	РѕС‚РѕР±СЂР°Р¶Р°СЋС‚СЃСЏ РёР»Рё СѓРєР°Р·Р°С‚РµР»РµРј SRAM (USE_THE_LOADER)
+ * 	РёР»Рё РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ РІ СЃРµРєС†РёРё РґР°РЅРЅС‹С…  
  ************************************************************************/
 static XCHG_DATA_STRUCT_h rx_data;
 static XCHG_DATA_STRUCT_h tx_data;
 static XCHG_COUNT_STRUCT_h xchg_counts;
 
-static XCHG_DATA_STRUCT_h *pRxBuf = &rx_data;	/* Указатель на нашу структуру приема! */
-static XCHG_DATA_STRUCT_h *pTxBuf = &tx_data;	/* Указатель на нашу структуру передачи! */
-static XCHG_COUNT_STRUCT_h *pCount = &xchg_counts;	/* Счетчики обмена */
+static XCHG_DATA_STRUCT_h *pRxBuf = &rx_data;	/* РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РЅР°С€Сѓ СЃС‚СЂСѓРєС‚СѓСЂСѓ РїСЂРёРµРјР°! */
+static XCHG_DATA_STRUCT_h *pTxBuf = &tx_data;	/* РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РЅР°С€Сѓ СЃС‚СЂСѓРєС‚СѓСЂСѓ РїРµСЂРµРґР°С‡Рё! */
+static XCHG_COUNT_STRUCT_h *pCount = &xchg_counts;	/* РЎС‡РµС‚С‡РёРєРё РѕР±РјРµРЅР° */
 
-static volatile int iTimeout = 0;	/* Счет таймаутов приема  */
+static volatile int iTimeout = 0;	/* РЎС‡РµС‚ С‚Р°Р№РјР°СѓС‚РѕРІ РїСЂРёРµРјР°  */
 
-/* Номер станции  */
+/* РќРѕРјРµСЂ СЃС‚Р°РЅС†РёРё  */
 static u32 dev_addr = 0;
 
 
-/* Параметры подключения по сети UDP и TCP */
+/* РџР°СЂР°РјРµС‚СЂС‹ РїРѕРґРєР»СЋС‡РµРЅРёСЏ РїРѕ СЃРµС‚Рё UDP Рё TCP */
 static SlSockAddrIn_t sAddr;
 static SlSockAddrIn_t sLocalAddr;
 static int iSockUDP = -1;
@@ -61,18 +61,18 @@ static int iSockTCP = -1;
 
 
 
-/* Тип соединения  - НЕ присоединено */
+/* РўРёРї СЃРѕРµРґРёРЅРµРЅРёСЏ  - РќР• РїСЂРёСЃРѕРµРґРёРЅРµРЅРѕ */
 static CONNECTION_TYPE conn_type = CONNECT_NONE;
 
-/* Синк объект - будет ожидать сообщение которое приходит из прерывания */
+/* РЎРёРЅРє РѕР±СЉРµРєС‚ - Р±СѓРґРµС‚ РѕР¶РёРґР°С‚СЊ СЃРѕРѕР±С‰РµРЅРёРµ РєРѕС‚РѕСЂРѕРµ РїСЂРёС…РѕРґРёС‚ РёР· РїСЂРµСЂС‹РІР°РЅРёСЏ */
 static OsiSyncObj_t gTxSyncObj;
 static OsiReturnVal_e xchg_create_sync_obj(void);
 
 
 
-static void vTxTask(void *);	/* Передающая задача   */
-static void vUdpTask(void *);	/* Приемная задача по UDP */
-static void vTcpTask(void *);	/* Приемная задача по TCP */
+static void vTxTask(void *);	/* РџРµСЂРµРґР°СЋС‰Р°СЏ Р·Р°РґР°С‡Р°   */
+static void vUdpTask(void *);	/* РџСЂРёРµРјРЅР°СЏ Р·Р°РґР°С‡Р° РїРѕ UDP */
+static void vTcpTask(void *);	/* РџСЂРёРµРјРЅР°СЏ Р·Р°РґР°С‡Р° РїРѕ TCP */
 static void vWlanStationTask(void *);
 static OsiTaskHandle gUdpTaskHandle;
 static OsiTaskHandle gTcpTaskHandle;
@@ -97,59 +97,59 @@ static void com_isr_handler(void);
 
 
 /**
- * Инициализируем UART
+ * РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј UART
  */
 void com_init(void)
 {
     u32 flags;
     flags = UART_INT_RX | UART_INT_DMATX | UART_INT_OE | UART_INT_PE | UART_INT_FE | UART_INT_BE;
 
-    /*  Настроим FIFO на прием и передачу, иначе DMA не будет работать. Минимальный пакет - 20 байт */
+    /*  РќР°СЃС‚СЂРѕРёРј FIFO РЅР° РїСЂРёРµРј Рё РїРµСЂРµРґР°С‡Сѓ, РёРЅР°С‡Рµ DMA РЅРµ Р±СѓРґРµС‚ СЂР°Р±РѕС‚Р°С‚СЊ. РњРёРЅРёРјР°Р»СЊРЅС‹Р№ РїР°РєРµС‚ - 20 Р±Р°Р№С‚ */
     MAP_UARTFIFOLevelSet(UARTA0_BASE, UART_FIFO_TX1_8, UART_FIFO_RX1_8 /* UART_FIFO_RX2_8 */ );
     MAP_UARTFIFOEnable(UARTA0_BASE);
 
-    /* Чистим буферы */
+    /* Р§РёСЃС‚РёРј Р±СѓС„РµСЂС‹ */
     mem_set(pTxBuf, 0, sizeof(XCHG_DATA_STRUCT_h));
     mem_set(pRxBuf, 0, sizeof(XCHG_DATA_STRUCT_h));
     mem_set(pCount, 0, sizeof(XCHG_COUNT_STRUCT_h));
 
-    /* Убрать непринятые симводы если они там есть */
+    /* РЈР±СЂР°С‚СЊ РЅРµРїСЂРёРЅСЏС‚С‹Рµ СЃРёРјРІРѕРґС‹ РµСЃР»Рё РѕРЅРё С‚Р°Рј РµСЃС‚СЊ */
     while (UARTCharsAvail(UARTA0_BASE)) {
 	(void) UARTCharGet(UARTA0_BASE);
     }
 
-    /* Регистрируем прерывания */
+    /* Р РµРіРёСЃС‚СЂРёСЂСѓРµРј РїСЂРµСЂС‹РІР°РЅРёСЏ */
     osi_InterruptRegister(INT_UARTA0, com_isr_handler, INT_PRIORITY_LVL_5);
 
-    /* Объект синхронизации запустить */
+    /* РћР±СЉРµРєС‚ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё Р·Р°РїСѓСЃС‚РёС‚СЊ */
     if (xchg_create_sync_obj() != OSI_OK) {
 	while (1);
     }
 
-    /* Чистим ошибки  */
+    /* Р§РёСЃС‚РёРј РѕС€РёР±РєРё  */
     MAP_UARTRxErrorClear(UARTA0_BASE);
 
-    /* Чистим флаги прерывания */
+    /* Р§РёСЃС‚РёРј С„Р»Р°РіРё РїСЂРµСЂС‹РІР°РЅРёСЏ */
     MAP_UARTIntClear(UARTA0_BASE, flags);
 
-    /* Ставим прерывания по-приему и ошибкам */
+    /* РЎС‚Р°РІРёРј РїСЂРµСЂС‹РІР°РЅРёСЏ РїРѕ-РїСЂРёРµРјСѓ Рё РѕС€РёР±РєР°Рј */
     MAP_UARTIntEnable(UARTA0_BASE, flags);
 }
 
 /**
- * создать передающую задачу и объект синхронизации
+ * СЃРѕР·РґР°С‚СЊ РїРµСЂРµРґР°СЋС‰СѓСЋ Р·Р°РґР°С‡Сѓ Рё РѕР±СЉРµРєС‚ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
  */
 static OsiReturnVal_e xchg_create_sync_obj(void)
 {
     OsiReturnVal_e ret;
     do {
-	/* Объект синхронизации (event или что то подобное) */
+	/* РћР±СЉРµРєС‚ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё (event РёР»Рё С‡С‚Рѕ С‚Рѕ РїРѕРґРѕР±РЅРѕРµ) */
 	ret = osi_SyncObjCreate(&gTxSyncObj);
 	if (ret != OSI_OK) {
 	    break;		/* Queue was not created and must not be used. */
 	}
 
-	/* Создаем задачу, которая будет передавать данные */
+	/* РЎРѕР·РґР°РµРј Р·Р°РґР°С‡Сѓ, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ РїРµСЂРµРґР°РІР°С‚СЊ РґР°РЅРЅС‹Рµ */
 	ret = osi_TaskCreate(vTxTask, "TxDataTask", OSI_STACK_SIZE, NULL, TX_DATA_TASK_PRIORITY, NULL);
 	if (ret != OSI_OK) {
 	    break;
@@ -166,7 +166,7 @@ static void com_isr_handler(void)
     volatile unsigned long status;
     volatile unsigned long err;
     volatile char c;
-    /* Смотрим ошибки и очищае5м */
+    /* РЎРјРѕС‚СЂРёРј РѕС€РёР±РєРё Рё РѕС‡РёС‰Р°Рµ5Рј */
     err = MAP_UARTRxErrorGet(UARTA0_BASE);
     if (err) {
 	MAP_UARTRxErrorClear(UARTA0_BASE);
@@ -178,13 +178,13 @@ static void com_isr_handler(void)
 
     /* Read the interrupt status of the UART. */
     status = MAP_UARTIntStatus(UARTA0_BASE, 1);
-    /* Очистить статус */
+    /* РћС‡РёСЃС‚РёС‚СЊ СЃС‚Р°С‚СѓСЃ */
     MAP_UARTIntClear(UARTA0_BASE, status);
     if (status & (UART_INT_OE | UART_INT_PE | UART_INT_FE | UART_INT_BE)) {
 	pCount->rx_cmd_err++;
     }
 
-    /* Вызываем функцию которая будет разбирать даные */
+    /* Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ СЂР°Р·Р±РёСЂР°С‚СЊ РґР°РЅС‹Рµ */
     if (status & UART_INT_RX) {
 	while (MAP_UARTCharsAvail(UARTA0_BASE)) {
 	    c = MAP_UARTCharGetNonBlocking(UARTA0_BASE);
@@ -192,7 +192,7 @@ static void com_isr_handler(void)
 	}
     }
 
-    /* Завершить DMA при передаче */
+    /* Р—Р°РІРµСЂС€РёС‚СЊ DMA РїСЂРё РїРµСЂРµРґР°С‡Рµ */
     if (status & UART_INT_DMATX) {
 	MAP_UARTDMADisable(UARTA0_BASE, UART_DMA_TX);
 	pTxBuf->end = 1;
@@ -202,132 +202,132 @@ static void com_isr_handler(void)
 
 
 /**
- * Обслуживание командного режима - прием
- * на любые неправильные пакеты не отвечаем
+ * РћР±СЃР»СѓР¶РёРІР°РЅРёРµ РєРѕРјР°РЅРґРЅРѕРіРѕ СЂРµР¶РёРјР° - РїСЂРёРµРј
+ * РЅР° Р»СЋР±С‹Рµ РЅРµРїСЂР°РІРёР»СЊРЅС‹Рµ РїР°РєРµС‚С‹ РЅРµ РѕС‚РІРµС‡Р°РµРј
  */
 static void com_debug_read_ISR(u8 rx_byte)
 {
-    /* Пришел самый первый байт посылки и наш адрес. Принимаем заголовок */
-    if (pRxBuf->ind == 0 && rx_byte == 0x4e) {	/* Первый байт NDAS 0x444e */
-	pRxBuf->ind = 1;	/* Один байт приняли */
-	pRxBuf->cnt = 1;	/* Счетчик пакетов - первый байт приняли */
+    /* РџСЂРёС€РµР» СЃР°РјС‹Р№ РїРµСЂРІС‹Р№ Р±Р°Р№С‚ РїРѕСЃС‹Р»РєРё Рё РЅР°С€ Р°РґСЂРµСЃ. РџСЂРёРЅРёРјР°РµРј Р·Р°РіРѕР»РѕРІРѕРє */
+    if (pRxBuf->ind == 0 && rx_byte == 0x4e) {	/* РџРµСЂРІС‹Р№ Р±Р°Р№С‚ NDAS 0x444e */
+	pRxBuf->ind = 1;	/* РћРґРёРЅ Р±Р°Р№С‚ РїСЂРёРЅСЏР»Рё */
+	pRxBuf->cnt = 1;	/* РЎС‡РµС‚С‡РёРє РїР°РєРµС‚РѕРІ - РїРµСЂРІС‹Р№ Р±Р°Р№С‚ РїСЂРёРЅСЏР»Рё */
 	pRxBuf->hdr.ndas = rx_byte;
-	/* Устанавливаем таймаут на ~10 мс, если пришли лишние байты 
-	 * или не окончился прием - сбросить автомат приема */
+	/* РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С‚Р°Р№РјР°СѓС‚ РЅР° ~10 РјСЃ, РµСЃР»Рё РїСЂРёС€Р»Рё Р»РёС€РЅРёРµ Р±Р°Р№С‚С‹ 
+	 * РёР»Рё РЅРµ РѕРєРѕРЅС‡РёР»СЃСЏ РїСЂРёРµРј - СЃР±СЂРѕСЃРёС‚СЊ Р°РІС‚РѕРјР°С‚ РїСЂРёРµРјР° */
 	set_timeout(UART_RX_TIMEOUT);
-    } else {			/* Пришли последующие байты */
+    } else {			/* РџСЂРёС€Р»Рё РїРѕСЃР»РµРґСѓСЋС‰РёРµ Р±Р°Р№С‚С‹ */
 	if (1 == pRxBuf->cnt) {
 	    pRxBuf->hdr.ndas |= (u16) rx_byte << 8;
 	    if (pRxBuf->hdr.ndas != NDAS) {
-		com_rx_end(RX_DATA_ERR);	/* рвем передачу. Второй байт д.б 0x44 */
+		com_rx_end(RX_DATA_ERR);	/* СЂРІРµРј РїРµСЂРµРґР°С‡Сѓ. Р’С‚РѕСЂРѕР№ Р±Р°Р№С‚ Рґ.Р± 0x44 */
 	    }
-	} else if (2 == pRxBuf->cnt) {	/* мл. байт crc16 */
+	} else if (2 == pRxBuf->cnt) {	/* РјР». Р±Р°Р№С‚ crc16 */
 	    pRxBuf->hdr.crc16 = rx_byte;
-	} else if (3 == pRxBuf->cnt) {	/* ст. байт crc16 */
+	} else if (3 == pRxBuf->cnt) {	/* СЃС‚. Р±Р°Р№С‚ crc16 */
 	    pRxBuf->hdr.crc16 |= (u16) rx_byte << 8;
-	} else if (4 == pRxBuf->cnt) {	/* мл. байт dev_id */
+	} else if (4 == pRxBuf->cnt) {	/* РјР». Р±Р°Р№С‚ dev_id */
 	    pRxBuf->hdr.dev_id = rx_byte;
-	} else if (5 == pRxBuf->cnt) {	/* мл. ср. байт dev_id */
+	} else if (5 == pRxBuf->cnt) {	/* РјР». СЃСЂ. Р±Р°Р№С‚ dev_id */
 	    pRxBuf->hdr.dev_id |= (u32) rx_byte << 8;
-	} else if (6 == pRxBuf->cnt) {	/* ст. ср. байт dev_id */
+	} else if (6 == pRxBuf->cnt) {	/* СЃС‚. СЃСЂ. Р±Р°Р№С‚ dev_id */
 	    pRxBuf->hdr.dev_id |= (u32) rx_byte << 16;
-	} else if (7 == pRxBuf->cnt) {	/* ст.байт dev_id */
+	} else if (7 == pRxBuf->cnt) {	/* СЃС‚.Р±Р°Р№С‚ dev_id */
 	    pRxBuf->hdr.dev_id |= (u32) rx_byte << 24;
-/* НЕ проверяем адрес - это адрес отправителя!!! */
+/* РќР• РїСЂРѕРІРµСЂСЏРµРј Р°РґСЂРµСЃ - СЌС‚Рѕ Р°РґСЂРµСЃ РѕС‚РїСЂР°РІРёС‚РµР»СЏ!!! */
 /*
 	    if (pRxBuf->hdr.dev_id != DEV_ADDR) {
 		com_rx_end(RX_DATA_ERR);	
 	    }
 */
-	} else if (8 == pRxBuf->cnt) {	/* мл.байт pack_type */
+	} else if (8 == pRxBuf->cnt) {	/* РјР».Р±Р°Р№С‚ pack_type */
 	    pRxBuf->hdr.pack_type = (PACK_TYPE) rx_byte;
-	} else if (9 == pRxBuf->cnt) {	/* ст. байт pack_type */
+	} else if (9 == pRxBuf->cnt) {	/* СЃС‚. Р±Р°Р№С‚ pack_type */
 	    pRxBuf->hdr.pack_type |= (u16) rx_byte << 16;
 	    if (pRxBuf->hdr.pack_type != PACK_REQUEST) {
-		com_rx_end(RX_DATA_ERR);	/* может быть только REQUEST */
+		com_rx_end(RX_DATA_ERR);	/* РјРѕР¶РµС‚ Р±С‹С‚СЊ С‚РѕР»СЊРєРѕ REQUEST */
 	    }
 	} else if (10 == pRxBuf->cnt) {
-	    pRxBuf->hdr.cmd = (USER_CMD) rx_byte;	/* мл байт команды */
+	    pRxBuf->hdr.cmd = (USER_CMD) rx_byte;	/* РјР» Р±Р°Р№С‚ РєРѕРјР°РЅРґС‹ */
 	} else if (11 == pRxBuf->cnt) {
-	    pRxBuf->hdr.cmd |= (u16) rx_byte << 8;	/* ст. байт команды  */
+	    pRxBuf->hdr.cmd |= (u16) rx_byte << 8;	/* СЃС‚. Р±Р°Р№С‚ РєРѕРјР°РЅРґС‹  */
 	} else if (12 == pRxBuf->cnt) {
-	    pRxBuf->hdr.ver = rx_byte;	/* мл байт ver */
+	    pRxBuf->hdr.ver = rx_byte;	/* РјР» Р±Р°Р№С‚ ver */
 	} else if (13 == pRxBuf->cnt) {
-	    pRxBuf->hdr.ver |= (u32) rx_byte << 8;	/* мл. ср. байт ver */
+	    pRxBuf->hdr.ver |= (u32) rx_byte << 8;	/* РјР». СЃСЂ. Р±Р°Р№С‚ ver */
 	} else if (14 == pRxBuf->cnt) {
-	    pRxBuf->hdr.ver |= (u32) rx_byte << 16;	/* ст. ср. байт ver */
+	    pRxBuf->hdr.ver |= (u32) rx_byte << 16;	/* СЃС‚. СЃСЂ. Р±Р°Р№С‚ ver */
 	} else if (15 == pRxBuf->cnt) {
-	    pRxBuf->hdr.ver |= (u32) rx_byte << 24;	/* ст. байт ver */
-	    /* Не проверяем. При приёме пакета на контролере значение поля version игнорировать, ошибки не выдавать. */
+	    pRxBuf->hdr.ver |= (u32) rx_byte << 24;	/* СЃС‚. Р±Р°Р№С‚ ver */
+	    /* РќРµ РїСЂРѕРІРµСЂСЏРµРј. РџСЂРё РїСЂРёС‘РјРµ РїР°РєРµС‚Р° РЅР° РєРѕРЅС‚СЂРѕР»РµСЂРµ Р·РЅР°С‡РµРЅРёРµ РїРѕР»СЏ version РёРіРЅРѕСЂРёСЂРѕРІР°С‚СЊ, РѕС€РёР±РєРё РЅРµ РІС‹РґР°РІР°С‚СЊ. */
 	} else if (16 == pRxBuf->cnt) {
-	    pRxBuf->hdr.size = rx_byte;	/* мл. байт size */
+	    pRxBuf->hdr.size = rx_byte;	/* РјР». Р±Р°Р№С‚ size */
 	} else if (17 == pRxBuf->cnt) {
-	    pRxBuf->hdr.size |= (u16) rx_byte << 8;	/* ст. байт size */
+	    pRxBuf->hdr.size |= (u16) rx_byte << 8;	/* СЃС‚. Р±Р°Р№С‚ size */
 	    if (pRxBuf->hdr.size > XCHG_BUF_LEN) {
-		com_rx_end(RX_DATA_ERR);	/* не наш размер */
+		com_rx_end(RX_DATA_ERR);	/* РЅРµ РЅР°С€ СЂР°Р·РјРµСЂ */
 	    }
 
-	    /* Сбросим автомат, если длина не соответсвует команде */
+	    /* РЎР±СЂРѕСЃРёРј Р°РІС‚РѕРјР°С‚, РµСЃР»Рё РґР»РёРЅР° РЅРµ СЃРѕРѕС‚РІРµС‚СЃРІСѓРµС‚ РєРѕРјР°РЅРґРµ */
 	    if (pRxBuf->hdr.size) {
 		if (pRxBuf->hdr.cmd != CMD_WRITE_PARAMETERS && pRxBuf->hdr.cmd != CMD_START_PREVIEW) {
-		    com_rx_end(RX_DATA_ERR);	/* Сброс автомата */
+		    com_rx_end(RX_DATA_ERR);	/* РЎР±СЂРѕСЃ Р°РІС‚РѕРјР°С‚Р° */
 		}
 	    }
 	} else if (18 == pRxBuf->cnt) {
-	    pRxBuf->hdr.rsvd0 = rx_byte;	/* мл. байт rsvd */
+	    pRxBuf->hdr.rsvd0 = rx_byte;	/* РјР». Р±Р°Р№С‚ rsvd */
 	} else if (19 == pRxBuf->cnt) {
-	    /* reserved также игнорировать и не выдавать по нему ошибок. */
-	    pRxBuf->hdr.rsvd0 |= (u16) rx_byte << 8;	/* ст. байт rsvd */
+	    /* reserved С‚Р°РєР¶Рµ РёРіРЅРѕСЂРёСЂРѕРІР°С‚СЊ Рё РЅРµ РІС‹РґР°РІР°С‚СЊ РїРѕ РЅРµРјСѓ РѕС€РёР±РѕРє. */
+	    pRxBuf->hdr.rsvd0 |= (u16) rx_byte << 8;	/* СЃС‚. Р±Р°Р№С‚ rsvd */
 	}
-	/* Принимаем даные, здесь можно включить прием по DMA, так как длина посылки нам известна */
+	/* РџСЂРёРЅРёРјР°РµРј РґР°РЅС‹Рµ, Р·РґРµСЃСЊ РјРѕР¶РЅРѕ РІРєР»СЋС‡РёС‚СЊ РїСЂРёРµРј РїРѕ DMA, С‚Р°Рє РєР°Рє РґР»РёРЅР° РїРѕСЃС‹Р»РєРё РЅР°Рј РёР·РІРµСЃС‚РЅР° */
 	else if (pRxBuf->cnt >= sizeof(HEADER_t) && pRxBuf->cnt < pRxBuf->hdr.size + sizeof(HEADER_t)) {
-	    pRxBuf->data[pRxBuf->cnt - sizeof(HEADER_t)] = rx_byte;	/* Набиваем буфер */
+	    pRxBuf->data[pRxBuf->cnt - sizeof(HEADER_t)] = rx_byte;	/* РќР°Р±РёРІР°РµРј Р±СѓС„РµСЂ */
 	}
 
 	pRxBuf->cnt++;
-	/* Проверим CRC16 */
+	/* РџСЂРѕРІРµСЂРёРј CRC16 */
 	if (pRxBuf->cnt >= pRxBuf->hdr.size + sizeof(HEADER_t)) {
 #if 0
 	    if (check_crc(pRxBuf->data, pRxBuf->hdr.size) != pRxBuf->hdr.crc16) {
 		com_rx_end(RX_CRC_ERR);
 	    } else
 #endif
-		clr_timeout();	/* Очищаем таймаут */
+		clr_timeout();	/* РћС‡РёС‰Р°РµРј С‚Р°Р№РјР°СѓС‚ */
 	    com_rx_end(RX_DATA_OK);
 	}
     }
 }
 
 /**
- * Конец приема. Запускаем задачу на передачу
- * Этот код можно сделать "NAKED" и вызывать напрямую из ISR
+ * РљРѕРЅРµС† РїСЂРёРµРјР°. Р—Р°РїСѓСЃРєР°РµРј Р·Р°РґР°С‡Сѓ РЅР° РїРµСЂРµРґР°С‡Сѓ
+ * Р­С‚РѕС‚ РєРѕРґ РјРѕР¶РЅРѕ СЃРґРµР»Р°С‚СЊ "NAKED" Рё РІС‹Р·С‹РІР°С‚СЊ РЅР°РїСЂСЏРјСѓСЋ РёР· ISR
  */
 static void com_rx_end(int err)
 {
     OsiReturnVal_e ret;
     pRxBuf->ind = 0;
     pRxBuf->cnt = 0;
-    pRxBuf->end = 0;		/* Посылка приянята Error */
+    pRxBuf->end = 0;		/* РџРѕСЃС‹Р»РєР° РїСЂРёСЏРЅСЏС‚Р° Error */
     if (err == RX_DATA_OK) {
-	pRxBuf->end = 1;	/* Посылка принята OK */
-	pTxBuf->end = 0;	/* Начало передачи */
-	pCount->rx_pack++;	/* Правильно принятые пакеты */
-	conn_type = CONNECT_COMM;	/* Пришла команда по COM порту */
-	/* Старт передачи. Передаем сообщение из процедуры ISR внешней задаче. */
-	ret = osi_SyncObjSignalFromISR(&gTxSyncObj);	/* Отправляем сигнал */
+	pRxBuf->end = 1;	/* РџРѕСЃС‹Р»РєР° РїСЂРёРЅСЏС‚Р° OK */
+	pTxBuf->end = 0;	/* РќР°С‡Р°Р»Рѕ РїРµСЂРµРґР°С‡Рё */
+	pCount->rx_pack++;	/* РџСЂР°РІРёР»СЊРЅРѕ РїСЂРёРЅСЏС‚С‹Рµ РїР°РєРµС‚С‹ */
+	conn_type = CONNECT_COMM;	/* РџСЂРёС€Р»Р° РєРѕРјР°РЅРґР° РїРѕ COM РїРѕСЂС‚Сѓ */
+	/* РЎС‚Р°СЂС‚ РїРµСЂРµРґР°С‡Рё. РџРµСЂРµРґР°РµРј СЃРѕРѕР±С‰РµРЅРёРµ РёР· РїСЂРѕС†РµРґСѓСЂС‹ ISR РІРЅРµС€РЅРµР№ Р·Р°РґР°С‡Рµ. */
+	ret = osi_SyncObjSignalFromISR(&gTxSyncObj);	/* РћС‚РїСЂР°РІР»СЏРµРј СЃРёРіРЅР°Р» */
 	if (ret != OSI_OK) {
 	    while (1);		/* Queue was not created and must not be used. */
 	}
-    } else if (err == RX_CRC_ERR) {	/* Контрольная сумма неверна-начинаем прием заново */
-	pCount->rx_crc_err++;	/* Ошибка CRC16 */
-    } else if (err == RX_DATA_ERR) {	/* Если что-то пошло не так */
-	pCount->rx_cmd_err++;	/* Ошибочная команда */
+    } else if (err == RX_CRC_ERR) {	/* РљРѕРЅС‚СЂРѕР»СЊРЅР°СЏ СЃСѓРјРјР° РЅРµРІРµСЂРЅР°-РЅР°С‡РёРЅР°РµРј РїСЂРёРµРј Р·Р°РЅРѕРІРѕ */
+	pCount->rx_crc_err++;	/* РћС€РёР±РєР° CRC16 */
+    } else if (err == RX_DATA_ERR) {	/* Р•СЃР»Рё С‡С‚Рѕ-С‚Рѕ РїРѕС€Р»Рѕ РЅРµ С‚Р°Рє */
+	pCount->rx_cmd_err++;	/* РћС€РёР±РѕС‡РЅР°СЏ РєРѕРјР°РЅРґР° */
     }
 }
 
 /**
- * Передающая задача RTOS. Ожидает сообщения и передает буфер данных
- * Отправляем или до DMA или побайтно всю цепочку
+ * РџРµСЂРµРґР°СЋС‰Р°СЏ Р·Р°РґР°С‡Р° RTOS. РћР¶РёРґР°РµС‚ СЃРѕРѕР±С‰РµРЅРёСЏ Рё РїРµСЂРµРґР°РµС‚ Р±СѓС„РµСЂ РґР°РЅРЅС‹С…
+ * РћС‚РїСЂР°РІР»СЏРµРј РёР»Рё РґРѕ DMA РёР»Рё РїРѕР±Р°Р№С‚РЅРѕ РІСЃСЋ С†РµРїРѕС‡РєСѓ
  */
 static void vTxTask(void *pvParameters)
 {
@@ -340,122 +340,122 @@ static void vTxTask(void *pvParameters)
 	ret = osi_SyncObjWait(&gTxSyncObj, OSI_WAIT_FOREVER);
 	if (ret == OSI_OK) {
 
-	    /* Формируем ответ на входящую команду */
+	    /* Р¤РѕСЂРјРёСЂСѓРµРј РѕС‚РІРµС‚ РЅР° РІС…РѕРґСЏС‰СѓСЋ РєРѕРјР°РЅРґСѓ */
 	    switch (pRxBuf->hdr.cmd) {
 
-		/* 12 получить сейсмограмму в режиме preview */
+		/* 12 РїРѕР»СѓС‡РёС‚СЊ СЃРµР№СЃРјРѕРіСЂР°РјРјСѓ РІ СЂРµР¶РёРјРµ preview */
 	    case CMD_QUERY_PREVIEW:
 		res = ADS131_get_pack((ADS131_DATA_h *) pTxBuf);
 		if (res) {
-		    pTxBuf->hdr.pack_type = PACK_ACK;	/* Подтвердим */
-		    pTxBuf->hdr.ver++;	/* При отсылке сигнала в version вставлять последовательно увеличивающиеся значения */
-		    len = sizeof(ADS131_DATA_h);	/* Столько передавать */
+		    pTxBuf->hdr.pack_type = PACK_ACK;	/* РџРѕРґС‚РІРµСЂРґРёРј */
+		    pTxBuf->hdr.ver++;	/* РџСЂРё РѕС‚СЃС‹Р»РєРµ СЃРёРіРЅР°Р»Р° РІ version РІСЃС‚Р°РІР»СЏС‚СЊ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ СѓРІРµР»РёС‡РёРІР°СЋС‰РёРµСЃСЏ Р·РЅР°С‡РµРЅРёСЏ */
+		    len = sizeof(ADS131_DATA_h);	/* РЎС‚РѕР»СЊРєРѕ РїРµСЂРµРґР°РІР°С‚СЊ */
 		} else {
-		    pTxBuf->hdr.pack_type = PACK_EMPTY;	/* Нет данных */
+		    pTxBuf->hdr.pack_type = PACK_EMPTY;	/* РќРµС‚ РґР°РЅРЅС‹С… */
 		    len = sizeof(HEADER_t);
 		}
-		pTxBuf->hdr.cmd = CMD_QUERY_PREVIEW;	/* Команда идет обратно */
+		pTxBuf->hdr.cmd = CMD_QUERY_PREVIEW;	/* РљРѕРјР°РЅРґР° РёРґРµС‚ РѕР±СЂР°С‚РЅРѕ */
 		break;
-		/* Прием параметров верхней PC */
+		/* РџСЂРёРµРј РїР°СЂР°РјРµС‚СЂРѕРІ РІРµСЂС…РЅРµР№ PC */
 	    case CMD_RECEIVE_PARAMETERS:
 		ADS131_get_adcp((ADCP_h *) pTxBuf);
-		pTxBuf->hdr.pack_type = PACK_ACK;	/* Подтвердим */
-		pTxBuf->hdr.cmd = CMD_RECEIVE_PARAMETERS;	/* Команда идет обратно */
+		pTxBuf->hdr.pack_type = PACK_ACK;	/* РџРѕРґС‚РІРµСЂРґРёРј */
+		pTxBuf->hdr.cmd = CMD_RECEIVE_PARAMETERS;	/* РљРѕРјР°РЅРґР° РёРґРµС‚ РѕР±СЂР°С‚РЅРѕ */
 		len = sizeof(ADCP_h);
 		break;
-		/* Cтарт приёма сигнала в режиме preview - время для Sync */
+		/* CС‚Р°СЂС‚ РїСЂРёС‘РјР° СЃРёРіРЅР°Р»Р° РІ СЂРµР¶РёРјРµ preview - РІСЂРµРјСЏ РґР»СЏ Sync */
 	    case CMD_START_PREVIEW:
 		res = ADS131_start_osciloscope((START_PREVIEW_h *) pRxBuf);
-		pTxBuf->hdr.pack_type = res ? PACK_ACK : PACK_NAK;	/* Подтвердим */
-		pTxBuf->hdr.cmd = CMD_START_PREVIEW;	/* Команда идет обратно */
+		pTxBuf->hdr.pack_type = res ? PACK_ACK : PACK_NAK;	/* РџРѕРґС‚РІРµСЂРґРёРј */
+		pTxBuf->hdr.cmd = CMD_START_PREVIEW;	/* РљРѕРјР°РЅРґР° РёРґРµС‚ РѕР±СЂР°С‚РЅРѕ */
 		len = sizeof(HEADER_t);
 		break;
-		/*Стоп измерений */
+		/*РЎС‚РѕРї РёР·РјРµСЂРµРЅРёР№ */
 	    case CMD_STOP_ACQUIRING:
 		res = ADS131_stop_osciloscope();
-		pTxBuf->hdr.pack_type = res ? PACK_ACK : PACK_NAK;	/* Подтвердим */
-		pTxBuf->hdr.cmd = CMD_STOP_ACQUIRING;	/* Команда идет обратно */
+		pTxBuf->hdr.pack_type = res ? PACK_ACK : PACK_NAK;	/* РџРѕРґС‚РІРµСЂРґРёРј */
+		pTxBuf->hdr.cmd = CMD_STOP_ACQUIRING;	/* РљРѕРјР°РЅРґР° РёРґРµС‚ РѕР±СЂР°С‚РЅРѕ */
 		pTxBuf->hdr.ver = 0;
 		len = sizeof(HEADER_t);
 		break;
-		/* Записать параметры/Применить параметры 
-		 * Скопируем принятые данные. учитываем заголовок */
+		/* Р—Р°РїРёСЃР°С‚СЊ РїР°СЂР°РјРµС‚СЂС‹/РџСЂРёРјРµРЅРёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ 
+		 * РЎРєРѕРїРёСЂСѓРµРј РїСЂРёРЅСЏС‚С‹Рµ РґР°РЅРЅС‹Рµ. СѓС‡РёС‚С‹РІР°РµРј Р·Р°РіРѕР»РѕРІРѕРє */
 	    case CMD_APPLY_PARAMETERS:
 	    case CMD_WRITE_PARAMETERS:
 		res = ADS131_write_parameters((ADCP_h *) pRxBuf);
-		pTxBuf->hdr.pack_type = res ? PACK_ACK : PACK_NAK;	/* Подтвердим */
-		pTxBuf->hdr.cmd = CMD_WRITE_PARAMETERS;	/* Команда идет обратно */
+		pTxBuf->hdr.pack_type = res ? PACK_ACK : PACK_NAK;	/* РџРѕРґС‚РІРµСЂРґРёРј */
+		pTxBuf->hdr.cmd = CMD_WRITE_PARAMETERS;	/* РљРѕРјР°РЅРґР° РёРґРµС‚ РѕР±СЂР°С‚РЅРѕ */
 		len = sizeof(HEADER_t);
 		break;
-		/* Запрос устройства */
+		/* Р—Р°РїСЂРѕСЃ СѓСЃС‚СЂРѕР№СЃС‚РІР° */
 	    case CMD_QUERY_DEVICE:
 		proto_get_dev_id((DEV_ID_h *) pTxBuf);
-		pTxBuf->hdr.pack_type = PACK_ACK;	/* Подтвердим */
-		pTxBuf->hdr.cmd = CMD_QUERY_DEVICE;	/* Команда идет обратно */
+		pTxBuf->hdr.pack_type = PACK_ACK;	/* РџРѕРґС‚РІРµСЂРґРёРј */
+		pTxBuf->hdr.cmd = CMD_QUERY_DEVICE;	/* РљРѕРјР°РЅРґР° РёРґРµС‚ РѕР±СЂР°С‚РЅРѕ */
 		len = sizeof(DEV_ID_h);
 		break;
-		/* Запрос статуса устройства */
+		/* Р—Р°РїСЂРѕСЃ СЃС‚Р°С‚СѓСЃР° СѓСЃС‚СЂРѕР№СЃС‚РІР° */
 	    case CMD_QUERY_STAT:
 		status_get_full_status((STATUS_h *) pTxBuf);
-		pTxBuf->hdr.pack_type = PACK_ACK;	/* Подтвердим */
-		pTxBuf->hdr.cmd = CMD_QUERY_STAT;	/* Команда идет обратно */
+		pTxBuf->hdr.pack_type = PACK_ACK;	/* РџРѕРґС‚РІРµСЂРґРёРј */
+		pTxBuf->hdr.cmd = CMD_QUERY_STAT;	/* РљРѕРјР°РЅРґР° РёРґРµС‚ РѕР±СЂР°С‚РЅРѕ */
 		len = sizeof(STATUS_h);
 		break;
-		/* Запрос информации об устройстве */
+		/* Р—Р°РїСЂРѕСЃ РёРЅС„РѕСЂРјР°С†РёРё РѕР± СѓСЃС‚СЂРѕР№СЃС‚РІРµ */
 	    case CMD_QUERY_INFO:
 		proto_get_info((INFO_h *) pTxBuf);
-		pTxBuf->hdr.pack_type = PACK_ACK;	/* Подтвердим */
-		pTxBuf->hdr.cmd = CMD_QUERY_INFO;	/* Команда идет обратно */
+		pTxBuf->hdr.pack_type = PACK_ACK;	/* РџРѕРґС‚РІРµСЂРґРёРј */
+		pTxBuf->hdr.cmd = CMD_QUERY_INFO;	/* РљРѕРјР°РЅРґР° РёРґРµС‚ РѕР±СЂР°С‚РЅРѕ */
 		len = sizeof(INFO_h);
 		break;
-		/* карту к процессору, бессмысленная команда при этой схеме */
+		/* РєР°СЂС‚Сѓ Рє РїСЂРѕС†РµСЃСЃРѕСЂСѓ, Р±РµСЃСЃРјС‹СЃР»РµРЅРЅР°СЏ РєРѕРјР°РЅРґР° РїСЂРё СЌС‚РѕР№ СЃС…РµРјРµ */
 	    case CMD_SELECT_SD_TO_MCU:
 		set_sd_to_mcu();
-		pTxBuf->hdr.pack_type = PACK_ACK;	/* Подтвердим */
-		pTxBuf->hdr.cmd = CMD_SELECT_SD_TO_MCU;	/* Команда идет обратно */
+		pTxBuf->hdr.pack_type = PACK_ACK;	/* РџРѕРґС‚РІРµСЂРґРёРј */
+		pTxBuf->hdr.cmd = CMD_SELECT_SD_TO_MCU;	/* РљРѕРјР°РЅРґР° РёРґРµС‚ РѕР±СЂР°С‚РЅРѕ */
 		len = sizeof(HEADER_t);
 		break;
-		/* карту к картридеру */
+		/* РєР°СЂС‚Сѓ Рє РєР°СЂС‚СЂРёРґРµСЂСѓ */
 	    case CMD_SELECT_SD_TO_CR:
 		set_sd_to_cr();
-		pTxBuf->hdr.pack_type = PACK_ACK;	/* Подтвердим */
-		pTxBuf->hdr.cmd = CMD_SELECT_SD_TO_CR;	/* Команда идет обратно */
+		pTxBuf->hdr.pack_type = PACK_ACK;	/* РџРѕРґС‚РІРµСЂРґРёРј */
+		pTxBuf->hdr.cmd = CMD_SELECT_SD_TO_CR;	/* РљРѕРјР°РЅРґР° РёРґРµС‚ РѕР±СЂР°С‚РЅРѕ */
 		len = sizeof(HEADER_t);
 		break;
-		/* Сброс процессора */
+		/* РЎР±СЂРѕСЃ РїСЂРѕС†РµСЃСЃРѕСЂР° */
 	    case CMD_RESET_MCU:
-		pTxBuf->hdr.pack_type = PACK_ACK;	/* Подтвердим */
-		pTxBuf->hdr.cmd = CMD_RESET_MCU;	/* Команда идет обратно */
+		pTxBuf->hdr.pack_type = PACK_ACK;	/* РџРѕРґС‚РІРµСЂРґРёРј */
+		pTxBuf->hdr.cmd = CMD_RESET_MCU;	/* РљРѕРјР°РЅРґР° РёРґРµС‚ РѕР±СЂР°С‚РЅРѕ */
 		len = sizeof(HEADER_t);
 		break;
-		/* Добавим команду - выдать счетчики обмена */
+		/* Р”РѕР±Р°РІРёРј РєРѕРјР°РЅРґСѓ - РІС‹РґР°С‚СЊ СЃС‡РµС‚С‡РёРєРё РѕР±РјРµРЅР° */
 	    case CMD_GET_COUNT:
 		mem_copy(pTxBuf, pCount, sizeof(XCHG_COUNT_STRUCT_h));
-		pTxBuf->hdr.pack_type = PACK_ACK;	/* Подтвердим */
-		pTxBuf->hdr.cmd = CMD_GET_COUNT;	/* Команда идет обратно */
+		pTxBuf->hdr.pack_type = PACK_ACK;	/* РџРѕРґС‚РІРµСЂРґРёРј */
+		pTxBuf->hdr.cmd = CMD_GET_COUNT;	/* РљРѕРјР°РЅРґР° РёРґРµС‚ РѕР±СЂР°С‚РЅРѕ */
 		len = sizeof(XCHG_COUNT_STRUCT_h);
 		break;
 	    default:
-		len = 0;	/* Не овечать на неизвестную команду */
+		len = 0;	/* РќРµ РѕРІРµС‡Р°С‚СЊ РЅР° РЅРµРёР·РІРµСЃС‚РЅСѓСЋ РєРѕРјР°РЅРґСѓ */
 		break;
 	    }
 
 
 	    if (len >= sizeof(HEADER_t)) {
-		/* Сформируем заголовок на отправление */
+		/* РЎС„РѕСЂРјРёСЂСѓРµРј Р·Р°РіРѕР»РѕРІРѕРє РЅР° РѕС‚РїСЂР°РІР»РµРЅРёРµ */
 		pTxBuf->hdr.ndas = NDAS;
 		pTxBuf->hdr.dev_id = dev_addr;
-		pTxBuf->hdr.rsvd0 = 0;	/* При посылке пакетов с контролера reserved всегда 0 */
-		pTxBuf->hdr.size = len - sizeof(HEADER_t);	/* Считаем длину: длина без заголовка */
-		/* Считаем CRC */
+		pTxBuf->hdr.rsvd0 = 0;	/* РџСЂРё РїРѕСЃС‹Р»РєРµ РїР°РєРµС‚РѕРІ СЃ РєРѕРЅС‚СЂРѕР»РµСЂР° reserved РІСЃРµРіРґР° 0 */
+		pTxBuf->hdr.size = len - sizeof(HEADER_t);	/* РЎС‡РёС‚Р°РµРј РґР»РёРЅСѓ: РґР»РёРЅР° Р±РµР· Р·Р°РіРѕР»РѕРІРєР° */
+		/* РЎС‡РёС‚Р°РµРј CRC */
 		if (len == sizeof(HEADER_t)) {
 		    pTxBuf->hdr.crc16 = 0;
 		} else {
-		    /* CRC для проверки */
-		    pTxBuf->hdr.crc16 = check_crc((u8 *) pTxBuf->data, len - sizeof(HEADER_t));	/* CRC для проверки */
+		    /* CRC РґР»СЏ РїСЂРѕРІРµСЂРєРё */
+		    pTxBuf->hdr.crc16 = check_crc((u8 *) pTxBuf->data, len - sizeof(HEADER_t));	/* CRC РґР»СЏ РїСЂРѕРІРµСЂРєРё */
 		}
 
-		/* В зависимости от того, откуда пришел запрос - выдаем ответ */
+		/* Р’ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РѕРіРѕ, РѕС‚РєСѓРґР° РїСЂРёС€РµР» Р·Р°РїСЂРѕСЃ - РІС‹РґР°РµРј РѕС‚РІРµС‚ */
 		if (conn_type == CONNECT_COMM) {
 		    com_tx_data((u8 *) pTxBuf, len);
 		} else if (conn_type == CONNECT_UDP) {
@@ -464,7 +464,7 @@ static void vTxTask(void *pvParameters)
 		    wlan_tx_tcp_data((u8 *) pTxBuf, len);
 		}
 
-		/* После ответной передачи на команду сброс процессора! */
+		/* РџРѕСЃР»Рµ РѕС‚РІРµС‚РЅРѕР№ РїРµСЂРµРґР°С‡Рё РЅР° РєРѕРјР°РЅРґСѓ СЃР±СЂРѕСЃ РїСЂРѕС†РµСЃСЃРѕСЂР°! */
 		if (pTxBuf->hdr.cmd == CMD_RESET_MCU) {
 		    delay_ms(50);
 		    board_reset();
@@ -476,29 +476,29 @@ static void vTxTask(void *pvParameters)
 }
 
 /**
- * Передача данных по DMA
+ * РџРµСЂРµРґР°С‡Р° РґР°РЅРЅС‹С… РїРѕ DMA
  */
 static void com_tx_data(u8 * data, int len)
 {
     /* Initialize uDMA */
     UDMAInit();
-    /* Настраиваем канал DMA для UARTA0 */
-    UDMASetupTransfer(UDMA_CH9_UARTA0_TX, UDMA_MODE_BASIC,	/* Простой режим */
-		      len,	/* Длина передачи с заголовком */
-		      UDMA_SIZE_8,	/* По байту */
-		      UDMA_ARB_1,	/* Гранулярность? */
-		      data,	/* Буфер передачи */
-		      UDMA_SRC_INC_8,	/* Адрес источника инкрементируется */
-		      (void *) (UARTA0_BASE + UART_O_DR),	/* Адрес назначения */
-		      UDMA_DST_INC_NONE);	/* Адрес назначения не инкрементируется */
-    /* Запустить прередачу */
+    /* РќР°СЃС‚СЂР°РёРІР°РµРј РєР°РЅР°Р» DMA РґР»СЏ UARTA0 */
+    UDMASetupTransfer(UDMA_CH9_UARTA0_TX, UDMA_MODE_BASIC,	/* РџСЂРѕСЃС‚РѕР№ СЂРµР¶РёРј */
+		      len,	/* Р”Р»РёРЅР° РїРµСЂРµРґР°С‡Рё СЃ Р·Р°РіРѕР»РѕРІРєРѕРј */
+		      UDMA_SIZE_8,	/* РџРѕ Р±Р°Р№С‚Сѓ */
+		      UDMA_ARB_1,	/* Р“СЂР°РЅСѓР»СЏСЂРЅРѕСЃС‚СЊ? */
+		      data,	/* Р‘СѓС„РµСЂ РїРµСЂРµРґР°С‡Рё */
+		      UDMA_SRC_INC_8,	/* РђРґСЂРµСЃ РёСЃС‚РѕС‡РЅРёРєР° РёРЅРєСЂРµРјРµРЅС‚РёСЂСѓРµС‚СЃСЏ */
+		      (void *) (UARTA0_BASE + UART_O_DR),	/* РђРґСЂРµСЃ РЅР°Р·РЅР°С‡РµРЅРёСЏ */
+		      UDMA_DST_INC_NONE);	/* РђРґСЂРµСЃ РЅР°Р·РЅР°С‡РµРЅРёСЏ РЅРµ РёРЅРєСЂРµРјРµРЅС‚РёСЂСѓРµС‚СЃСЏ */
+    /* Р—Р°РїСѓСЃС‚РёС‚СЊ РїСЂРµСЂРµРґР°С‡Сѓ */
     MAP_UARTDMAEnable(UARTA0_BASE, UART_DMA_TX);
-    pCount->tx_pack++;		/* Счетчики передач */
+    pCount->tx_pack++;		/* РЎС‡РµС‚С‡РёРєРё РїРµСЂРµРґР°С‡ */
 }
 
 
 /**
- * Передача данных по сети через UDP сокет
+ * РџРµСЂРµРґР°С‡Р° РґР°РЅРЅС‹С… РїРѕ СЃРµС‚Рё С‡РµСЂРµР· UDP СЃРѕРєРµС‚
  */
 static void wlan_tx_udp_data(u8 * data, int len)
 {
@@ -509,14 +509,14 @@ static void wlan_tx_udp_data(u8 * data, int len)
     if (iStatus != len) {
 	PRINTF("ERROR: SendTo...\r\n");
     } else {
-	pCount->tx_pack++;	/* Счетчики передач */
+	pCount->tx_pack++;	/* РЎС‡РµС‚С‡РёРєРё РїРµСЂРµРґР°С‡ */
     }
-    conn_type = CONNECT_COMM;	/* Сбрасываем указатель на порт */
+    conn_type = CONNECT_COMM;	/* РЎР±СЂР°СЃС‹РІР°РµРј СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РїРѕСЂС‚ */
 }
 
 
 /**
- * Передача данных по сети через TCP сокет
+ * РџРµСЂРµРґР°С‡Р° РґР°РЅРЅС‹С… РїРѕ СЃРµС‚Рё С‡РµСЂРµР· TCP СЃРѕРєРµС‚
  */
 static void wlan_tx_tcp_data(u8 * data, int len)
 {
@@ -529,25 +529,25 @@ static void wlan_tx_tcp_data(u8 * data, int len)
 	PRINTF("SendTo (%d.%d.%d.%d)... OK\r\n",
 	       (u8) (sAddr.sin_addr.s_addr), (u8) (sAddr.sin_addr.s_addr >> 8), (u8) (sAddr.sin_addr.s_addr >> 16), (u8) (sAddr.sin_addr.s_addr >> 24));
 #endif
-	pCount->tx_pack++;	/* Счетчики передач */
+	pCount->tx_pack++;	/* РЎС‡РµС‚С‡РёРєРё РїРµСЂРµРґР°С‡ */
     }
-    conn_type = CONNECT_COMM;	/* Сбрасываем указатель на порт */
+    conn_type = CONNECT_COMM;	/* РЎР±СЂР°СЃС‹РІР°РµРј СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РїРѕСЂС‚ */
 }
 
 
 /**
- * Создание сокета UDP и прием через него
+ * РЎРѕР·РґР°РЅРёРµ СЃРѕРєРµС‚Р° UDP Рё РїСЂРёРµРј С‡РµСЂРµР· РЅРµРіРѕ
  */
 static void vUdpTask(void *par)
 {
     long ret = -1;
     int iAddrSize;
     int iStatus;
-    fd_set read_s;		// Множество
-    timeval time_out;		// Таймаут
+    fd_set read_s;		// РњРЅРѕР¶РµСЃС‚РІРѕ
+    timeval time_out;		// РўР°Р№РјР°СѓС‚
     while (1) {
 
-	/* Ждать семафора, что есть соединение с WiFi */
+	/* Р–РґР°С‚СЊ СЃРµРјР°С„РѕСЂР°, С‡С‚Рѕ РµСЃС‚СЊ СЃРѕРµРґРёРЅРµРЅРёРµ СЃ WiFi */
 	while (!IS_CONNECTED(get_wlan_status())) {
 	    osi_Sleep(500);
 	}
@@ -558,7 +558,7 @@ static void vUdpTask(void *par)
 	sLocalAddr.sin_port = sl_Htons((u16) ((GNS_PARAM_STRUCT *) par)->gns_server_udp_port);
 	sLocalAddr.sin_addr.s_addr = 0;
 	iAddrSize = sizeof(SlSockAddrIn_t);
-	/* Создаем UDP socket */
+	/* РЎРѕР·РґР°РµРј UDP socket */
 	iSockUDP = sl_Socket(SL_AF_INET, SL_SOCK_DGRAM, 0);
 	if (iSockUDP < 0) {
 	    PRINTF("ERROR: Create UDP Socket\r\n");
@@ -573,10 +573,10 @@ static void vUdpTask(void *par)
 	    continue;
 	}
 	PRINTF("INFO: Bind UDP Socket OK\r\n");
-	FD_ZERO(&read_s);	/* Обнуляем множество */
-	FD_SET(iSockUDP, &read_s);	/* Заносим в него наш сокет  */
+	FD_ZERO(&read_s);	/* РћР±РЅСѓР»СЏРµРј РјРЅРѕР¶РµСЃС‚РІРѕ */
+	FD_SET(iSockUDP, &read_s);	/* Р—Р°РЅРѕСЃРёРј РІ РЅРµРіРѕ РЅР°С€ СЃРѕРєРµС‚  */
 	time_out.tv_sec = 0;
-	time_out.tv_usec = 500000;	/* Таймаут 0.5 секунды - ожидаем входящих запросов */
+	time_out.tv_usec = 500000;	/* РўР°Р№РјР°СѓС‚ 0.5 СЃРµРєСѓРЅРґС‹ - РѕР¶РёРґР°РµРј РІС…РѕРґСЏС‰РёС… Р·Р°РїСЂРѕСЃРѕРІ */
 	while (IS_CONNECTED(get_wlan_status())) {
 
 	    ret = select(iSockUDP + 1, &read_s, NULL, NULL, &time_out);
@@ -600,17 +600,17 @@ static void vUdpTask(void *par)
 }
 
 /**
- * Приемная задача по TCP 
+ * РџСЂРёРµРјРЅР°СЏ Р·Р°РґР°С‡Р° РїРѕ TCP 
  */
 static void vTcpTask(void *par)
 {
     int iAddrSize;
     int iStatus;
-    int tcpSock;		/* Временный доакцептный сокет */
+    int tcpSock;		/* Р’СЂРµРјРµРЅРЅС‹Р№ РґРѕР°РєС†РµРїС‚РЅС‹Р№ СЃРѕРєРµС‚ */
     long lNonBlocking = 0;
     while (1) {
 
-	/* Ждем сети */
+	/* Р–РґРµРј СЃРµС‚Рё */
 	while (!IS_CONNECTED(get_wlan_status())) {
 	    osi_Sleep(500);
 	}
@@ -636,7 +636,7 @@ static void vTcpTask(void *par)
 	    continue;
 	}
 	PRINTF("INFO: Bind TCP Socket OK\r\n");
-	/* Только одно соединение  */
+	/* РўРѕР»СЊРєРѕ РѕРґРЅРѕ СЃРѕРµРґРёРЅРµРЅРёРµ  */
 	iStatus = sl_Listen(tcpSock, 1);
 	if (iStatus < 0) {
 	    sl_Close(tcpSock);
@@ -679,7 +679,7 @@ static void vTcpTask(void *par)
 	    }
 
 
-	    /* Пока есть TCP соединение - крутимся в этом цикле  */
+	    /* РџРѕРєР° РµСЃС‚СЊ TCP СЃРѕРµРґРёРЅРµРЅРёРµ - РєСЂСѓС‚РёРјСЃСЏ РІ СЌС‚РѕРј С†РёРєР»Рµ  */
 	    while (1) {
 		iStatus = sl_Recv(iSockTCP, pRxBuf, sizeof(XCHG_DATA_STRUCT_h), 0);
 		if (iStatus < 0) {
@@ -721,7 +721,7 @@ static void vWlanStationTask(void *par)
     while (1) {
 	osi_Sleep(500);
 #if 0
-	/* Объект синхронизации (event или что то подобное) */
+	/* РћР±СЉРµРєС‚ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё (event РёР»Рё С‡С‚Рѕ С‚Рѕ РїРѕРґРѕР±РЅРѕРµ) */
 	if (gUdpSyncObj == NULL) {
 	    ret = osi_SyncObjCreate(&gUdpSyncObj);
 	    if (ret != OSI_OK) {
@@ -733,7 +733,7 @@ static void vWlanStationTask(void *par)
 	}
 
 
-	/* Объект синхронизации (event или что то подобное) */
+	/* РћР±СЉРµРєС‚ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё (event РёР»Рё С‡С‚Рѕ С‚Рѕ РїРѕРґРѕР±РЅРѕРµ) */
 	if (gTcpSyncObj == NULL) {
 	    ret = osi_SyncObjCreate(&gTcpSyncObj);
 	    if (ret != OSI_OK) {
@@ -769,7 +769,7 @@ static void vWlanStationTask(void *par)
 	}
 	PRINTF("INFO: Connection established w/ AP and IP is aquired\n");
 /////------>
-	/* Создаем задачу, которая будет принимать данные */
+	/* РЎРѕР·РґР°РµРј Р·Р°РґР°С‡Сѓ, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ РїСЂРёРЅРёРјР°С‚СЊ РґР°РЅРЅС‹Рµ */
 	if (gUdpTaskHandle == NULL) {
 	    ret = osi_TaskCreate(vUdpTask, "UdpRxTask", OSI_STACK_SIZE, par, UDP_RX_TASK_PRIORITY, &gUdpTaskHandle);
 	    if (ret != OSI_OK) {
@@ -779,15 +779,15 @@ static void vWlanStationTask(void *par)
 	    }
 	}
 #if 0
-	/* Старт передачи. Передаем сообщение из процедуры ISR внешней задаче. */
-	ret = osi_SyncObjSignal(&gUdpSyncObj);	/* Отправляем сигнал */
+	/* РЎС‚Р°СЂС‚ РїРµСЂРµРґР°С‡Рё. РџРµСЂРµРґР°РµРј СЃРѕРѕР±С‰РµРЅРёРµ РёР· РїСЂРѕС†РµРґСѓСЂС‹ ISR РІРЅРµС€РЅРµР№ Р·Р°РґР°С‡Рµ. */
+	ret = osi_SyncObjSignal(&gUdpSyncObj);	/* РћС‚РїСЂР°РІР»СЏРµРј СЃРёРіРЅР°Р» */
 	if (ret != OSI_OK) {
-	    conn_type = CONNECT_COMM;	/* Сбрасываем указатель на порт */
+	    conn_type = CONNECT_COMM;	/* РЎР±СЂР°СЃС‹РІР°РµРј СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РїРѕСЂС‚ */
 	    while (1);		/* Queue was not created and must not be used. */
 	}
 #endif
 
-	/* Создаем задачу, которая будет принимать данные */
+	/* РЎРѕР·РґР°РµРј Р·Р°РґР°С‡Сѓ, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ РїСЂРёРЅРёРјР°С‚СЊ РґР°РЅРЅС‹Рµ */
 	if (gTcpTaskHandle == NULL) {
 	    ret = osi_TaskCreate(vTcpTask, "TcpRxTask", OSI_STACK_SIZE, par, TCP_RX_TASK_PRIORITY, &gTcpTaskHandle);
 	    if (ret != OSI_OK) {
@@ -797,13 +797,13 @@ static void vWlanStationTask(void *par)
 	    }
 	}
 
-	/* Пока не рухнет  */
+	/* РџРѕРєР° РЅРµ СЂСѓС…РЅРµС‚  */
 	while (IS_CONNECTED(get_wlan_status())) {
 #if 0
-	    /* Проверяем подключен ли USB кабель. При такой последовательности  будет редко опрашивать TWI  */
+	    /* РџСЂРѕРІРµСЂСЏРµРј РїРѕРґРєР»СЋС‡РµРЅ Р»Рё USB РєР°Р±РµР»СЊ. РџСЂРё С‚Р°РєРѕР№ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё  Р±СѓРґРµС‚ СЂРµРґРєРѕ РѕРїСЂР°С€РёРІР°С‚СЊ TWI  */
 	    if (get_sd_state() == SD_CARD_TO_CR && get_sd_cable() == 0) {
 		/*      set_sd_to_mcu(); */
-		board_reset();	/* Сброс платы */
+		board_reset();	/* РЎР±СЂРѕСЃ РїР»Р°С‚С‹ */
 	    }
 #endif
 	    osi_Sleep(100);
@@ -820,60 +820,60 @@ static void vWlanStationTask(void *par)
 
 
 /**
- * Обслуживание приема в командном режиме по сети
- * на любые неправильные пакеты не отвечаем
+ * РћР±СЃР»СѓР¶РёРІР°РЅРёРµ РїСЂРёРµРјР° РІ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ РїРѕ СЃРµС‚Рё
+ * РЅР° Р»СЋР±С‹Рµ РЅРµРїСЂР°РІРёР»СЊРЅС‹Рµ РїР°РєРµС‚С‹ РЅРµ РѕС‚РІРµС‡Р°РµРј
  */
 static bool net_debug_parse_func(void)
 {
     bool res = 0;
     HEADER_t *hdr = &pRxBuf->hdr;
     OsiReturnVal_e ret;
-    /* Проверяем заголовок */
+    /* РџСЂРѕРІРµСЂСЏРµРј Р·Р°РіРѕР»РѕРІРѕРє */
     do {
 	if (hdr->ndas != NDAS /*|| hdr->dev_id != dev_addr */  || hdr->pack_type != PACK_REQUEST) {
-	    pCount->rx_cmd_err++;	/* Счетчики ошибок */
+	    pCount->rx_cmd_err++;	/* РЎС‡РµС‚С‡РёРєРё РѕС€РёР±РѕРє */
 	    break;
 	}
 
-	/* Сбросим автомат, если длина не соответсвует команде */
+	/* РЎР±СЂРѕСЃРёРј Р°РІС‚РѕРјР°С‚, РµСЃР»Рё РґР»РёРЅР° РЅРµ СЃРѕРѕС‚РІРµС‚СЃРІСѓРµС‚ РєРѕРјР°РЅРґРµ */
 	if (hdr->size) {
 	    if (hdr->cmd != CMD_WRITE_PARAMETERS && hdr->cmd != CMD_START_PREVIEW) {
-		pCount->rx_cmd_err++;	/* Счетчики ошибок */
+		pCount->rx_cmd_err++;	/* РЎС‡РµС‚С‡РёРєРё РѕС€РёР±РѕРє */
 		break;
 	    }
 	}
-	/* Проверим CRC16  */
+	/* РџСЂРѕРІРµСЂРёРј CRC16  */
 	if (check_crc(pRxBuf->data, hdr->size) != hdr->crc16) {
-	    pCount->rx_crc_err++;	/* Счетчики ошибок */
+	    pCount->rx_crc_err++;	/* РЎС‡РµС‚С‡РёРєРё РѕС€РёР±РѕРє */
 	    break;
 	}
 
-	/* Старт передачи. Передаем сообщение из процедуры ISR внешней задаче. */
-	ret = osi_SyncObjSignal(&gTxSyncObj);	/* Отправляем сигнал */
+	/* РЎС‚Р°СЂС‚ РїРµСЂРµРґР°С‡Рё. РџРµСЂРµРґР°РµРј СЃРѕРѕР±С‰РµРЅРёРµ РёР· РїСЂРѕС†РµРґСѓСЂС‹ ISR РІРЅРµС€РЅРµР№ Р·Р°РґР°С‡Рµ. */
+	ret = osi_SyncObjSignal(&gTxSyncObj);	/* РћС‚РїСЂР°РІР»СЏРµРј СЃРёРіРЅР°Р» */
 	if (ret != OSI_OK) {
-	    conn_type = CONNECT_COMM;	/* Сбрасываем указатель на порт */
+	    conn_type = CONNECT_COMM;	/* РЎР±СЂР°СЃС‹РІР°РµРј СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РїРѕСЂС‚ */
 	    while (1);		/* Queue was not created and must not be used. */
 	}
-	pCount->rx_pack++;	/* Счетчики приемов */
+	pCount->rx_pack++;	/* РЎС‡РµС‚С‡РёРєРё РїСЂРёРµРјРѕРІ */
     } while (0);
     return res;
 }
 
 /**
- * Подсоединиться к точке доступа, указанной в файле recparam.ini
+ * РџРѕРґСЃРѕРµРґРёРЅРёС‚СЊСЃСЏ Рє С‚РѕС‡РєРµ РґРѕСЃС‚СѓРїР°, СѓРєР°Р·Р°РЅРЅРѕР№ РІ С„Р°Р№Р»Рµ recparam.ini
  */
 void xchg_start(GNS_PARAM_STRUCT * par)
 {
     long ret = -1;
 
 
-    /* Адрес, который пришел с SD карты */
+    /* РђРґСЂРµСЃ, РєРѕС‚РѕСЂС‹Р№ РїСЂРёС€РµР» СЃ SD РєР°СЂС‚С‹ */
     dev_addr = par->gns_addr;
 
-    /* Создать передающую задачу для порта и wlan + объект - семафор */
+    /* РЎРѕР·РґР°С‚СЊ РїРµСЂРµРґР°СЋС‰СѓСЋ Р·Р°РґР°С‡Сѓ РґР»СЏ РїРѕСЂС‚Р° Рё wlan + РѕР±СЉРµРєС‚ - СЃРµРјР°С„РѕСЂ */
     com_init();
 
-    /* Не запускать сетевые задачи если имя сети None. Только COM порт */
+    /* РќРµ Р·Р°РїСѓСЃРєР°С‚СЊ СЃРµС‚РµРІС‹Рµ Р·Р°РґР°С‡Рё РµСЃР»Рё РёРјСЏ СЃРµС‚Рё None. РўРѕР»СЊРєРѕ COM РїРѕСЂС‚ */
     if (par && strnicmp(par->gns_ssid_name, "None", 4)) {
 
 	/* Start the SimpleLink Host */
@@ -963,7 +963,7 @@ static long ConfigureSimpleLinkToDefaultState(void)
     unsigned char ucPower = 0;
     long ret = -1;
     long lMode = -1;
-    // Подключаем в режиме станции
+    // РџРѕРґРєР»СЋС‡Р°РµРј РІ СЂРµР¶РёРјРµ СЃС‚Р°РЅС†РёРё
     lMode = sl_Start(0, 0, 0);
     ASSERT_ON_ERROR(lMode);
     /* Get the device's version-information */
@@ -1026,11 +1026,11 @@ static long ConfigureSimpleLinkToDefaultState(void)
 }
 
 /**
- * Затактировать ноги Com - порта 
+ * Р—Р°С‚Р°РєС‚РёСЂРѕРІР°С‚СЊ РЅРѕРіРё Com - РїРѕСЂС‚Р° 
  */
 void com_mux_config(void)
 {
-    /* Затактировать ноги UART */
+    /* Р—Р°С‚Р°РєС‚РёСЂРѕРІР°С‚СЊ РЅРѕРіРё UART */
     MAP_PRCMPeripheralReset(PRCM_UARTA0);
 
     /* Enable Peripheral Clocks */
@@ -1043,25 +1043,25 @@ void com_mux_config(void)
     /* Configure PIN_57 for UART0 UART0_RX */
     MAP_PinTypeUART(PIN_57, PIN_MODE_3);
 
-    /* Настроить UART - 115200 - 8N2 */
+    /* РќР°СЃС‚СЂРѕРёС‚СЊ UART - 115200 - 8N2 */
     MAP_UARTConfigSetExpClk(UARTA0_BASE, MAP_PRCMPeripheralClockGet(PRCM_UARTA0), UART_BAUD_RATE,
 			    UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_TWO | UART_CONFIG_PAR_NONE);
 
 }
 
 /*
- * Выключить com порт
+ * Р’С‹РєР»СЋС‡РёС‚СЊ com РїРѕСЂС‚
  */
 void com_mux_unconfig(void)
 {
-    /* Убрать тактирование */
+    /* РЈР±СЂР°С‚СЊ С‚Р°РєС‚РёСЂРѕРІР°РЅРёРµ */
     MAP_PRCMPeripheralClkDisable(PRCM_UARTA0, PRCM_RUN_MODE_CLK);
 }
 
 
-/*************** Таймауты *****/
+/*************** РўР°Р№РјР°СѓС‚С‹ *****/
 /**
- * Вызывается из операционной системы
+ * Р’С‹Р·С‹РІР°РµС‚СЃСЏ РёР· РѕРїРµСЂР°С†РёРѕРЅРЅРѕР№ СЃРёСЃС‚РµРјС‹
  */
 
 #ifdef USE_FREERTOS
@@ -1075,19 +1075,19 @@ void Clock_tick(void)
 	--iTimeout;
 	if (iTimeout == 0) {
 	    pRxBuf->ind = 0;
-	    pCount->rx_timeout++;	/* Таймаут приема */
+	    pCount->rx_timeout++;	/* РўР°Р№РјР°СѓС‚ РїСЂРёРµРјР° */
 	}
     }
 }
 
 
-/* Установить таймаут в мс */
+/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ С‚Р°Р№РјР°СѓС‚ РІ РјСЃ */
 void set_timeout(int ms)
 {
     iTimeout = ms;
 }
 
-/* Проверить, прошел таймаут или не */
+/* РџСЂРѕРІРµСЂРёС‚СЊ, РїСЂРѕС€РµР» С‚Р°Р№РјР°СѓС‚ РёР»Рё РЅРµ */
 bool is_timeout(void)
 {
     volatile bool res = false;
