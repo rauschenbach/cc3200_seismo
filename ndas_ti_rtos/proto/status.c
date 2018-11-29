@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Отдельные функции для манипуляции со статосом и отдельными битами-полями
+ * РћС‚РґРµР»СЊРЅС‹Рµ С„СѓРЅРєС†РёРё РґР»СЏ РјР°РЅРёРїСѓР»СЏС†РёРё СЃРѕ СЃС‚Р°С‚РѕСЃРѕРј Рё РѕС‚РґРµР»СЊРЅС‹РјРё Р±РёС‚Р°РјРё-РїРѕР»СЏРјРё
  *****************************************************************************/
 #include <string.h>
 #include <hw_types.h>
@@ -18,27 +18,27 @@
 static STATUS_h status;
 
 /**
- * Установим биты статуса в самом начале работы программы
+ * РЈСЃС‚Р°РЅРѕРІРёРј Р±РёС‚С‹ СЃС‚Р°С‚СѓСЃР° РІ СЃР°РјРѕРј РЅР°С‡Р°Р»Рµ СЂР°Р±РѕС‚С‹ РїСЂРѕРіСЂР°РјРјС‹
  */
 void status_init(void)
 {
     long s;
 
-    /* Структура INIT_STATE */
+    /* РЎС‚СЂСѓРєС‚СѓСЂР° INIT_STATE */
     status.init_state.no_time = 1;
     status.init_state.no_const = 1;
     status.init_state.no_reg_file = 0;
     status.init_state.reg_fault = 0;
     s = MAP_PRCMSysResetCauseGet();
-    status.init_state.reset_cause = s;	/* Причина сброса */
+    status.init_state.reset_cause = s;	/* РџСЂРёС‡РёРЅР° СЃР±СЂРѕСЃР° */
 
-    /* Структура RUNTIME_STATE */
+    /* РЎС‚СЂСѓРєС‚СѓСЂР° RUNTIME_STATE */
     status.runtime_state.gps_sync_ok = 1;
     status.runtime_state.acqis_running = 0;
     status.runtime_state.init_error = 0;
     status.runtime_state.mem_ovr = 0;
 
-    /* Структура DEVICE_STATE */
+    /* РЎС‚СЂСѓРєС‚СѓСЂР° DEVICE_STATE */
     status.sens_date.temper = -1;
     status.sens_date.humid = -1;
     status.sens_date.voltage = -1;
@@ -55,7 +55,7 @@ void status_init(void)
     status.current_GPS_data.tAcc = 0;	/* 0 - receiver time, 1 - GPS time, 2 - UTC time */
 }
 
-/* Вернуть статус устройства - 100 байт */
+/* Р’РµСЂРЅСѓС‚СЊ СЃС‚Р°С‚СѓСЃ СѓСЃС‚СЂРѕР№СЃС‚РІР° - 100 Р±Р°Р№С‚ */
 void status_get_full_status(STATUS_h * par)
 {
     if (par != NULL) {
@@ -63,7 +63,7 @@ void status_get_full_status(STATUS_h * par)
     }
 }
 
-/* Вернуть подстатус устройства */
+/* Р’РµСЂРЅСѓС‚СЊ РїРѕРґСЃС‚Р°С‚СѓСЃ СѓСЃС‚СЂРѕР№СЃС‚РІР° */
 void status_get_init_state(INIT_STATE_t * par)
 {
     if (par != NULL) {
@@ -71,7 +71,7 @@ void status_get_init_state(INIT_STATE_t * par)
     }
 }
 
-/* Установить подстатус */
+/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РїРѕРґСЃС‚Р°С‚СѓСЃ */
 void status_set_init_state(INIT_STATE_t * par)
 {
     if (par != NULL) {
@@ -79,19 +79,19 @@ void status_set_init_state(INIT_STATE_t * par)
     }
 }
 
-/* Получить параметры  */
+/* РџРѕР»СѓС‡РёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹  */
 void status_get_runtime_state(RUNTIME_STATE_t * par)
 {
     mem_copy(par, &status.runtime_state, sizeof(RUNTIME_STATE_t));
 }
 
-/* установить параметры */
+/* СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ */
 void status_set_runtime_state(RUNTIME_STATE_t * par)
 {
     mem_copy(&status.runtime_state, par, sizeof(RUNTIME_STATE_t));
 }
 
-/* Получить параметры GPS  */
+/* РџРѕР»СѓС‡РёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ GPS  */
 void status_get_gps_data(GPS_DATA_t * par)
 {
     if (par != NULL) {
@@ -100,24 +100,24 @@ void status_get_gps_data(GPS_DATA_t * par)
 }
 
 /**
- * Получить время GPS в статусе
+ * РџРѕР»СѓС‡РёС‚СЊ РІСЂРµРјСЏ GPS РІ СЃС‚Р°С‚СѓСЃРµ
  */
 s64 status_get_gps_time(void)
 {
     return status.current_GPS_data.time;
 }
 
-/* Установить параметры GPS - каждую секунду */
+/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ GPS - РєР°Р¶РґСѓСЋ СЃРµРєСѓРЅРґСѓ */
 void status_set_gps_data(long time, s32 lat, s32 lon, s32 hi, u8 numSV, bool fix)
 {
-    status.current_GPS_data.time = (UNIX_TIME_t) time * TIMER_NS_DIVIDER;	/* Время UNIX в нс с 1970 года */
+    status.current_GPS_data.time = (UNIX_TIME_t) time * TIMER_NS_DIVIDER;	/* Р’СЂРµРјСЏ UNIX РІ РЅСЃ СЃ 1970 РіРѕРґР° */
     status.current_GPS_data.fix = fix;	/* 0 - time is not valid, 1 - valid GPS fix */
-    status.current_GPS_data.hi = hi;	/* Высота над уровнем моря */
+    status.current_GPS_data.hi = hi;	/* Р’С‹СЃРѕС‚Р° РЅР°Рґ СѓСЂРѕРІРЅРµРј РјРѕСЂСЏ */
     status.current_GPS_data.lon = lon;	/* Longitude, deg */
     status.current_GPS_data.lat = lat;	/* Latitude, deg */
-    status.current_GPS_data.numSV = numSV;	/* Число спутников */
+    status.current_GPS_data.numSV = numSV;	/* Р§РёСЃР»Рѕ СЃРїСѓС‚РЅРёРєРѕРІ */
 
-    /* Есть fixx но нет статуса что время установлено. Один раз установить */
+    /* Р•СЃС‚СЊ fixx РЅРѕ РЅРµС‚ СЃС‚Р°С‚СѓСЃР° С‡С‚Рѕ РІСЂРµРјСЏ СѓСЃС‚Р°РЅРѕРІР»РµРЅРѕ. РћРґРёРЅ СЂР°Р· СѓСЃС‚Р°РЅРѕРІРёС‚СЊ */
 /*    
     if (fix && status.init_state.no_time) {
 	set_sec_ticks(time);
@@ -134,7 +134,7 @@ void status_set_gps_data(long time, s32 lat, s32 lon, s32 hi, u8 numSV, bool fix
 */
 }
 
-/* Записать дрифт */
+/* Р—Р°РїРёСЃР°С‚СЊ РґСЂРёС„С‚ */
 void status_set_drift(s32 drift)
 {
     status.current_GPS_data.tAcc = drift;
@@ -142,25 +142,25 @@ void status_set_drift(s32 drift)
 
 
 /**
- * Мигать самотестированием
+ * РњРёРіР°С‚СЊ СЃР°РјРѕС‚РµСЃС‚РёСЂРѕРІР°РЅРёРµРј
  */ 
 void status_self_test_on(void)
 {
-    status.init_state.self_test_on ^= 1;	/* Мигаем */
+    status.init_state.self_test_on ^= 1;	/* РњРёРіР°РµРј */
 }
 
 /**
- * Выключить самотестирование
+ * Р’С‹РєР»СЋС‡РёС‚СЊ СЃР°РјРѕС‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ
  */ 
 void status_self_test_off(void)
 {
-    status.init_state.self_test_on = 0;	/* Выключаем */
+    status.init_state.self_test_on = 0;	/* Р’С‹РєР»СЋС‡Р°РµРј */
 }
 
 
 
 /**
- * Принудительно синхронизироваьт часы
+ * РџСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ СЃРёРЅС…СЂРѕРЅРёР·РёСЂРѕРІР°СЊС‚ С‡Р°СЃС‹
  */
 void status_sync_time(void)
 {
@@ -172,7 +172,7 @@ void status_sync_time(void)
 }
 
 /**
- * Получить данные сенсоров
+ * РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ СЃРµРЅСЃРѕСЂРѕРІ
  */
 void status_get_sensor_date(SENSOR_DATE_t * par)
 {
@@ -183,7 +183,7 @@ void status_get_sensor_date(SENSOR_DATE_t * par)
 
 
 /**
- * Сохранить и установить данные сенсоров
+ * РЎРѕС…СЂР°РЅРёС‚СЊ Рё СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РґР°РЅРЅС‹Рµ СЃРµРЅСЃРѕСЂРѕРІ
  */
 void status_set_sensor_date(SENSOR_DATE_t * par)
 {
@@ -194,9 +194,9 @@ void status_set_sensor_date(SENSOR_DATE_t * par)
 
 
 /**
- * Слова тестирования получить
- * Хотя число и 4 байта, получаю данные так же с помошью memcpy
- * Мы не знаем выровнено оно или нет
+ * РЎР»РѕРІР° С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ РїРѕР»СѓС‡РёС‚СЊ
+ * РҐРѕС‚СЏ С‡РёСЃР»Рѕ Рё 4 Р±Р°Р№С‚Р°, РїРѕР»СѓС‡Р°СЋ РґР°РЅРЅС‹Рµ С‚Р°Рє Р¶Рµ СЃ РїРѕРјРѕС€СЊСЋ memcpy
+ * РњС‹ РЅРµ Р·РЅР°РµРј РІС‹СЂРѕРІРЅРµРЅРѕ РѕРЅРѕ РёР»Рё РЅРµС‚
  */
 void status_get_test_state(TEST_STATE_t * par)
 {
@@ -206,8 +206,8 @@ void status_get_test_state(TEST_STATE_t * par)
 }
 
 /**
- * Слова тестирования установить
- * Хотя число и 4 байта, получаю данные так же с помошью memcpy
+ * РЎР»РѕРІР° С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ
+ * РҐРѕС‚СЏ С‡РёСЃР»Рѕ Рё 4 Р±Р°Р№С‚Р°, РїРѕР»СѓС‡Р°СЋ РґР°РЅРЅС‹Рµ С‚Р°Рє Р¶Рµ СЃ РїРѕРјРѕС€СЊСЋ memcpy
  */
 void status_set_test_state(TEST_STATE_t * par)
 {
