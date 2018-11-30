@@ -1,5 +1,5 @@
 /*************************************************************************************
- * Получение данных с ацп. В версии платы SPI сделано простым чтением
+ * РџРѕР»СѓС‡РµРЅРёРµ РґР°РЅРЅС‹С… СЃ Р°С†Рї. Р’ РІРµСЂСЃРёРё РїР»Р°С‚С‹ SPI СЃРґРµР»Р°РЅРѕ РїСЂРѕСЃС‚С‹Рј С‡С‚РµРЅРёРµРј
  *************************************************************************************/
 #include <stdlib.h>
 #include <string.h>
@@ -16,25 +16,25 @@
 #include "myspi.h"
 #include "ads131.h"
 
-/* Структура, которая описывает параметры буферов для разной частоты */
+/* РЎС‚СЂСѓРєС‚СѓСЂР°, РєРѕС‚РѕСЂР°СЏ РѕРїРёСЃС‹РІР°РµС‚ РїР°СЂР°РјРµС‚СЂС‹ Р±СѓС„РµСЂРѕРІ РґР»СЏ СЂР°Р·РЅРѕР№ С‡Р°СЃС‚РѕС‚С‹ */
 #include "struct.h"
 
-/* Не работает с задержкой от systick!!! даже если поставить приоритеты 
- * Заменить на вн. функцию!!!
+/* РќРµ СЂР°Р±РѕС‚Р°РµС‚ СЃ Р·Р°РґРµСЂР¶РєРѕР№ РѕС‚ systick!!! РґР°Р¶Рµ РµСЃР»Рё РїРѕСЃС‚Р°РІРёС‚СЊ РїСЂРёРѕСЂРёС‚РµС‚С‹ 
+ * Р—Р°РјРµРЅРёС‚СЊ РЅР° РІРЅ. С„СѓРЅРєС†РёСЋ!!!
  */
 #define DELAY	delay_ms
 
 /**
- * Дефиниции  
+ * Р”РµС„РёРЅРёС†РёРё  
  */
-#define  		TEST_BUFFER_SIZE 		80	/* Пакетов */
-#define			BYTES_IN_DATA			3	/* Число байт в слове данных АЦП */
-#define			MAX_PING_PONG_SIZE		12000	/* Размер буфера - если выделять один раз */
+#define  		TEST_BUFFER_SIZE 		80	/* РџР°РєРµС‚РѕРІ */
+#define			BYTES_IN_DATA			3	/* Р§РёСЃР»Рѕ Р±Р°Р№С‚ РІ СЃР»РѕРІРµ РґР°РЅРЅС‹С… РђР¦Рџ */
+#define			MAX_PING_PONG_SIZE		12000	/* Р Р°Р·РјРµСЂ Р±СѓС„РµСЂР° - РµСЃР»Рё РІС‹РґРµР»СЏС‚СЊ РѕРґРёРЅ СЂР°Р· */
 
 
 
 /**
- * адреса регистров 
+ * Р°РґСЂРµСЃР° СЂРµРіРёСЃС‚СЂРѕРІ 
  */
 /* Device settings reg (Read only!) */
 #define 	ID		0x00
@@ -63,7 +63,7 @@
 #define 	GPIO	 	0x14
 
 /************************************************************************
- * ADS131 commands - обозначения по даташиту
+ * ADS131 commands - РѕР±РѕР·РЅР°С‡РµРЅРёСЏ РїРѕ РґР°С‚Р°С€РёС‚Сѓ
  ************************************************************************/
 /* System CMD */
 #define 	CMD_WAKEUP		0x02
@@ -71,73 +71,73 @@
 #define 	CMD_RESET		0x06
 #define 	CMD_START		0x08
 #define 	CMD_STOP		0x0A
-#define 	CMD_OFFSETCAL		0x1A	/* смещение нуля */
+#define 	CMD_OFFSETCAL		0x1A	/* СЃРјРµС‰РµРЅРёРµ РЅСѓР»СЏ */
 
 /* Data read CMD */
-#define 	CMD_RDATAC		0x10	/* Непрерывное чтение */
-#define 	CMD_SDATAC		0x11	/* Стоп непрерывное чтение  */
-#define 	CMD_RDATA		0x12	/* Чтение по команде */
+#define 	CMD_RDATAC		0x10	/* РќРµРїСЂРµСЂС‹РІРЅРѕРµ С‡С‚РµРЅРёРµ */
+#define 	CMD_SDATAC		0x11	/* РЎС‚РѕРї РЅРµРїСЂРµСЂС‹РІРЅРѕРµ С‡С‚РµРЅРёРµ  */
+#define 	CMD_RDATA		0x12	/* Р§С‚РµРЅРёРµ РїРѕ РєРѕРјР°РЅРґРµ */
 
 
 /**
- * Параметры заполнения буферов для АЦП и режим работы АЦП. Командный или осцилограф 
- * Внутреняя структура
+ * РџР°СЂР°РјРµС‚СЂС‹ Р·Р°РїРѕР»РЅРµРЅРёСЏ Р±СѓС„РµСЂРѕРІ РґР»СЏ РђР¦Рџ Рё СЂРµР¶РёРј СЂР°Р±РѕС‚С‹ РђР¦Рџ. РљРѕРјР°РЅРґРЅС‹Р№ РёР»Рё РѕСЃС†РёР»РѕРіСЂР°С„ 
+ * Р’РЅСѓС‚СЂРµРЅСЏСЏ СЃС‚СЂСѓРєС‚СѓСЂР°
  */
 static struct {
-    ADS131_Regs regs;		/*  Коэффициенты АПЦ */
+    ADS131_Regs regs;		/*  РљРѕСЌС„С„РёС†РёРµРЅС‚С‹ РђРџР¦ */
 
     u64 long_time0;
     u64 long_time1;
-    u32 num_irq;		/* количество прерываний */
+    u32 num_irq;		/* РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРµСЂС‹РІР°РЅРёР№ */
 
-    s32 num_sig;		/* Номер сигнала */
-    u32 sig_in_time;		/* Как часто записывать часовой файл */
+    s32 num_sig;		/* РќРѕРјРµСЂ СЃРёРіРЅР°Р»Р° */
+    u32 sig_in_time;		/* РљР°Рє С‡Р°СЃС‚Рѕ Р·Р°РїРёСЃС‹РІР°С‚СЊ С‡Р°СЃРѕРІРѕР№ С„Р°Р№Р» */
 
-    u16 pack_cmd_cnt;		/* Счетчик командных пакетов */
-    u16 pack_work_cnt;		/* Счетчик рабочих пакетов */
+    u16 pack_cmd_cnt;		/* РЎС‡РµС‚С‡РёРє РєРѕРјР°РЅРґРЅС‹С… РїР°РєРµС‚РѕРІ */
+    u16 pack_work_cnt;		/* РЎС‡РµС‚С‡РёРє СЂР°Р±РѕС‡РёС… РїР°РєРµС‚РѕРІ */
 
-    u16 sig_in_min;		/* Как часто записывать заголовок */
-    u16 samples_in_ping;	/* Число собранных пакетов за заданное время */
+    u16 sig_in_min;		/* РљР°Рє С‡Р°СЃС‚Рѕ Р·Р°РїРёСЃС‹РІР°С‚СЊ Р·Р°РіРѕР»РѕРІРѕРє */
+    u16 samples_in_ping;	/* Р§РёСЃР»Рѕ СЃРѕР±СЂР°РЅРЅС‹С… РїР°РєРµС‚РѕРІ Р·Р° Р·Р°РґР°РЅРЅРѕРµ РІСЂРµРјСЏ */
 
-    u16 sample_us;		/* Уход периода следования прерываний в микросекундах */
-    u8 sps_code;		/* Код частоты дискретизации */
-    u8 data_size;		/* Размер пакета данных со всех каналов 3..6..9..12 */
+    u16 sample_us;		/* РЈС…РѕРґ РїРµСЂРёРѕРґР° СЃР»РµРґРѕРІР°РЅРёСЏ РїСЂРµСЂС‹РІР°РЅРёР№ РІ РјРёРєСЂРѕСЃРµРєСѓРЅРґР°С… */
+    u8 sps_code;		/* РљРѕРґ С‡Р°СЃС‚РѕС‚С‹ РґРёСЃРєСЂРµС‚РёР·Р°С†РёРё */
+    u8 data_size;		/* Р Р°Р·РјРµСЂ РїР°РєРµС‚Р° РґР°РЅРЅС‹С… СЃРѕ РІСЃРµС… РєР°РЅР°Р»РѕРІ 3..6..9..12 */
 
-    u8 bitmap;			/* Карта каналов */
-    u8 decim;			/* Прореживать? */
-    u8 ping_pong_flag;		/* Флаг записи - пинг или понг  */
-    u8 mode;			/* Режим работы - test, work или cmd */
+    u8 bitmap;			/* РљР°СЂС‚Р° РєР°РЅР°Р»РѕРІ */
+    u8 decim;			/* РџСЂРѕСЂРµР¶РёРІР°С‚СЊ? */
+    u8 ping_pong_flag;		/* Р¤Р»Р°Рі Р·Р°РїРёСЃРё - РїРёРЅРі РёР»Рё РїРѕРЅРі  */
+    u8 mode;			/* Р РµР¶РёРј СЂР°Р±РѕС‚С‹ - test, work РёР»Рё cmd */
 
-    bool handler_write_flag;	/* Флаг того, что запись удалась */
-    bool handler_sig_flag;	/* Для лампочек */
-    bool is_set;		/* Установлен */
-    bool is_init;		/* Используем для "Инициализирован" */
-    bool is_run;		/* Используем для "Работает" */
+    bool handler_write_flag;	/* Р¤Р»Р°Рі С‚РѕРіРѕ, С‡С‚Рѕ Р·Р°РїРёСЃСЊ СѓРґР°Р»Р°СЃСЊ */
+    bool handler_sig_flag;	/* Р”Р»СЏ Р»Р°РјРїРѕС‡РµРє */
+    bool is_set;		/* РЈСЃС‚Р°РЅРѕРІР»РµРЅ */
+    bool is_init;		/* РСЃРїРѕР»СЊР·СѓРµРј РґР»СЏ "РРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅ" */
+    bool is_run;		/* РСЃРїРѕР»СЊР·СѓРµРј РґР»СЏ "Р Р°Р±РѕС‚Р°РµС‚" */
 } adc_pars_struct;
 
 
-/* Параметры АЦП нового протокола */
+/* РџР°СЂР°РјРµС‚СЂС‹ РђР¦Рџ РЅРѕРІРѕРіРѕ РїСЂРѕС‚РѕРєРѕР»Р° */
 static ADCP_h adcp;
 static CircularBuffer cb;
 
 /**
- * Ошыпки АЦП пишем сюда
+ * РћС€С‹РїРєРё РђР¦Рџ РїРёС€РµРј СЃСЋРґР°
  */
-static ADS131_ERROR_STRUCT adc_error;	/* Ошыпки АЦП пишем сюда */
+static ADS131_ERROR_STRUCT adc_error;	/* РћС€С‹РїРєРё РђР¦Рџ РїРёС€РµРј СЃСЋРґР° */
 static ADS131_ERROR_STRUCT *pAdc_error = &adc_error;
 
-static ADS131_DATA_h adc_pack;	/* Пакет с данными на отправление  - статический буфер  - 272 байта или 160 */
-static ADS131_DATA_h *pack = &adc_pack;	/* Пакет с данными на отправление */
+static ADS131_DATA_h adc_pack;	/* РџР°РєРµС‚ СЃ РґР°РЅРЅС‹РјРё РЅР° РѕС‚РїСЂР°РІР»РµРЅРёРµ  - СЃС‚Р°С‚РёС‡РµСЃРєРёР№ Р±СѓС„РµСЂ  - 272 Р±Р°Р№С‚Р° РёР»Рё 160 */
+static ADS131_DATA_h *pack = &adc_pack;	/* РџР°РєРµС‚ СЃ РґР°РЅРЅС‹РјРё РЅР° РѕС‚РїСЂР°РІР»РµРЅРёРµ */
 
-static u8 ADC_ping_buf[MAX_PING_PONG_SIZE];	/* Статический буфер выберем  */
+static u8 ADC_ping_buf[MAX_PING_PONG_SIZE];	/* РЎС‚Р°С‚РёС‡РµСЃРєРёР№ Р±СѓС„РµСЂ РІС‹Р±РµСЂРµРј  */
 static u8 ADC_pong_buf[MAX_PING_PONG_SIZE];
 
-static u8 *ADC_DATA_ping = ADC_ping_buf;	/* Пользуемся указателями  */
+static u8 *ADC_DATA_ping = ADC_ping_buf;	/* РџРѕР»СЊР·СѓРµРјСЃСЏ СѓРєР°Р·Р°С‚РµР»СЏРјРё  */
 static u8 *ADC_DATA_pong = ADC_pong_buf;
 
 /* 
- * Синк объекты для записи на SD - будет ожидать сообщение  которое приходит из прерывания.
- * Изначально как указатели на NULL
+ * РЎРёРЅРє РѕР±СЉРµРєС‚С‹ РґР»СЏ Р·Р°РїРёСЃРё РЅР° SD - Р±СѓРґРµС‚ РѕР¶РёРґР°С‚СЊ СЃРѕРѕР±С‰РµРЅРёРµ  РєРѕС‚РѕСЂРѕРµ РїСЂРёС…РѕРґРёС‚ РёР· РїСЂРµСЂС‹РІР°РЅРёСЏ.
+ * РР·РЅР°С‡Р°Р»СЊРЅРѕ РєР°Рє СѓРєР°Р·Р°С‚РµР»Рё РЅР° NULL
  */
 static OsiSyncObj_t gSdSyncObj;
 static OsiTaskHandle gSdTaskHandle;
@@ -149,7 +149,7 @@ static void vCmdTask(void *);
 
 
 /*************************************************************************************
- * 	Статические функции - видны тока здесь
+ * 	РЎС‚Р°С‚РёС‡РµСЃРєРёРµ С„СѓРЅРєС†РёРё - РІРёРґРЅС‹ С‚РѕРєР° Р·РґРµСЃСЊ
  *************************************************************************************/
 static void adc_pin_config(void);
 static void adc_reset(void);
@@ -171,7 +171,7 @@ static void cmd_mode_handler(u32 *, int);
 static void work_mode_handler(u32 *, int);
 
 /**
- * Расчитать и заполнить размер буфера для частоты и числа байт в пакете
+ * Р Р°СЃС‡РёС‚Р°С‚СЊ Рё Р·Р°РїРѕР»РЅРёС‚СЊ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° РґР»СЏ С‡Р°СЃС‚РѕС‚С‹ Рё С‡РёСЃР»Р° Р±Р°Р№С‚ РІ РїР°РєРµС‚Рµ
  */
 static int calculate_ping_pong_buffer(ADS131_FreqEn freq, u8 bitmap, int len)
 {
@@ -179,40 +179,40 @@ static int calculate_ping_pong_buffer(ADS131_FreqEn freq, u8 bitmap, int len)
     int res = -1;
     u8 bytes = 0;
 
-    /* Не сделано для 8 итд */
+    /* РќРµ СЃРґРµР»Р°РЅРѕ РґР»СЏ 8 РёС‚Рґ */
     if (freq > SPS4K) {
 	log_write_log_file("ERROR: ADS131 Sample Frequency > 4 kHz not supported!\n");
 	return res;
     }
 
-    /* Какие каналы пишем. Размер 1 сампла (число 1 * 3 - со всех работающих АЦП сразу) */
+    /* РљР°РєРёРµ РєР°РЅР°Р»С‹ РїРёС€РµРј. Р Р°Р·РјРµСЂ 1 СЃР°РјРїР»Р° (С‡РёСЃР»Рѕ 1 * 3 - СЃРѕ РІСЃРµС… СЂР°Р±РѕС‚Р°СЋС‰РёС… РђР¦Рџ СЃСЂР°Р·Сѓ) */
     for (i = 0; i < 4; i++) {
 	if ((bitmap >> i) & 0x01) {
 	    bytes += 3;
 	}
     }
 
-    /* Здесь будет переменный размер буфера ping-pong */
+    /* Р—РґРµСЃСЊ Р±СѓРґРµС‚ РїРµСЂРµРјРµРЅРЅС‹Р№ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° ping-pong */
     for (i = 0; i < sizeof(adc_work_struct) / sizeof(ADS131_WORK_STRUCT); i++) {
 
 	if (bytes == 0 || len == 0) {
 	    break;
 	}
 
-	/* Если такая частота и число байт поддерживается  */
+	/* Р•СЃР»Рё С‚Р°РєР°СЏ С‡Р°СЃС‚РѕС‚Р° Рё С‡РёСЃР»Рѕ Р±Р°Р№С‚ РїРѕРґРґРµСЂР¶РёРІР°РµС‚СЃСЏ  */
 	if (freq == adc_work_struct[i].sample_freq && bytes == adc_work_struct[i].num_bytes) {
-	    adc_pars_struct.bitmap = bitmap;	/* Какие каналы пишем  */
+	    adc_pars_struct.bitmap = bitmap;	/* РљР°РєРёРµ РєР°РЅР°Р»С‹ РїРёС€РµРј  */
 	    adc_pars_struct.data_size = adc_work_struct[i].num_bytes;
-	    adc_pars_struct.samples_in_ping = adc_work_struct[i].samples_in_ping;	/* число отсчетов в одном ping */
-	    adc_pars_struct.sig_in_min = adc_work_struct[i].sig_in_min;	/* вызывать signal раз в минуту */
-	    adc_pars_struct.sig_in_time = adc_work_struct[i].sig_in_time;	/* Заголовок пишется столько раз за 1 час */
-	    adc_pars_struct.sig_in_time *= len;	/* Сколько часов пишем? **** */
-	    adc_pars_struct.decim = adc_work_struct[i].decim_coef;	/* Прореживать */
+	    adc_pars_struct.samples_in_ping = adc_work_struct[i].samples_in_ping;	/* С‡РёСЃР»Рѕ РѕС‚СЃС‡РµС‚РѕРІ РІ РѕРґРЅРѕРј ping */
+	    adc_pars_struct.sig_in_min = adc_work_struct[i].sig_in_min;	/* РІС‹Р·С‹РІР°С‚СЊ signal СЂР°Р· РІ РјРёРЅСѓС‚Сѓ */
+	    adc_pars_struct.sig_in_time = adc_work_struct[i].sig_in_time;	/* Р—Р°РіРѕР»РѕРІРѕРє РїРёС€РµС‚СЃСЏ СЃС‚РѕР»СЊРєРѕ СЂР°Р· Р·Р° 1 С‡Р°СЃ */
+	    adc_pars_struct.sig_in_time *= len;	/* РЎРєРѕР»СЊРєРѕ С‡Р°СЃРѕРІ РїРёС€РµРј? **** */
+	    adc_pars_struct.decim = adc_work_struct[i].decim_coef;	/* РџСЂРѕСЂРµР¶РёРІР°С‚СЊ */
 	    adc_pars_struct.num_sig = 0;
 	    adc_pars_struct.ping_pong_flag = 0;
 	    adc_pars_struct.handler_sig_flag = false;
-	    adc_pars_struct.pack_cmd_cnt = 0;	/* обнуляем счетчики */
-	    adc_pars_struct.pack_work_cnt = 0;	/* обнуляем счетчики */
+	    adc_pars_struct.pack_cmd_cnt = 0;	/* РѕР±РЅСѓР»СЏРµРј СЃС‡РµС‚С‡РёРєРё */
+	    adc_pars_struct.pack_work_cnt = 0;	/* РѕР±РЅСѓР»СЏРµРј СЃС‡РµС‚С‡РёРєРё */
 	    adc_pars_struct.sample_us = adc_work_struct[i].period_us;
 
 	    log_write_log_file("INFO: freq:  %d Hz, bytes: %d\n", TIMER_US_DIVIDER / adc_pars_struct.sample_us, bytes);
@@ -227,16 +227,16 @@ static int calculate_ping_pong_buffer(ADS131_FreqEn freq, u8 bitmap, int len)
 	    break;
 	}
     }
-    /* Уход - макс. 5% */
+    /* РЈС…РѕРґ - РјР°РєСЃ. 5% */
     adc_pars_struct.sample_us += adc_pars_struct.sample_us / 20;
     return res;
 }
 
 
 /**
- * Конфигурирование АЦП без запуска
- * Готовим АЦП к настройке - создаем необходимые буферы
- * Проверяем правильность параметров, коотрые были переданы
+ * РљРѕРЅС„РёРіСѓСЂРёСЂРѕРІР°РЅРёРµ РђР¦Рџ Р±РµР· Р·Р°РїСѓСЃРєР°
+ * Р“РѕС‚РѕРІРёРј РђР¦Рџ Рє РЅР°СЃС‚СЂРѕР№РєРµ - СЃРѕР·РґР°РµРј РЅРµРѕР±С…РѕРґРёРјС‹Рµ Р±СѓС„РµСЂС‹
+ * РџСЂРѕРІРµСЂСЏРµРј РїСЂР°РІРёР»СЊРЅРѕСЃС‚СЊ РїР°СЂР°РјРµС‚СЂРѕРІ, РєРѕРѕС‚СЂС‹Рµ Р±С‹Р»Рё РїРµСЂРµРґР°РЅС‹
  */
 bool ADS131_config(ADS131_Params * par)
 {
@@ -253,24 +253,24 @@ bool ADS131_config(ADS131_Params * par)
         
         log_write_log_file("---------------ADS131 Configuration--------------- \n");
 
-	/* Очистим регистры */
+	/* РћС‡РёСЃС‚РёРј СЂРµРіРёСЃС‚СЂС‹ */
 	mem_set(&regs, 0, sizeof(regs));
 
 
-	/* Если запущен - выключаем прерывания АЦП */
+	/* Р•СЃР»Рё Р·Р°РїСѓС‰РµРЅ - РІС‹РєР»СЋС‡Р°РµРј РїСЂРµСЂС‹РІР°РЅРёСЏ РђР¦Рџ */
 /*vvvvv		adc_irq_unregister(); */
-	adc_pars_struct.mode = par->mode;	/* Сохраняем режим работы */
+	adc_pars_struct.mode = par->mode;	/* РЎРѕС…СЂР°РЅСЏРµРј СЂРµР¶РёРј СЂР°Р±РѕС‚С‹ */
 
-	/* Первый регистр CONFIG1 - data rate. От 125 до 4000 при 24 битах 
-	 * Если неверные настройки. NB: SIVY не поддерживает частоту больше 4 кГц */
+	/* РџРµСЂРІС‹Р№ СЂРµРіРёСЃС‚СЂ CONFIG1 - data rate. РћС‚ 125 РґРѕ 4000 РїСЂРё 24 Р±РёС‚Р°С… 
+	 * Р•СЃР»Рё РЅРµРІРµСЂРЅС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё. NB: SIVY РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚ С‡Р°СЃС‚РѕС‚Сѓ Р±РѕР»СЊС€Рµ 4 РєР“С† */
 	tmp = par->sps;
 	if (tmp > SPS4K) {
 	    log_write_log_file("ERROR:  ADS131 Sample Frequency > 4 kHz not supported\n");
 	    break;
 	}
 
-	/* Выбираем частоту  - или все частоты меньше 1 кГц получаютя фильтрацией/децимацией на 8 или снижаем частоту генератора */
-	coef = 6;		/* Коэффициент  для частоты 1k при генераторе на 1000 Гц  */
+	/* Р’С‹Р±РёСЂР°РµРј С‡Р°СЃС‚РѕС‚Сѓ  - РёР»Рё РІСЃРµ С‡Р°СЃС‚РѕС‚С‹ РјРµРЅСЊС€Рµ 1 РєР“С† РїРѕР»СѓС‡Р°СЋС‚СЏ С„РёР»СЊС‚СЂР°С†РёРµР№/РґРµС†РёРјР°С†РёРµР№ РЅР° 8 РёР»Рё СЃРЅРёР¶Р°РµРј С‡Р°СЃС‚РѕС‚Сѓ РіРµРЅРµСЂР°С‚РѕСЂР° */
+	coef = 6;		/* РљРѕСЌС„С„РёС†РёРµРЅС‚  РґР»СЏ С‡Р°СЃС‚РѕС‚С‹ 1k РїСЂРё РіРµРЅРµСЂР°С‚РѕСЂРµ РЅР° 1000 Р“С†  */
 	switch (tmp) {
 	case SPS4K:
 	    regs.config1 = coef - 4;
@@ -284,50 +284,50 @@ bool ADS131_config(ADS131_Params * par)
 	    regs.config1 = coef - 2;
 	    break;
 
-	    /* частота 4 кГц - децимация на 8 */
+	    /* С‡Р°СЃС‚РѕС‚Р° 4 РєР“С† - РґРµС†РёРјР°С†РёСЏ РЅР° 8 */
 	case SPS500:
 	    regs.config1 = coef - 1;
 	    break;
 
-	    /* частота 2кГц - децимация на 8  */
+	    /* С‡Р°СЃС‚РѕС‚Р° 2РєР“С† - РґРµС†РёРјР°С†РёСЏ РЅР° 8  */
 	case SPS250:
 	    regs.config1 = coef;
 	    break;
 
-	    /* частота 1 кГц - децимация на 8  */
+	    /* С‡Р°СЃС‚РѕС‚Р° 1 РєР“С† - РґРµС†РёРјР°С†РёСЏ РЅР° 8  */
 	case SPS125:
 	    regs.config1 = coef;
 	    break;
 
-	    /* Все значения < 1K будут получены децимацией */
+	    /* Р’СЃРµ Р·РЅР°С‡РµРЅРёСЏ < 1K Р±СѓРґСѓС‚ РїРѕР»СѓС‡РµРЅС‹ РґРµС†РёРјР°С†РёРµР№ */
 	default:
 	    regs.config1 = coef;
 	}
 
-	/* Первый регистр: Sample frequency + daisy chain off */
+	/* РџРµСЂРІС‹Р№ СЂРµРіРёСЃС‚СЂ: Sample frequency + daisy chain off */
 	regs.config1 |= 0xD0;
 
-	adc_pars_struct.sps_code = par->sps;	/* код частоты сохраняем в структуре */
+	adc_pars_struct.sps_code = par->sps;	/* РєРѕРґ С‡Р°СЃС‚РѕС‚С‹ СЃРѕС…СЂР°РЅСЏРµРј РІ СЃС‚СЂСѓРєС‚СѓСЂРµ */
 
-	/* Второй регистр: не меняем - это подача тестового сигнала */
+	/* Р’С‚РѕСЂРѕР№ СЂРµРіРёСЃС‚СЂ: РЅРµ РјРµРЅСЏРµРј - СЌС‚Рѕ РїРѕРґР°С‡Р° С‚РµСЃС‚РѕРІРѕРіРѕ СЃРёРіРЅР°Р»Р° */
 	regs.config2 = (par->test_freq & 0x3) | ((par->test_sign << 4) & 0x10);
 	regs.config2 |= 0xE0;
 
-	/* Третий регистр: VREF_4V - use with a 5-V analog supply */
+	/* РўСЂРµС‚РёР№ СЂРµРіРёСЃС‚СЂ: VREF_4V - use with a 5-V analog supply */
 	regs.config3 = 0xC0;
 
 
-	/* Настраиваем регистры для МАКСИМАЛЬНОГО числа каналов */
+	/* РќР°СЃС‚СЂР°РёРІР°РµРј СЂРµРіРёСЃС‚СЂС‹ РґР»СЏ РњРђРљРЎРРњРђР›Р¬РќРћР“Рћ С‡РёСЃР»Р° РєР°РЅР°Р»РѕРІ */
 	for (i = 0; i < MAX_ADS131_CHAN; i++) {
 
-	    /* Не может быть 000 011 и 111 */
+	    /* РќРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ 000 011 Рё 111 */
 	    if (par->pga[i] == 0 || par->pga[i] == 0x03 || par->pga[i] > 0x06) {
 		log_write_log_file("WARN: ADS131 this gain parameter %d not supported for %d channel!\n", par->pga[i], i);
 		log_write_log_file("WARN: Set gain 1 for %d channel!\n", i);
 		par->pga[i] = PGA1;
 	    }
 
-	    /* Не используем MUX 010 110 и 111 */
+	    /* РќРµ РёСЃРїРѕР»СЊР·СѓРµРј MUX 010 110 Рё 111 */
 	    if (par->mux == 2 || par->mux > 5) {
 		log_write_log_file("WARN: ADS131 this mux parameter not supported!\n");
 		log_write_log_file("WARN: Set mux parameter on MUX0!\n");
@@ -338,38 +338,38 @@ bool ADS131_config(ADS131_Params * par)
 	    regs.chxset[i] = tmp;
 	    log_write_log_file("CH%dSET = 0x%02X\r\n", i + 1, tmp);
 
-	    /* Выключаем ненужные каналы */
+	    /* Р’С‹РєР»СЋС‡Р°РµРј РЅРµРЅСѓР¶РЅС‹Рµ РєР°РЅР°Р»С‹ */
 	    if (i >= NUM_ADS131_CHAN) {
 		regs.chxset[i] = 0x90;
 	    }
 	}
 
-	/* В рабочем режиме проводим эти настройки  */
+	/* Р’ СЂР°Р±РѕС‡РµРј СЂРµР¶РёРјРµ РїСЂРѕРІРѕРґРёРј СЌС‚Рё РЅР°СЃС‚СЂРѕР№РєРё  */
 	if (calculate_ping_pong_buffer(par->sps, par->bitmap, par->file_len) != 0) {
 	    log_write_log_file("ERROR: Unable to calculate buffer PING PONG\n");
 	    break;
 	}
 
-	/* Теперь заполняем заголовок */
+	/* РўРµРїРµСЂСЊ Р·Р°РїРѕР»РЅСЏРµРј Р·Р°РіРѕР»РѕРІРѕРє */
 	log_fill_adc_header(par->sps, adc_pars_struct.bitmap, adc_pars_struct.data_size);
 	log_write_log_file("INFO: change ADS131 header OK\n");
 
-	/* Командный режым - или WiFi или COM порт */
+	/* РљРѕРјР°РЅРґРЅС‹Р№ СЂРµР¶С‹Рј - РёР»Рё WiFi РёР»Рё COM РїРѕСЂС‚ */
 	if (par->mode == CMD_MODE) {
 
-	    adc_pars_struct.bitmap = 0x0F;	/* В командном режиме - все каналы */
+	    adc_pars_struct.bitmap = 0x0F;	/* Р’ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ - РІСЃРµ РєР°РЅР°Р»С‹ */
 
-	    pack->sample_capacity = 3;	/* По 3 байта в данных всегда */
-	    pack->channel_mask = 0x0f;	/* 4 канала всегда */
+	    pack->sample_capacity = 3;	/* РџРѕ 3 Р±Р°Р№С‚Р° РІ РґР°РЅРЅС‹С… РІСЃРµРіРґР° */
+	    pack->channel_mask = 0x0f;	/* 4 РєР°РЅР°Р»Р° РІСЃРµРіРґР° */
 
 
-	    /* подсчитаем децимацию - посмотреть чтобы не был =0! */
+	    /* РїРѕРґСЃС‡РёС‚Р°РµРј РґРµС†РёРјР°С†РёСЋ - РїРѕСЃРјРѕС‚СЂРµС‚СЊ С‡С‚РѕР±С‹ РЅРµ Р±С‹Р» =0! */
 	    adc_pars_struct.decim = 1;
 	    if (par->sps < SPS1K) {
 		adc_pars_struct.decim = 8 / (1 << par->sps);
 	    }
 
-	    /* Если буфер не существует создадим его на TEST_BUFFER_SIZE пачек ADS131_DATA_h */
+	    /* Р•СЃР»Рё Р±СѓС„РµСЂ РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚ СЃРѕР·РґР°РґРёРј РµРіРѕ РЅР° TEST_BUFFER_SIZE РїР°С‡РµРє ADS131_DATA_h */
 	    log_write_log_file("Try to alloc %d bytes for Circular Buffer\r\n", TEST_BUFFER_SIZE * sizeof(ADS131_DATA_h));
 	    PRINTF("Try to alloc %d bytes for Circular Buffer\r\n", TEST_BUFFER_SIZE * sizeof(ADS131_DATA_h));
 	    if (!ADS131_is_run() && cb_init(&cb, TEST_BUFFER_SIZE)) {
@@ -383,13 +383,13 @@ bool ADS131_config(ADS131_Params * par)
 	memset(pAdc_error, 0, sizeof(ADS131_ERROR_STRUCT));
 
 	adc_pars_struct.is_set = true;
-	if (regs_config(&regs) == 0) {	/*  Конфигурируем регистры АЦП во всех режимах */
-	    adc_pars_struct.is_init = true;	/* Инициализирован  */
+	if (regs_config(&regs) == 0) {	/*  РљРѕРЅС„РёРіСѓСЂРёСЂСѓРµРј СЂРµРіРёСЃС‚СЂС‹ РђР¦Рџ РІРѕ РІСЃРµС… СЂРµР¶РёРјР°С… */
+	    adc_pars_struct.is_init = true;	/* РРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅ  */
 	    adc_pars_struct.num_irq = 0;
 	    res = true;
 	} else {
 	    log_write_log_file("Error config regs\n");
-	    adc_pars_struct.is_init = false;	/* Инициализирован  */
+	    adc_pars_struct.is_init = false;	/* РРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅ  */
 	}
     } while (0);
 
@@ -398,17 +398,17 @@ bool ADS131_config(ADS131_Params * par)
 
 
 /**
- * Конфигурировать регистры всех 4 или 8 АЦП, SPI0, чипселект дергаем в этой функции
- * Настраиваем выводы _131_START - выход, _131_DRDY - вход
- * Сразу поставим Data Rate в параметре
+ * РљРѕРЅС„РёРіСѓСЂРёСЂРѕРІР°С‚СЊ СЂРµРіРёСЃС‚СЂС‹ РІСЃРµС… 4 РёР»Рё 8 РђР¦Рџ, SPI0, С‡РёРїСЃРµР»РµРєС‚ РґРµСЂРіР°РµРј РІ СЌС‚РѕР№ С„СѓРЅРєС†РёРё
+ * РќР°СЃС‚СЂР°РёРІР°РµРј РІС‹РІРѕРґС‹ _131_START - РІС‹С…РѕРґ, _131_DRDY - РІС…РѕРґ
+ * РЎСЂР°Р·Сѓ РїРѕСЃС‚Р°РІРёРј Data Rate РІ РїР°СЂР°РјРµС‚СЂРµ
  */
 static int regs_config(ADS131_Regs * regs)
 {
-    u8 byte = 0;		// максимум 8 каналов может быть
+    u8 byte = 0;		// РјР°РєСЃРёРјСѓРј 8 РєР°РЅР°Р»РѕРІ РјРѕР¶РµС‚ Р±С‹С‚СЊ
     int i, n;
     int res = 0;
 
-    adc_pin_config();		/* Выводы DRDY + SPI0 */
+    adc_pin_config();		/* Р’С‹РІРѕРґС‹ DRDY + SPI0 */
 
     /* Before using the Continuous command or configured in read Data serial interface: reset the serial interface. */
     adc_reset();
@@ -416,16 +416,16 @@ static int regs_config(ADS131_Regs * regs)
     if (!adc_pars_struct.is_set)
 	return -1;
 
-    /* Остановим. SDATAC command must be issued before any other 
+    /* РћСЃС‚Р°РЅРѕРІРёРј. SDATAC command must be issued before any other 
      * commands can be sent to the device.
      */
     cmd_write(CMD_SDATAC);
     DELAY(50);
 
-    /* В качестве проверки сделать чтение - должны прочитать то же самое что записали */
+    /* Р’ РєР°С‡РµСЃС‚РІРµ РїСЂРѕРІРµСЂРєРё СЃРґРµР»Р°С‚СЊ С‡С‚РµРЅРёРµ - РґРѕР»Р¶РЅС‹ РїСЂРѕС‡РёС‚Р°С‚СЊ С‚Рѕ Р¶Рµ СЃР°РјРѕРµ С‡С‚Рѕ Р·Р°РїРёСЃР°Р»Рё */
     log_write_log_file("------------ADC tunning--------\n");
 
-    /* Читаем регистр ID  */
+    /* Р§РёС‚Р°РµРј СЂРµРіРёСЃС‚СЂ ID  */
     byte = reg_read(ID);
     if ((byte & 0x03) == 0) {
 	log_write_log_file("INFO: 4-channel device\n");
@@ -444,12 +444,12 @@ static int regs_config(ADS131_Regs * regs)
     PRINTF("INFO: ID = 0x%02x\n", byte);
 
 
-    /* Пишем регистры */
+    /* РџРёС€РµРј СЂРµРіРёСЃС‚СЂС‹ */
     reg_write(CONFIG1, regs->config1);
     reg_write(CONFIG2, regs->config2);
     reg_write(CONFIG3, regs->config3);
 
-    /* Первый conf */
+    /* РџРµСЂРІС‹Р№ conf */
     byte = reg_read(CONFIG1);
     if (byte != regs->config1) {
 	log_write_log_file("FAIL: CONFIG1 = 0x%02x\n", byte);
@@ -460,7 +460,7 @@ static int regs_config(ADS131_Regs * regs)
 
     PRINTF("CONFIG1: 0x%02x\n", byte);
 
-    /* Второй conf */
+    /* Р’С‚РѕСЂРѕР№ conf */
     byte = reg_read(CONFIG2);
     if (byte != regs->config2) {
 	log_write_log_file("FAIL: CONFIG2 = 0x%02x\n", byte);
@@ -471,7 +471,7 @@ static int regs_config(ADS131_Regs * regs)
 
     PRINTF("CONFIG2: 0x%02x\n", byte);
 
-    /* Третий conf - иногда стоит бит 0x01 можно проверить по XOR */
+    /* РўСЂРµС‚РёР№ conf - РёРЅРѕРіРґР° СЃС‚РѕРёС‚ Р±РёС‚ 0x01 РјРѕР¶РЅРѕ РїСЂРѕРІРµСЂРёС‚СЊ РїРѕ XOR */
     byte = reg_read(CONFIG3);
     if (byte != regs->config3) {
 	log_write_log_file("WARN: CONFIG3: 0x%02X, read 0x%02x \n", regs->config3, byte);
@@ -483,11 +483,11 @@ static int regs_config(ADS131_Regs * regs)
     PRINTF("CONFIG3: 0x%02x\n", byte);
 
 
-    /* Выбираем все АЦП, независимо от карты включенных каналов. Ненужные выключаем */
+    /* Р’С‹Р±РёСЂР°РµРј РІСЃРµ РђР¦Рџ, РЅРµР·Р°РІРёСЃРёРјРѕ РѕС‚ РєР°СЂС‚С‹ РІРєР»СЋС‡РµРЅРЅС‹С… РєР°РЅР°Р»РѕРІ. РќРµРЅСѓР¶РЅС‹Рµ РІС‹РєР»СЋС‡Р°РµРј */
     for (i = 0; i < n; i++) {
-	reg_write(CH1SET + i, regs->chxset[i]);	/* Пишем в регистр */
+	reg_write(CH1SET + i, regs->chxset[i]);	/* РџРёС€РµРј РІ СЂРµРіРёСЃС‚СЂ */
 
-	/* Читаем проверку  - ошибка если в младших 4-х регистрах */
+	/* Р§РёС‚Р°РµРј РїСЂРѕРІРµСЂРєСѓ  - РѕС€РёР±РєР° РµСЃР»Рё РІ РјР»Р°РґС€РёС… 4-С… СЂРµРіРёСЃС‚СЂР°С… */
 	byte = reg_read(CH1SET + i);
 	if (byte != regs->chxset[i] && i < NUM_ADS131_CHAN) {
 	    log_write_log_file("FAIL: CH%iSET = 0x%02x\n", i, byte);
@@ -498,15 +498,15 @@ static int regs_config(ADS131_Regs * regs)
 	PRINTF("CH%dSET: 0x%02x\n", i + 1, byte);
     }
 
-    /* Прочитаем FAULT  */
+    /* РџСЂРѕС‡РёС‚Р°РµРј FAULT  */
     byte = reg_read(FAULT);
     log_write_log_file("FAULT: 0x%02x\n", byte);
 
 
-    /*  Частота дискретизации или код?   */
+    /*  Р§Р°СЃС‚РѕС‚Р° РґРёСЃРєСЂРµС‚РёР·Р°С†РёРё РёР»Рё РєРѕРґ?   */
     adcp.sample_rate = adc_pars_struct.sps_code;
 
-    /* Состояние каналов АЦП и усиление */
+    /* РЎРѕСЃС‚РѕСЏРЅРёРµ РєР°РЅР°Р»РѕРІ РђР¦Рџ Рё СѓСЃРёР»РµРЅРёРµ */
     adcp.adc_board_1.board_active = 1;
     adcp.adc_board_1.ch_1_gain = (regs->chxset[0] >> 4) & 7;
     adcp.adc_board_1.ch_2_gain = (regs->chxset[1] >> 4) & 7;
@@ -534,8 +534,8 @@ static int regs_config(ADS131_Regs * regs)
 }
 
 /**
- * Запустить все АЦП с заданным коэффициентом
- * Все действия с задачами выполняем 1 раз!
+ * Р—Р°РїСѓСЃС‚РёС‚СЊ РІСЃРµ РђР¦Рџ СЃ Р·Р°РґР°РЅРЅС‹Рј РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРј
+ * Р’СЃРµ РґРµР№СЃС‚РІРёСЏ СЃ Р·Р°РґР°С‡Р°РјРё РІС‹РїРѕР»РЅСЏРµРј 1 СЂР°Р·!
  */
 void ADS131_start(void)
 {
@@ -543,21 +543,21 @@ void ADS131_start(void)
     OsiReturnVal_e ret;
 
 
-    if (ADS131_is_run()) {	/* Уже запускали */
+    if (ADS131_is_run()) {	/* РЈР¶Рµ Р·Р°РїСѓСЃРєР°Р»Рё */
 	return;
     }
 
-    /* Получить биты */
+    /* РџРѕР»СѓС‡РёС‚СЊ Р±РёС‚С‹ */
     status_get_runtime_state(&t);
 
-    cmd_write(CMD_RDATAC);	/* Set the data mode. Запустили все */
-    adc_sync();			/* Синхронизируем АЦП */
-    adc_set_run(true);		/* Уже запускали */
+    cmd_write(CMD_RDATAC);	/* Set the data mode. Р—Р°РїСѓСЃС‚РёР»Рё РІСЃРµ */
+    adc_sync();			/* РЎРёРЅС…СЂРѕРЅРёР·РёСЂСѓРµРј РђР¦Рџ */
+    adc_set_run(true);		/* РЈР¶Рµ Р·Р°РїСѓСЃРєР°Р»Рё */
 
-    /* Ставим сигнал на IVG14 если в рабочем режиме. На pga не смотрим. */
-    adc_pars_struct.handler_write_flag = true;	/* В первый раз говорим, что можно писать */
+    /* РЎС‚Р°РІРёРј СЃРёРіРЅР°Р» РЅР° IVG14 РµСЃР»Рё РІ СЂР°Р±РѕС‡РµРј СЂРµР¶РёРјРµ. РќР° pga РЅРµ СЃРјРѕС‚СЂРёРј. */
+    adc_pars_struct.handler_write_flag = true;	/* Р’ РїРµСЂРІС‹Р№ СЂР°Р· РіРѕРІРѕСЂРёРј, С‡С‚Рѕ РјРѕР¶РЅРѕ РїРёСЃР°С‚СЊ */
 
-    /* Объект синхронизации (event или что то подобное) */
+    /* РћР±СЉРµРєС‚ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё (event РёР»Рё С‡С‚Рѕ С‚Рѕ РїРѕРґРѕР±РЅРѕРµ) */
     if (gSdSyncObj == NULL) {
 	ret = osi_SyncObjCreate(&gSdSyncObj);
 	if (ret != OSI_OK) {
@@ -570,7 +570,7 @@ void ADS131_start(void)
 	log_write_log_file("WARN: gSdSyncObj already exists!\r\n");
     }
 
-    /* Создаем задачу, которая будет передавать данные */
+    /* РЎРѕР·РґР°РµРј Р·Р°РґР°С‡Сѓ, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ РїРµСЂРµРґР°РІР°С‚СЊ РґР°РЅРЅС‹Рµ */
     if (gSdTaskHandle == NULL) {
 	ret = osi_TaskCreate(vSdTask, "SdTask", OSI_STACK_SIZE, NULL, SD_TASK_PRIORITY, &gSdTaskHandle);
 	if (ret != OSI_OK) {
@@ -585,7 +585,7 @@ void ADS131_start(void)
 
     if (adc_pars_struct.mode == CMD_MODE) {
 
-	/* Объект синхронизации (event или что то подобное) */
+	/* РћР±СЉРµРєС‚ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё (event РёР»Рё С‡С‚Рѕ С‚Рѕ РїРѕРґРѕР±РЅРѕРµ) */
 	if (gCmdSyncObj == NULL) {
 	    ret = osi_SyncObjCreate(&gCmdSyncObj);
 	    if (ret != OSI_OK) {
@@ -598,7 +598,7 @@ void ADS131_start(void)
 	    log_write_log_file("WARN: gCmdSyncObj already exists!\r\n");
 	}
 
-	/* Создаем задачу, которая будет принимать данные для кольцевого буфера */
+	/* РЎРѕР·РґР°РµРј Р·Р°РґР°С‡Сѓ, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ РїСЂРёРЅРёРјР°С‚СЊ РґР°РЅРЅС‹Рµ РґР»СЏ РєРѕР»СЊС†РµРІРѕРіРѕ Р±СѓС„РµСЂР° */
 	if (gCmdTaskHandle == NULL) {
 	    ret = osi_TaskCreate(vCmdTask, "CmdTask", OSI_STACK_SIZE, NULL, CMD_TASK_PRIORITY, &gCmdTaskHandle);
 	    if (ret != OSI_OK) {
@@ -612,63 +612,63 @@ void ADS131_start(void)
 	}
     }
 
-    /* Регистрируем обработчик для АЦП на 2-й высокий приоритет но не запускаем */
+    /* Р РµРіРёСЃС‚СЂРёСЂСѓРµРј РѕР±СЂР°Р±РѕС‚С‡РёРє РґР»СЏ РђР¦Рџ РЅР° 2-Р№ РІС‹СЃРѕРєРёР№ РїСЂРёРѕСЂРёС‚РµС‚ РЅРѕ РЅРµ Р·Р°РїСѓСЃРєР°РµРј */
     adc_irq_register();
 
     t.acqis_running = 1;
-    status_set_runtime_state(&t);	/* Установить биты */
+    status_set_runtime_state(&t);	/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ Р±РёС‚С‹ */
 }
 
 
 /**
- * Стоп АЦП из режима CONTINIOUS в PowerDown, Выключение SPI
+ * РЎС‚РѕРї РђР¦Рџ РёР· СЂРµР¶РёРјР° CONTINIOUS РІ PowerDown, Р’С‹РєР»СЋС‡РµРЅРёРµ SPI
  */
 void ADS131_stop(void)
 {
     RUNTIME_STATE_t t;
 
-    adc_irq_unregister();	/* Если запущен - выключаем прерывания АЦП */
-    adc_pin_config();		/* Выводы DRDY и OWFL + мультиплексор + SPI */
-    adc_stop();			/* Сигнал стоп вниз */
+    adc_irq_unregister();	/* Р•СЃР»Рё Р·Р°РїСѓС‰РµРЅ - РІС‹РєР»СЋС‡Р°РµРј РїСЂРµСЂС‹РІР°РЅРёСЏ РђР¦Рџ */
+    adc_pin_config();		/* Р’С‹РІРѕРґС‹ DRDY Рё OWFL + РјСѓР»СЊС‚РёРїР»РµРєСЃРѕСЂ + SPI */
+    adc_stop();			/* РЎРёРіРЅР°Р» СЃС‚РѕРї РІРЅРёР· */
 
     DELAY(50);
 
-    /* Получить биты */
+    /* РџРѕР»СѓС‡РёС‚СЊ Р±РёС‚С‹ */
     status_get_runtime_state(&t);
     t.acqis_running = 0;
 
-    /* Посылаем команду Stop data continous  */
+    /* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ Stop data continous  */
     cmd_write(CMD_SDATAC);
 
     log_write_log_file("------------------ADC stop------------------\n");
-    log_write_log_file("CFG1: 0x%02x\n", reg_read(CONFIG1));	/* Прочитаем регистры для проверки */
+    log_write_log_file("CFG1: 0x%02x\n", reg_read(CONFIG1));	/* РџСЂРѕС‡РёС‚Р°РµРј СЂРµРіРёСЃС‚СЂС‹ РґР»СЏ РїСЂРѕРІРµСЂРєРё */
     log_write_log_file("CFG2: 0x%02x\n", reg_read(CONFIG2));
     log_write_log_file("CFG3: 0x%02x\n", reg_read(CONFIG3));
     cmd_write(CMD_STANDBY);
 
-    adc_set_run(false);		/* не запущен  */
+    adc_set_run(false);		/* РЅРµ Р·Р°РїСѓС‰РµРЅ  */
 
-    adc_pars_struct.is_init = false;	/* Требуется инициализация  */
-    spi_stop();			/* Отрубить SPI */
+    adc_pars_struct.is_init = false;	/* РўСЂРµР±СѓРµС‚СЃСЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ  */
+    spi_stop();			/* РћС‚СЂСѓР±РёС‚СЊ SPI */
 
-    status_set_runtime_state(&t);	/* Установить биты */
+    status_set_runtime_state(&t);	/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ Р±РёС‚С‹ */
 }
 
 /**
- * Прерывание в командном режиме - байты наверх в Little Endian
+ * РџСЂРµСЂС‹РІР°РЅРёРµ РІ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ - Р±Р°Р№С‚С‹ РЅР°РІРµСЂС… РІ Little Endian
  */
 static void cmd_mode_handler(u32 * data, int num)
 {
-    /* По первому пакету метка времени */
+    /* РџРѕ РїРµСЂРІРѕРјСѓ РїР°РєРµС‚Сѓ РјРµС‚РєР° РІСЂРµРјРµРЅРё */
     if (adc_pars_struct.pack_cmd_cnt == 0) {
 	u64 ms = timer_get_msec_ticks();
-	pack->time_stamp = ms * 1000000;	/* Секунда + миллисекунды первого пакета. время UNIX_TIME_t */
+	pack->time_stamp = ms * 1000000;	/* РЎРµРєСѓРЅРґР° + РјРёР»Р»РёСЃРµРєСѓРЅРґС‹ РїРµСЂРІРѕРіРѕ РїР°РєРµС‚Р°. РІСЂРµРјСЏ UNIX_TIME_t */
 
-	/* В командном режиме отмечаем что частота на ступень меньше - нет 125!  */
+	/* Р’ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ РѕС‚РјРµС‡Р°РµРј С‡С‚Рѕ С‡Р°СЃС‚РѕС‚Р° РЅР° СЃС‚СѓРїРµРЅСЊ РјРµРЅСЊС€Рµ - РЅРµС‚ 125!  */
 	pack->adc_freq = adc_pars_struct.sps_code - 1;
     }
 
-    /* Убираем самый младший байт */
+    /* РЈР±РёСЂР°РµРј СЃР°РјС‹Р№ РјР»Р°РґС€РёР№ Р±Р°Р№С‚ */
     pack->sig[adc_pars_struct.pack_cmd_cnt].x = data[0] >> 8;	// x 3..4..1?..0?..6..
     pack->sig[adc_pars_struct.pack_cmd_cnt].y = data[1] >> 8;
     pack->sig[adc_pars_struct.pack_cmd_cnt].z = data[2] >> 8;
@@ -681,12 +681,12 @@ static void cmd_mode_handler(u32 * data, int num)
     }
 #endif
 
-    /* Пишем в круговой буфер и посылаем сигнал на запись */
+    /* РџРёС€РµРј РІ РєСЂСѓРіРѕРІРѕР№ Р±СѓС„РµСЂ Рё РїРѕСЃС‹Р»Р°РµРј СЃРёРіРЅР°Р» РЅР° Р·Р°РїРёСЃСЊ */
     if (adc_pars_struct.pack_cmd_cnt >= NUM_ADS131_PACK) {
 	OsiReturnVal_e ret;
 	adc_pars_struct.pack_cmd_cnt = 0;
 
-	ret = osi_SyncObjSignalFromISR(&gCmdSyncObj);	/* Отправляем сигнал */
+	ret = osi_SyncObjSignalFromISR(&gCmdSyncObj);	/* РћС‚РїСЂР°РІР»СЏРµРј СЃРёРіРЅР°Р» */
 	if (ret != OSI_OK) {
 	    PRINTF("SyncObjSignalFromISR CmdSyncObj error!\r\n");
 //          while (1);
@@ -696,7 +696,7 @@ static void cmd_mode_handler(u32 * data, int num)
 
 
 /**
- * Прерывание в рабочем режиме 4 канала данных
+ * РџСЂРµСЂС‹РІР°РЅРёРµ РІ СЂР°Р±РѕС‡РµРј СЂРµР¶РёРјРµ 4 РєР°РЅР°Р»Р° РґР°РЅРЅС‹С…
  */
 static void work_mode_handler(u32 * data, int num)
 {
@@ -706,33 +706,33 @@ static void work_mode_handler(u32 * data, int num)
     u64 ns, us;
     OsiReturnVal_e ret;
 
-    ns = timer_get_long_time();	/* время в наносекундах */
-    us = ns / 1000;		/* микросекунды */
+    ns = timer_get_long_time();	/* РІСЂРµРјСЏ РІ РЅР°РЅРѕСЃРµРєСѓРЅРґР°С… */
+    us = ns / 1000;		/* РјРёРєСЂРѕСЃРµРєСѓРЅРґС‹ */
 
     pAdc_error->time_last = pAdc_error->time_now;
-    pAdc_error->time_now = us;	/* Время сампла */
+    pAdc_error->time_now = us;	/* Р’СЂРµРјСЏ СЃР°РјРїР»Р° */
 
-    /* Смотрим порядок следования прерываний АЦП. Если опоздали на 5% - зафиксировать ошибку АЦП */
+    /* РЎРјРѕС‚СЂРёРј РїРѕСЂСЏРґРѕРє СЃР»РµРґРѕРІР°РЅРёСЏ РїСЂРµСЂС‹РІР°РЅРёР№ РђР¦Рџ. Р•СЃР»Рё РѕРїРѕР·РґР°Р»Рё РЅР° 5% - Р·Р°С„РёРєСЃРёСЂРѕРІР°С‚СЊ РѕС€РёР±РєСѓ РђР¦Рџ */
     if (pAdc_error->time_last != 0 && pAdc_error->time_now - pAdc_error->time_last > adc_pars_struct.sample_us) {
 	pAdc_error->sample_miss++;
     }
 
-    /* Пишем время первого пакета */
+    /* РџРёС€РµРј РІСЂРµРјСЏ РїРµСЂРІРѕРіРѕ РїР°РєРµС‚Р° */
     if (0 == adc_pars_struct.pack_work_cnt) {
-	adc_pars_struct.long_time0 = ns;	/* Секунды + наносекунды первого пакета */
+	adc_pars_struct.long_time0 = ns;	/* РЎРµРєСѓРЅРґС‹ + РЅР°РЅРѕСЃРµРєСѓРЅРґС‹ РїРµСЂРІРѕРіРѕ РїР°РєРµС‚Р° */
     }
 
-    /* Собираем пинг или понг за 1 секунду */
+    /* РЎРѕР±РёСЂР°РµРј РїРёРЅРі РёР»Рё РїРѕРЅРі Р·Р° 1 СЃРµРєСѓРЅРґСѓ */
     if (0 == adc_pars_struct.ping_pong_flag) {
-	ptr = ADC_DATA_ping;	/* 0 собираем пинг */
+	ptr = ADC_DATA_ping;	/* 0 СЃРѕР±РёСЂР°РµРј РїРёРЅРі */
     } else {
-	ptr = ADC_DATA_pong;	/* 1 собираем понг */
+	ptr = ADC_DATA_pong;	/* 1 СЃРѕР±РёСЂР°РµРј РїРѕРЅРі */
     }
 
-    /* Какие каналы включены */
+    /* РљР°РєРёРµ РєР°РЅР°Р»С‹ РІРєР»СЋС‡РµРЅС‹ */
     ch = adc_pars_struct.bitmap;
 
-    /* Если канал включен - перевернем в Big Endian и запишем только 3 байта */
+    /* Р•СЃР»Рё РєР°РЅР°Р» РІРєР»СЋС‡РµРЅ - РїРµСЂРµРІРµСЂРЅРµРј РІ Big Endian Рё Р·Р°РїРёС€РµРј С‚РѕР»СЊРєРѕ 3 Р±Р°Р№С‚Р° */
     for (i = 0; i < NUM_ADS131_CHAN; i++) {
 	if ((1 << i) & ch) {
 	    d = byteswap4(data[i]);
@@ -741,22 +741,21 @@ static void work_mode_handler(u32 * data, int num)
 	}
     }
 
-    adc_pars_struct.pack_work_cnt++;	/* Счетчик пакетов увеличим  */
+    adc_pars_struct.pack_work_cnt++;	/* РЎС‡РµС‚С‡РёРє РїР°РєРµС‚РѕРІ СѓРІРµР»РёС‡РёРј  */
 
-
-    /*  1 раз в секунду за 2 или за 4 секунды будет 1000 пакетов */
+    /*  1 СЂР°Р· РІ СЃРµРєСѓРЅРґСѓ Р·Р° 2 РёР»Рё Р·Р° 4 СЃРµРєСѓРЅРґС‹ Р±СѓРґРµС‚ 1000 РїР°РєРµС‚РѕРІ */
     if (adc_pars_struct.pack_work_cnt >= adc_pars_struct.samples_in_ping) {
-	adc_pars_struct.pack_work_cnt = 0;	/* обнуляем счетчик */
-	adc_pars_struct.ping_pong_flag = !adc_pars_struct.ping_pong_flag;	/* меняем флаг. что собрали то и посылаем */
+	adc_pars_struct.pack_work_cnt = 0;	/* РѕР±РЅСѓР»СЏРµРј СЃС‡РµС‚С‡РёРє */
+	adc_pars_struct.ping_pong_flag = !adc_pars_struct.ping_pong_flag;	/* РјРµРЅСЏРµРј С„Р»Р°Рі. С‡С‚Рѕ СЃРѕР±СЂР°Р»Рё С‚Рѕ Рё РїРѕСЃС‹Р»Р°РµРј */
 
-	/* Если нет флага записи: handler_write_flag, значит запись на SD застопорилась - скидываем на flash  */
+	/* Р•СЃР»Рё РЅРµС‚ С„Р»Р°РіР° Р·Р°РїРёСЃРё: handler_write_flag, Р·РЅР°С‡РёС‚ Р·Р°РїРёСЃСЊ РЅР° SD Р·Р°СЃС‚РѕРїРѕСЂРёР»Р°СЃСЊ - СЃРєРёРґС‹РІР°РµРј РЅР° flash  */
 	if (!adc_pars_struct.handler_write_flag) {
-	    pAdc_error->block_timeout++;	/* Считаем ошибки сброса блока на SD */
+	    pAdc_error->block_timeout++;	/* РЎС‡РёС‚Р°РµРј РѕС€РёР±РєРё СЃР±СЂРѕСЃР° Р±Р»РѕРєР° РЅР° SD */
 	}
 
-	adc_pars_struct.long_time1 = adc_pars_struct.long_time0;	/* Скопируем. иначе можем затереть */
+	adc_pars_struct.long_time1 = adc_pars_struct.long_time0;	/* РЎРєРѕРїРёСЂСѓРµРј. РёРЅР°С‡Рµ РјРѕР¶РµРј Р·Р°С‚РµСЂРµС‚СЊ */
 
-	ret = osi_SyncObjSignalFromISR(&gSdSyncObj);	/* Отправляем сигнал */
+	ret = osi_SyncObjSignalFromISR(&gSdSyncObj);	/* РћС‚РїСЂР°РІР»СЏРµРј СЃРёРіРЅР°Р» */
 	if (ret != OSI_OK) {
 	    PRINTF("SyncObjSignalFromISR error!\r\n");
 //          while (1);
@@ -766,24 +765,24 @@ static void work_mode_handler(u32 * data, int num)
 
 
 /**
- * Прерывание по переходу из "1" в "0" для АЦП
- * Здесь будет передаваться сообщение в задачу, которая будет обрабатыввать данные
+ * РџСЂРµСЂС‹РІР°РЅРёРµ РїРѕ РїРµСЂРµС…РѕРґСѓ РёР· "1" РІ "0" РґР»СЏ РђР¦Рџ
+ * Р—РґРµСЃСЊ Р±СѓРґРµС‚ РїРµСЂРµРґР°РІР°С‚СЊСЃСЏ СЃРѕРѕР±С‰РµРЅРёРµ РІ Р·Р°РґР°С‡Сѓ, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ РѕР±СЂР°Р±Р°С‚С‹РІРІР°С‚СЊ РґР°РЅРЅС‹Рµ
  */
 void ADS131_ISR_func(void)
 {
-    u32 data[NUM_ADS131_CHAN];	/* 4 канала  */
+    u32 data[NUM_ADS131_CHAN];	/* 4 РєР°РЅР°Р»Р°  */
 
     spi_cs_on();
 
-    spi_write_read_data(NUM_ADS131_CHAN, data);	/* Получаем в формате BIG ENDIAN!!! Сверху вниз */
+    spi_write_read_data(NUM_ADS131_CHAN, data);	/* РџРѕР»СѓС‡Р°РµРј РІ С„РѕСЂРјР°С‚Рµ BIG ENDIAN!!! РЎРІРµСЂС…Сѓ РІРЅРёР· */
 
     do {
-	/* Для частоты 125 - беру каждый 2 отсчет. условие в такой последовательности! */
+	/* Р”Р»СЏ С‡Р°СЃС‚РѕС‚С‹ 125 - Р±РµСЂСѓ РєР°Р¶РґС‹Р№ 2 РѕС‚СЃС‡РµС‚. СѓСЃР»РѕРІРёРµ РІ С‚Р°РєРѕР№ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё! */
 	if ((adc_pars_struct.sps_code == SPS125) && (adc_pars_struct.num_irq % 2 == 1)) {
 	    break;
 	}
 #if 0
-	/* Тест синусоидой */
+	/* РўРµСЃС‚ СЃРёРЅСѓСЃРѕРёРґРѕР№ */
 	static int k = 0, j = 0;
 	data[0] = get_sin_table(k);
 	if (j++ % 10 == 0) {
@@ -791,34 +790,34 @@ void ADS131_ISR_func(void)
 	}
 #endif
 
-	/* Программный режым - запись на SD карту  */
+	/* РџСЂРѕРіСЂР°РјРјРЅС‹Р№ СЂРµР¶С‹Рј - Р·Р°РїРёСЃСЊ РЅР° SD РєР°СЂС‚Сѓ  */
 	work_mode_handler(data, NUM_ADS131_CHAN);
 
 	if (adc_pars_struct.mode == CMD_MODE) {
 
-	    /* Делитель до частоты 125 - беру каждый этот отсчет для получения данных для PC */
+	    /* Р”РµР»РёС‚РµР»СЊ РґРѕ С‡Р°СЃС‚РѕС‚С‹ 125 - Р±РµСЂСѓ РєР°Р¶РґС‹Р№ СЌС‚РѕС‚ РѕС‚СЃС‡РµС‚ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РґР°РЅРЅС‹С… РґР»СЏ PC */
 	    if (adc_pars_struct.num_irq % (1 << adc_pars_struct.sps_code) == 0) {
-		cmd_mode_handler(data, NUM_ADS131_CHAN);	/* Для режима ОТ PC */
+		cmd_mode_handler(data, NUM_ADS131_CHAN);	/* Р”Р»СЏ СЂРµР¶РёРјР° РћРў PC */
 	    }
 	}
     } while (0);
 
-    adc_pars_struct.num_irq++;	/* Считаем прерывания */
+    adc_pars_struct.num_irq++;	/* РЎС‡РёС‚Р°РµРј РїСЂРµСЂС‹РІР°РЅРёСЏ */
 
     if (adc_pars_struct.num_irq % 125 == 0) {
 	led_toggle(LED_GREEN);
     }
 
 
-    spi_cs_off();		/* Убрали CS  */
+    spi_cs_off();		/* РЈР±СЂР°Р»Рё CS  */
 
-    /* Подтвердим в конце, иначе будут вхождение внутрь одного прерывания */
+    /* РџРѕРґС‚РІРµСЂРґРёРј РІ РєРѕРЅС†Рµ, РёРЅР°С‡Рµ Р±СѓРґСѓС‚ РІС…РѕР¶РґРµРЅРёРµ РІРЅСѓС‚СЂСЊ РѕРґРЅРѕРіРѕ РїСЂРµСЂС‹РІР°РЅРёСЏ */
     MAP_GPIOIntClear(ADS131_DRDY_BASE, ADS131_DRDY_GPIO);
 }
 
 
 /**
- * Возвращаем счетчик ошибок
+ * Р’РѕР·РІСЂР°С‰Р°РµРј СЃС‡РµС‚С‡РёРє РѕС€РёР±РѕРє
  */
 void ADS131_get_error_count(ADS131_ERROR_STRUCT * err)
 {
@@ -828,8 +827,8 @@ void ADS131_get_error_count(ADS131_ERROR_STRUCT * err)
 }
 
 /**
- * Запуск АЦП с установленными настройками
- * Прерывание возникнет по перепаду из единицы в ноль, пин будет читаться как 1 при перепаде в 0 
+ * Р—Р°РїСѓСЃРє РђР¦Рџ СЃ СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹РјРё РЅР°СЃС‚СЂРѕР№РєР°РјРё
+ * РџСЂРµСЂС‹РІР°РЅРёРµ РІРѕР·РЅРёРєРЅРµС‚ РїРѕ РїРµСЂРµРїР°РґСѓ РёР· РµРґРёРЅРёС†С‹ РІ РЅРѕР»СЊ, РїРёРЅ Р±СѓРґРµС‚ С‡РёС‚Р°С‚СЊСЃСЏ РєР°Рє 1 РїСЂРё РїРµСЂРµРїР°РґРµ РІ 0 
  */
 static void adc_irq_register(void)
 {
@@ -840,7 +839,7 @@ static void adc_irq_register(void)
 
 
 /**
- * Отвяжем прерывание
+ * РћС‚РІСЏР¶РµРј РїСЂРµСЂС‹РІР°РЅРёРµ
  */
 static void adc_irq_unregister(void)
 {
@@ -850,11 +849,11 @@ static void adc_irq_unregister(void)
 }
 
 /**
- * Старт АЦП - только разрешим прерывания! 
+ * РЎС‚Р°СЂС‚ РђР¦Рџ - С‚РѕР»СЊРєРѕ СЂР°Р·СЂРµС€РёРј РїСЂРµСЂС‹РІР°РЅРёСЏ! 
  */
 void ADS131_start_irq(void)
 {
-    /* Чистим флаги */
+    /* Р§РёСЃС‚РёРј С„Р»Р°РіРё */
     MAP_GPIOIntClear(ADS131_DRDY_BASE, ADS131_DRDY_GPIO);
 
     /* Enable Interrupt */
@@ -862,7 +861,7 @@ void ADS131_start_irq(void)
 }
 
 /**
- * Команда ацп в PD - перед включением
+ * РљРѕРјР°РЅРґР° Р°С†Рї РІ PD - РїРµСЂРµРґ РІРєР»СЋС‡РµРЅРёРµРј
  */
 void ADS131_standby(void)
 {
@@ -873,14 +872,14 @@ void ADS131_standby(void)
 }
 
 /**
- * Команда offset cal
+ * РљРѕРјР°РЅРґР° offset cal
  * OFFSETCAL must be executed every time there is a change in PGA gain settings.
  */
 bool ADS131_ofscal(void)
 {
     bool res = false;
 
-    /* НЕ когда запущен!  */
+    /* РќР• РєРѕРіРґР° Р·Р°РїСѓС‰РµРЅ!  */
     if (!ADS131_is_run()) {
 	adc_pin_config();
 	cmd_write(CMD_OFFSETCAL);
@@ -891,7 +890,7 @@ bool ADS131_ofscal(void)
 }
 
 /**
- * АЦП запущен?
+ * РђР¦Рџ Р·Р°РїСѓС‰РµРЅ?
  */
 bool ADS131_is_run(void)
 {
@@ -899,7 +898,7 @@ bool ADS131_is_run(void)
 }
 
 /**
- * Установить - АЦП запущен или остановлен
+ * РЈСЃС‚Р°РЅРѕРІРёС‚СЊ - РђР¦Рџ Р·Р°РїСѓС‰РµРЅ РёР»Рё РѕСЃС‚Р°РЅРѕРІР»РµРЅ
  */
 IDEF void adc_set_run(bool run)
 {
@@ -908,34 +907,34 @@ IDEF void adc_set_run(bool run)
 
 
 /**
- *  Эта функция откачивает данные из пакета
- *  Получить данные - если false, данных нет 
+ *  Р­С‚Р° С„СѓРЅРєС†РёСЏ РѕС‚РєР°С‡РёРІР°РµС‚ РґР°РЅРЅС‹Рµ РёР· РїР°РєРµС‚Р°
+ *  РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ - РµСЃР»Рё false, РґР°РЅРЅС‹С… РЅРµС‚ 
  */
 bool ADS131_get_pack(ADS131_DATA_h * buf)
 {
     if (!cb_is_empty(&cb) && buf != NULL) {
 	RUNTIME_STATE_t t;
 
-	status_get_runtime_state(&t);	/* Получить биты */
-	t.mem_ovr = 0;		/* убираем статус - "буфер полон" */
-	status_set_runtime_state(&t);	/* Установить биты */
+	status_get_runtime_state(&t);	/* РџРѕР»СѓС‡РёС‚СЊ Р±РёС‚С‹ */
+	t.mem_ovr = 0;		/* СѓР±РёСЂР°РµРј СЃС‚Р°С‚СѓСЃ - "Р±СѓС„РµСЂ РїРѕР»РѕРЅ" */
+	status_set_runtime_state(&t);	/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ Р±РёС‚С‹ */
 	cb_read(&cb, (ElemType *) buf);
 	return true;
     } else {
-	return false;		/*  "Данные не готовы" */
+	return false;		/*  "Р”Р°РЅРЅС‹Рµ РЅРµ РіРѕС‚РѕРІС‹" */
     }
 }
 
 /**  
- *  Очистить буфер данных
+ *  РћС‡РёСЃС‚РёС‚СЊ Р±СѓС„РµСЂ РґР°РЅРЅС‹С…
  */
 bool ADS131_clear_adc_buf(void)
 {
     RUNTIME_STATE_t t;
 
-    status_get_runtime_state(&t);	/* Получить биты */
-    t.mem_ovr = 0;		/* убираем статус - "буфер полон" */
-    status_set_runtime_state(&t);	/* Установить биты */
+    status_get_runtime_state(&t);	/* РџРѕР»СѓС‡РёС‚СЊ Р±РёС‚С‹ */
+    t.mem_ovr = 0;		/* СѓР±РёСЂР°РµРј СЃС‚Р°С‚СѓСЃ - "Р±СѓС„РµСЂ РїРѕР»РѕРЅ" */
+    status_set_runtime_state(&t);	/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ Р±РёС‚С‹ */
 
     cb_clear(&cb);
     return true;
@@ -943,7 +942,7 @@ bool ADS131_clear_adc_buf(void)
 
 
 /**
- * Узнать флаг внутри сигнала
+ * РЈР·РЅР°С‚СЊ С„Р»Р°Рі РІРЅСѓС‚СЂРё СЃРёРіРЅР°Р»Р°
  */
 bool ADS131_get_handler_flag(void)
 {
@@ -951,7 +950,7 @@ bool ADS131_get_handler_flag(void)
 }
 
 /**
- * Сбросить флаг внутри сигнала
+ * РЎР±СЂРѕСЃРёС‚СЊ С„Р»Р°Рі РІРЅСѓС‚СЂРё СЃРёРіРЅР°Р»Р°
  */
 void ADS131_reset_handler_flag(void)
 {
@@ -961,9 +960,9 @@ void ADS131_reset_handler_flag(void)
 
 
 /**
- * Подача команды в АЦП 
- * параметр: команда 
- * возврат:  нет
+ * РџРѕРґР°С‡Р° РєРѕРјР°РЅРґС‹ РІ РђР¦Рџ 
+ * РїР°СЂР°РјРµС‚СЂ: РєРѕРјР°РЅРґР° 
+ * РІРѕР·РІСЂР°С‚:  РЅРµС‚
  */
 static void cmd_write(u8 cmd)
 {
@@ -971,18 +970,18 @@ static void cmd_write(u8 cmd)
 
     spi_cs_on();
 
-    spi_write_read(cmd);	/* отправка команды */
+    spi_write_read(cmd);	/* РѕС‚РїСЂР°РІРєР° РєРѕРјР°РЅРґС‹ */
 
-    /* Пауза в 24 цикла Fclk минимум ~5 микросекунд - ОБЯЗАТЕЛЬНО ДОЛЖНА БЫТЬ!!! 
-     * Подобрать длительность паузы по datasheet!!! */
+    /* РџР°СѓР·Р° РІ 24 С†РёРєР»Р° Fclk РјРёРЅРёРјСѓРј ~5 РјРёРєСЂРѕСЃРµРєСѓРЅРґ - РћР‘РЇР—РђРўР•Р›Р¬РќРћ Р”РћР›Р–РќРђ Р‘Р«РўР¬!!! 
+     * РџРѕРґРѕР±СЂР°С‚СЊ РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РїР°СѓР·С‹ РїРѕ datasheet!!! */
     for (i = 0; i < 25; i++);
     spi_cs_off();
 }
 
 /**
- * Запись в 1 регистр  АЦП
- * параметр:  адрес регистра, данные
- * возврат:  нет
+ * Р—Р°РїРёСЃСЊ РІ 1 СЂРµРіРёСЃС‚СЂ  РђР¦Рџ
+ * РїР°СЂР°РјРµС‚СЂ:  Р°РґСЂРµСЃ СЂРµРіРёСЃС‚СЂР°, РґР°РЅРЅС‹Рµ
+ * РІРѕР·РІСЂР°С‚:  РЅРµС‚
  */
 static void reg_write(u8 addr, u8 data)
 {
@@ -999,16 +998,16 @@ static void reg_write(u8 addr, u8 data)
     for (i = 0; i < 3; i++) {
 	spi_write_read(cmd[i]);
 
-	/* Пауза в ~24 цикла Fclk (5 мкс) - минимум! */
+	/* РџР°СѓР·Р° РІ ~24 С†РёРєР»Р° Fclk (5 РјРєСЃ) - РјРёРЅРёРјСѓРј! */
 	for (j = 0; j < 25; j++);
     }
     spi_cs_off();
 }
 
 /**
- * Прочитать 1 регистр  АЦП: 
- * параметр:  адрес регистра
- * возврат:   данные
+ * РџСЂРѕС‡РёС‚Р°С‚СЊ 1 СЂРµРіРёСЃС‚СЂ  РђР¦Рџ: 
+ * РїР°СЂР°РјРµС‚СЂ:  Р°РґСЂРµСЃ СЂРµРіРёСЃС‚СЂР°
+ * РІРѕР·РІСЂР°С‚:   РґР°РЅРЅС‹Рµ
  */
 static u8 reg_read(u8 addr)
 {
@@ -1024,7 +1023,7 @@ static u8 reg_read(u8 addr)
     for (i = 0; i < 2; i++) {
 	spi_write_read(cmd[i]);
 
-	/* Пауза в ~24 цикла Fclk (5 мкс) - минимум! */
+	/* РџР°СѓР·Р° РІ ~24 С†РёРєР»Р° Fclk (5 РјРєСЃ) - РјРёРЅРёРјСѓРј! */
 	for (j = 0; j < 25; j++);
     }
     data = spi_write_read(0);
@@ -1034,8 +1033,8 @@ static u8 reg_read(u8 addr)
 }
 
 /**
- * Просто конфирурация ножек DRDY и START и инициализация переключателя АЦП
- * Делаем ее один раз всего!
+ * РџСЂРѕСЃС‚Рѕ РєРѕРЅС„РёСЂСѓСЂР°С†РёСЏ РЅРѕР¶РµРє DRDY Рё START Рё РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїРµСЂРµРєР»СЋС‡Р°С‚РµР»СЏ РђР¦Рџ
+ * Р”РµР»Р°РµРј РµРµ РѕРґРёРЅ СЂР°Р· РІСЃРµРіРѕ!
  */
 static void adc_pin_config(void)
 {
@@ -1044,7 +1043,7 @@ static void adc_pin_config(void)
 }
 
 /**
- * Конфигурим ноги DRDY и START
+ * РљРѕРЅС„РёРіСѓСЂРёРј РЅРѕРіРё DRDY Рё START
  */
 static void adc_mux_config(void)
 {
@@ -1054,42 +1053,42 @@ static void adc_mux_config(void)
     MAP_PRCMPeripheralClkEnable(PRCM_GPIOA2, PRCM_RUN_MODE_CLK);
     MAP_PRCMPeripheralClkEnable(PRCM_GPIOA3, PRCM_RUN_MODE_CLK);
 
-    /*  Ногу reset на выход в "1" */
+    /*  РќРѕРіСѓ reset РЅР° РІС‹С…РѕРґ РІ "1" */
     MAP_PinTypeGPIO(ADS131_RESET_PIN, ADS131_RESET_MODE, false);
     MAP_GPIODirModeSet(ADS131_RESET_BASE, ADS131_RESET_BIT, GPIO_DIR_MODE_OUT);
-    MAP_GPIOPinWrite(ADS131_RESET_BASE, ADS131_RESET_BIT, ADS131_RESET_BIT);	/* Ставим в 1 */
+    MAP_GPIOPinWrite(ADS131_RESET_BASE, ADS131_RESET_BIT, ADS131_RESET_BIT);	/* РЎС‚Р°РІРёРј РІ 1 */
 
-    /* Ногу старт / sync_in (PIN_63 / GPIO_08) на выход в 0 */
+    /* РќРѕРіСѓ СЃС‚Р°СЂС‚ / sync_in (PIN_63 / GPIO_08) РЅР° РІС‹С…РѕРґ РІ 0 */
     MAP_PinTypeGPIO(ADS131_START_PIN, ADS131_START_MODE, false);
     MAP_GPIODirModeSet(ADS131_START_BASE, ADS131_START_BIT, GPIO_DIR_MODE_OUT);
-    MAP_GPIOPinWrite(ADS131_START_BASE, ADS131_START_BIT, ~ADS131_START_BIT);	/* Ставим в 0 */
+    MAP_GPIOPinWrite(ADS131_START_BASE, ADS131_START_BIT, ~ADS131_START_BIT);	/* РЎС‚Р°РІРёРј РІ 0 */
 
-    /* Ногу DRDY (PIN_61 / GPIO_06) на вход - прицепить так же прерывания к ней */
+    /* РќРѕРіСѓ DRDY (PIN_61 / GPIO_06) РЅР° РІС…РѕРґ - РїСЂРёС†РµРїРёС‚СЊ С‚Р°Рє Р¶Рµ РїСЂРµСЂС‹РІР°РЅРёСЏ Рє РЅРµР№ */
     MAP_PinTypeGPIO(ADS131_DRDY_PIN, ADS131_DRDY_MODE, false);
     MAP_GPIODirModeSet(ADS131_DRDY_BASE, ADS131_DRDY_BIT, GPIO_DIR_MODE_IN);
 }
 
 /**
- * Старт всех АЦП период импульса START минимум 0.5 мкс 
+ * РЎС‚Р°СЂС‚ РІСЃРµС… РђР¦Рџ РїРµСЂРёРѕРґ РёРјРїСѓР»СЊСЃР° START РјРёРЅРёРјСѓРј 0.5 РјРєСЃ 
  */
 static void adc_sync(void)
 {
-    /* Включаем функции для START - изначально в нуле - Ставим в 1 */
+    /* Р’РєР»СЋС‡Р°РµРј С„СѓРЅРєС†РёРё РґР»СЏ START - РёР·РЅР°С‡Р°Р»СЊРЅРѕ РІ РЅСѓР»Рµ - РЎС‚Р°РІРёРј РІ 1 */
     MAP_GPIOPinWrite(ADS131_START_BASE, ADS131_START_BIT, ADS131_START_BIT);
 
-    /* Перед разрешение IRQ - clear pending interrupts */
+    /* РџРµСЂРµРґ СЂР°Р·СЂРµС€РµРЅРёРµ IRQ - clear pending interrupts */
     MAP_IntPendClear(ADS131_DRDY_GROUP_INT);
 }
 
-/* Стоп ацп  */
+/* РЎС‚РѕРї Р°С†Рї  */
 static void adc_stop(void)
 {
-    /* Ставим в 1 */
+    /* РЎС‚Р°РІРёРј РІ 1 */
     MAP_GPIOPinWrite(ADS131_START_BASE, ADS131_START_BIT, ADS131_START_BIT);
 }
 
 /**
- * вызывется каждый раз при заполнении 1-го пакета для кольцевого буфера
+ * РІС‹Р·С‹РІРµС‚СЃСЏ РєР°Р¶РґС‹Р№ СЂР°Р· РїСЂРё Р·Р°РїРѕР»РЅРµРЅРёРё 1-РіРѕ РїР°РєРµС‚Р° РґР»СЏ РєРѕР»СЊС†РµРІРѕРіРѕ Р±СѓС„РµСЂР°
  */
 static void vCmdTask(void *s)
 {
@@ -1104,19 +1103,19 @@ static void vCmdTask(void *s)
 	    if (cb_is_full(&cb)) {
 		RUNTIME_STATE_t t;
 
-		/* Получить биты */
+		/* РџРѕР»СѓС‡РёС‚СЊ Р±РёС‚С‹ */
 		status_get_runtime_state(&t);
-		t.mem_ovr = 1;	/* ставим статус - "буфер полон". Очищаем при чтении, не здесь! */
-		status_set_runtime_state(&t);	/* Установить биты */
+		t.mem_ovr = 1;	/* СЃС‚Р°РІРёРј СЃС‚Р°С‚СѓСЃ - "Р±СѓС„РµСЂ РїРѕР»РѕРЅ". РћС‡РёС‰Р°РµРј РїСЂРё С‡С‚РµРЅРёРё, РЅРµ Р·РґРµСЃСЊ! */
+		status_set_runtime_state(&t);	/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ Р±РёС‚С‹ */
 	    } else {
-		cb_write(&cb, pack);	/* Пишем в буфер */
+		cb_write(&cb, pack);	/* РџРёС€РµРј РІ Р±СѓС„РµСЂ */
 	    }
 	}
     }
 }
 
 /**
- * Сигнал - вызывется 1...4 раза в секунду при нашей частоте при заполнения любого PING_PONG
+ * РЎРёРіРЅР°Р» - РІС‹Р·С‹РІРµС‚СЃСЏ 1...4 СЂР°Р·Р° РІ СЃРµРєСѓРЅРґСѓ РїСЂРё РЅР°С€РµР№ С‡Р°СЃС‚РѕС‚Рµ РїСЂРё Р·Р°РїРѕР»РЅРµРЅРёСЏ Р»СЋР±РѕРіРѕ PING_PONG
  */
 static void vSdTask(void *s)
 {
@@ -1125,7 +1124,7 @@ static void vSdTask(void *s)
     int res;
     OsiReturnVal_e ret;
 
-    /* Выполнять пока запущена */
+    /* Р’С‹РїРѕР»РЅСЏС‚СЊ РїРѕРєР° Р·Р°РїСѓС‰РµРЅР° */
     while (1) {
 
 	/* Wait for a message to arrive. */
@@ -1134,32 +1133,32 @@ static void vSdTask(void *s)
 
 	if (ret == OSI_OK) {
 
-	    ns = adc_pars_struct.long_time1;	/* Получили в наносекундах */
-	    adc_pars_struct.handler_write_flag = false;	/* Убираем флаг сигнала - входим в обработчик */
+	    ns = adc_pars_struct.long_time1;	/* РџРѕР»СѓС‡РёР»Рё РІ РЅР°РЅРѕСЃРµРєСѓРЅРґР°С… */
+	    adc_pars_struct.handler_write_flag = false;	/* РЈР±РёСЂР°РµРј С„Р»Р°Рі СЃРёРіРЅР°Р»Р° - РІС…РѕРґРёРј РІ РѕР±СЂР°Р±РѕС‚С‡РёРє */
 
-	    /*  Делаем суточные файлы или часовые - по времени измеренном в ISR */
+	    /*  Р”РµР»Р°РµРј СЃСѓС‚РѕС‡РЅС‹Рµ С„Р°Р№Р»С‹ РёР»Рё С‡Р°СЃРѕРІС‹Рµ - РїРѕ РІСЂРµРјРµРЅРё РёР·РјРµСЂРµРЅРЅРѕРј РІ ISR */
 	    if (0 == adc_pars_struct.num_sig % adc_pars_struct.sig_in_time) {
 		res = log_create_hour_data_file(ns);
 	    }
 
-	    /* 1 раз в минуту скидываем заголовок с изменившимся временем  */
+	    /* 1 СЂР°Р· РІ РјРёРЅСѓС‚Сѓ СЃРєРёРґС‹РІР°РµРј Р·Р°РіРѕР»РѕРІРѕРє СЃ РёР·РјРµРЅРёРІС€РёРјСЃСЏ РІСЂРµРјРµРЅРµРј  */
 	    if (0 == adc_pars_struct.num_sig % adc_pars_struct.sig_in_min) {
 		log_change_num_irq_to_header(adc_pars_struct.num_irq);
-		res += log_write_adc_header_to_file(ns);	/* Миллисекунды пишем в заголовок */
+		res += log_write_adc_header_to_file(ns);	/* РњРёР»Р»РёСЃРµРєСѓРЅРґС‹ РїРёС€РµРј РІ Р·Р°РіРѕР»РѕРІРѕРє */
 	    }
 
 
-	    /* Cбрасываем буфер на SD карту */
-	    if (1 == adc_pars_struct.ping_pong_flag) {	/* пишем массив пинг */
+	    /* CР±СЂР°СЃС‹РІР°РµРј Р±СѓС„РµСЂ РЅР° SD РєР°СЂС‚Сѓ */
+	    if (1 == adc_pars_struct.ping_pong_flag) {	/* РїРёС€РµРј РјР°СЃСЃРёРІ РїРёРЅРі */
 		ptr = ADC_DATA_ping;
-	    } else {		/* пишем массив понг */
+	    } else {		/* РїРёС€РµРј РјР°СЃСЃРёРІ РїРѕРЅРі */
 		ptr = ADC_DATA_pong;
 	    }
 
 	    res += log_write_adc_data_to_file(ptr, adc_pars_struct.samples_in_ping * adc_pars_struct.data_size);
-	    adc_pars_struct.num_sig++;	/* Сбрасываем данные за 4, 2 или 1 секунду */
-	    adc_pars_struct.handler_sig_flag = true;	/* 1 раз в секунду - зеленый светодиод */
-	    adc_pars_struct.handler_write_flag = true;	/* Ставим флаг - выходим из обработчика. */
+	    adc_pars_struct.num_sig++;	/* РЎР±СЂР°СЃС‹РІР°РµРј РґР°РЅРЅС‹Рµ Р·Р° 4, 2 РёР»Рё 1 СЃРµРєСѓРЅРґСѓ */
+	    adc_pars_struct.handler_sig_flag = true;	/* 1 СЂР°Р· РІ СЃРµРєСѓРЅРґСѓ - Р·РµР»РµРЅС‹Р№ СЃРІРµС‚РѕРґРёРѕРґ */
+	    adc_pars_struct.handler_write_flag = true;	/* РЎС‚Р°РІРёРј С„Р»Р°Рі - РІС‹С…РѕРґРёРј РёР· РѕР±СЂР°Р±РѕС‚С‡РёРєР°. */
 	} else {
 	    PRINTF("Error get message!\r\n");
 	}
@@ -1172,30 +1171,30 @@ static void vSdTask(void *s)
 
 
 /**
- * Сброс АЦП ногой
+ * РЎР±СЂРѕСЃ РђР¦Рџ РЅРѕРіРѕР№
  */
 static void adc_reset(void)
 {
-    /* Ставим в 0 */
+    /* РЎС‚Р°РІРёРј РІ 0 */
     MAP_GPIOPinWrite(ADS131_RESET_BASE, ADS131_RESET_BIT, (unsigned char) ~ADS131_RESET_BIT);
 
-    /* Задержка  */
+    /* Р—Р°РґРµСЂР¶РєР°  */
     DELAY(5);
 
-    /* Ставим в 1 */
+    /* РЎС‚Р°РІРёРј РІ 1 */
     MAP_GPIOPinWrite(ADS131_RESET_BASE, ADS131_RESET_BIT, ADS131_RESET_BIT);
-    DELAY(5);			/* Задержка  */
+    DELAY(5);			/* Р—Р°РґРµСЂР¶РєР°  */
 }
 
 
-/* Задача, которая будет считать количество времени на АЦП */
+/* Р—Р°РґР°С‡Р°, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ СЃС‡РёС‚Р°С‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РІСЂРµРјРµРЅРё РЅР° РђР¦Рџ */
 static void vAdcTask(void *p)
 {
     OsiReturnVal_e ret;
     GPS_DATA_t data;
     int i = 0;
 
-    /* Записываем пока нет флага окончания регистрации и идут прерывания */
+    /* Р—Р°РїРёСЃС‹РІР°РµРј РїРѕРєР° РЅРµС‚ С„Р»Р°РіР° РѕРєРѕРЅС‡Р°РЅРёСЏ СЂРµРіРёСЃС‚СЂР°С†РёРё Рё РёРґСѓС‚ РїСЂРµСЂС‹РІР°РЅРёСЏ */
     do {
 
 	if (adc_pars_struct.num_irq) {
@@ -1214,12 +1213,12 @@ static void vAdcTask(void *p)
 
     ADS131_stop();
     log_write_log_file("Stop conversion\r\n");
-    log_close_data_file();	/* Закрываем файл данных */
+    log_close_data_file();	/* Р—Р°РєСЂС‹РІР°РµРј С„Р°Р№Р» РґР°РЅРЅС‹С… */
     log_close_log_file();
     PRINTF("Stop conversion\r\n");
 
 
-    /* Удаляем Sync объект */
+    /* РЈРґР°Р»СЏРµРј Sync РѕР±СЉРµРєС‚ */
     ret = osi_SyncObjDelete(&gSdSyncObj);
     if (ret != OSI_OK) {
 	PRINTF("Delete gSdSyncObj error!\r\n");
@@ -1228,16 +1227,16 @@ static void vAdcTask(void *p)
 	PRINTF("Delete gSdSyncObj OK!\r\n");
     }
 
-    /* или поставить наоборот - удалить объект синхро, а потом задучу иначе иксепшен */
-    /* Удаляем задачу - сами себя */
+    /* РёР»Рё РїРѕСЃС‚Р°РІРёС‚СЊ РЅР°РѕР±РѕСЂРѕС‚ - СѓРґР°Р»РёС‚СЊ РѕР±СЉРµРєС‚ СЃРёРЅС…СЂРѕ, Р° РїРѕС‚РѕРј Р·Р°РґСѓС‡Сѓ РёРЅР°С‡Рµ РёРєСЃРµРїС€РµРЅ */
+    /* РЈРґР°Р»СЏРµРј Р·Р°РґР°С‡Сѓ - СЃР°РјРё СЃРµР±СЏ */
     osi_TaskDelete(&gSdTaskHandle);
     PRINTF("Delete SdTask OK!\r\n");
 
 
-    board_reset();		/* Сбросим плату */
+    board_reset();		/* РЎР±СЂРѕСЃРёРј РїР»Р°С‚Сѓ */
 }
 
-/* Создать задачу для теста АЦП */
+/* РЎРѕР·РґР°С‚СЊ Р·Р°РґР°С‡Сѓ РґР»СЏ С‚РµСЃС‚Р° РђР¦Рџ */
 void ADS131_test(ADS131_Params * par)
 {
     bool res;
@@ -1268,14 +1267,14 @@ void ADS131_test(ADS131_Params * par)
     PRINTF("ADC test freq: %d\r\n", par->test_freq);
     PRINTF("File len: 0x%02X\r\n", par->file_len);
 
-    /* Сделать ожидание 3dfix GPS и запускать на заданное время */
+    /* РЎРґРµР»Р°С‚СЊ РѕР¶РёРґР°РЅРёРµ 3dfix GPS Рё Р·Р°РїСѓСЃРєР°С‚СЊ РЅР° Р·Р°РґР°РЅРЅРѕРµ РІСЂРµРјСЏ */
     PRINTF("Init test...: result = %s\r\n", res ? "OK" : "FAIL");
     ADS131_start();
     PRINTF("ADS131 start...\n");
 
 /*    ADS131_start_irq(); */
 
-    /* Создаем задачу, которая будет передавать данные */
+    /* РЎРѕР·РґР°РµРј Р·Р°РґР°С‡Сѓ, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ РїРµСЂРµРґР°РІР°С‚СЊ РґР°РЅРЅС‹Рµ */
     ret = osi_TaskCreate(vAdcTask, "AdcTask", OSI_STACK_SIZE, NULL, ADC_TASK_PRIORITY, NULL);
     if (ret != OSI_OK) {
 	while (1) {
@@ -1287,19 +1286,19 @@ void ADS131_test(ADS131_Params * par)
     }
 }
 
-/* параметры ацп */
+/* РїР°СЂР°РјРµС‚СЂС‹ Р°С†Рї */
 void ADS131_get_adcp(ADCP_h * par)
 {
     if (par != NULL) {
 	mem_copy(par, &adcp, sizeof(adcp));
-	par->sample_rate -= 1;	/* на 1 меньше */
+	par->sample_rate -= 1;	/* РЅР° 1 РјРµРЅСЊС€Рµ */
     }
 }
 
 
 /**
- * параметры ацп установить  
- * + Запуск АЦП в командном режиме 
+ * РїР°СЂР°РјРµС‚СЂС‹ Р°С†Рї СѓСЃС‚Р°РЅРѕРІРёС‚СЊ  
+ * + Р—Р°РїСѓСЃРє РђР¦Рџ РІ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ 
  */
 bool ADS131_write_parameters(ADCP_h * v)
 {
@@ -1308,36 +1307,36 @@ bool ADS131_write_parameters(ADCP_h * v)
     if (v != NULL && !ADS131_is_run()) {
 	ADS131_Params par;
 	mem_copy(&adcp, v, sizeof(ADCP_h));
-	par.mode = CMD_MODE;	/* режим работы програмы */
-	par.sps = (ADS131_FreqEn) (adcp.sample_rate + 1);	/* частота - будет на 1 больше! */
+	par.mode = CMD_MODE;	/* СЂРµР¶РёРј СЂР°Р±РѕС‚С‹ РїСЂРѕРіСЂР°РјС‹ */
+	par.sps = (ADS131_FreqEn) (adcp.sample_rate + 1);	/* С‡Р°СЃС‚РѕС‚Р° - Р±СѓРґРµС‚ РЅР° 1 Р±РѕР»СЊС€Рµ! */
 
 
-	/* Проверим в функции настройки АЦП */
+	/* РџСЂРѕРІРµСЂРёРј РІ С„СѓРЅРєС†РёРё РЅР°СЃС‚СЂРѕР№РєРё РђР¦Рџ */
 	par.pga[0] = (ADS131_PgaEn) adcp.adc_board_1.ch_1_gain;
 	par.pga[1] = (ADS131_PgaEn) adcp.adc_board_1.ch_2_gain;
 	par.pga[2] = (ADS131_PgaEn) adcp.adc_board_1.ch_3_gain;
 	par.pga[3] = (ADS131_PgaEn) adcp.adc_board_1.ch_4_gain;
 
-	/* Остальные 4 канала - чтобы не ругался  */
+	/* РћСЃС‚Р°Р»СЊРЅС‹Рµ 4 РєР°РЅР°Р»Р° - С‡С‚РѕР±С‹ РЅРµ СЂСѓРіР°Р»СЃСЏ  */
 	par.pga[4] = par.pga[5] = par.pga[6] = par.pga[7] = PGA1;
 
-	/* Если тестовый сигнал */
+	/* Р•СЃР»Рё С‚РµСЃС‚РѕРІС‹Р№ СЃРёРіРЅР°Р» */
 	if (adcp.test_signal) {
-	    par.mux = MUX_TEST;	/* Мультиплексор на входе */
-	    par.test_sign = TEST_INT;	/* Тестовый сигнал  */
-	    par.test_freq = TEST_FREQ_0;	/* Частота тестового сигнала */
+	    par.mux = MUX_TEST;	/* РњСѓР»СЊС‚РёРїР»РµРєСЃРѕСЂ РЅР° РІС…РѕРґРµ */
+	    par.test_sign = TEST_INT;	/* РўРµСЃС‚РѕРІС‹Р№ СЃРёРіРЅР°Р»  */
+	    par.test_freq = TEST_FREQ_0;	/* Р§Р°СЃС‚РѕС‚Р° С‚РµСЃС‚РѕРІРѕРіРѕ СЃРёРіРЅР°Р»Р° */
 	} else {
-	    par.mux = MUX_NORM;	/* Мультиплексор на входе */
-	    par.test_sign = TEST_EXT;	/* Внешний сигнал  */
-	    par.test_freq = TEST_FREQ_NONE;	/* Частота тестового сигнала не используется */
+	    par.mux = MUX_NORM;	/* РњСѓР»СЊС‚РёРїР»РµРєСЃРѕСЂ РЅР° РІС…РѕРґРµ */
+	    par.test_sign = TEST_EXT;	/* Р’РЅРµС€РЅРёР№ СЃРёРіРЅР°Р»  */
+	    par.test_freq = TEST_FREQ_NONE;	/* Р§Р°СЃС‚РѕС‚Р° С‚РµСЃС‚РѕРІРѕРіРѕ СЃРёРіРЅР°Р»Р° РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ */
 	}
 
-	par.bitmap = 0x0f;	/* Включенные каналы: 1 канал включен, 0 - выключен */
-	par.file_len = DATA_FILE_LEN;	/* Длина файла записи в часах - 4 часа пишем */
+	par.bitmap = 0x0f;	/* Р’РєР»СЋС‡РµРЅРЅС‹Рµ РєР°РЅР°Р»С‹: 1 РєР°РЅР°Р» РІРєР»СЋС‡РµРЅ, 0 - РІС‹РєР»СЋС‡РµРЅ */
+	par.file_len = DATA_FILE_LEN;	/* Р”Р»РёРЅР° С„Р°Р№Р»Р° Р·Р°РїРёСЃРё РІ С‡Р°СЃР°С… - 4 С‡Р°СЃР° РїРёС€РµРј */
 
-	/* Передаем параметры */
+	/* РџРµСЂРµРґР°РµРј РїР°СЂР°РјРµС‚СЂС‹ */
 	if (ADS131_config(&par) == true) {
-	    ADS131_start();	/* Запускаем АЦП с PGA  */
+	    ADS131_start();	/* Р—Р°РїСѓСЃРєР°РµРј РђР¦Рџ СЃ PGA  */
 	    res = true;
 	}
     }
@@ -1345,7 +1344,7 @@ bool ADS131_write_parameters(ADCP_h * v)
 }
 
 /**
- * Запуск АЦП в командном режиме - установка таймера на время старта
+ * Р—Р°РїСѓСЃРє РђР¦Рџ РІ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ - СѓСЃС‚Р°РЅРѕРІРєР° С‚Р°Р№РјРµСЂР° РЅР° РІСЂРµРјСЏ СЃС‚Р°СЂС‚Р°
  */
 bool ADS131_start_osciloscope(START_PREVIEW_h * sv)
 {
@@ -1353,7 +1352,7 @@ bool ADS131_start_osciloscope(START_PREVIEW_h * sv)
     GPS_DATA_t date;
     RUNTIME_STATE_t t;
 
-    /* Синхронизируем время */
+    /* РЎРёРЅС…СЂРѕРЅРёР·РёСЂСѓРµРј РІСЂРµРјСЏ */
     if (!timer_is_sync() && sv != NULL) {
 	timer_set_sec_ticks(sv->time_stamp / TIMER_NS_DIVIDER);
     }
@@ -1361,31 +1360,31 @@ bool ADS131_start_osciloscope(START_PREVIEW_h * sv)
     status_get_gps_data(&date);
     log_create_adc_header(&date);
 
-    /* Получить биты */
+    /* РџРѕР»СѓС‡РёС‚СЊ Р±РёС‚С‹ */
     status_get_runtime_state(&t);
 
     if (t.acqis_running) {
-	ADS131_start_irq();	/* Разрешаем IRQ  */
+	ADS131_start_irq();	/* Р Р°Р·СЂРµС€Р°РµРј IRQ  */
 	res = true;
     }
     return res;
 }
 
 /**
- * Стоп всех АЦП 
+ * РЎС‚РѕРї РІСЃРµС… РђР¦Рџ 
  */
 bool ADS131_stop_osciloscope(void)
 {
     bool res = false;
     RUNTIME_STATE_t t;
 
-    /* Получить биты */
+    /* РџРѕР»СѓС‡РёС‚СЊ Р±РёС‚С‹ */
     status_get_runtime_state(&t);
 
     if (t.acqis_running) {
 	ADS131_stop();
 	log_write_log_file("Stop conversion\r\n");
-	log_close_data_file();	/* Закрываем файл данных */
+	log_close_data_file();	/* Р—Р°РєСЂС‹РІР°РµРј С„Р°Р№Р» РґР°РЅРЅС‹С… */
 	res = true;
     }
     return res;
