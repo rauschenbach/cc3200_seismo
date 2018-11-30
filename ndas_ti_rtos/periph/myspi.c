@@ -1,9 +1,9 @@
 #include "myspi.h"
 #include "dma.h"
 
-//#define SPI_CLOCK_FREQ           8000000UL /* 80 / 10 = 8 МГц - достаточно */
+//#define SPI_CLOCK_FREQ           8000000UL /* 80 / 10 = 8 РњР“С† - РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ */
 
-#define SPI_CLOCK_FREQ         4000000UL /* 4 МГц - достаточно */
+#define SPI_CLOCK_FREQ         4000000UL /* 4 РњР“С† - РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ */
 
 static void spi_mux_config(void);
 
@@ -13,12 +13,12 @@ void spi_init(void)
         
         spi_mux_config();
 
-	/* недокументированная возможность - включить гистерезис 10% 
-	 * без нее работать не будет */
+	/* РЅРµРґРѕРєСѓРјРµРЅС‚РёСЂРѕРІР°РЅРЅР°СЏ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ - РІРєР»СЋС‡РёС‚СЊ РіРёСЃС‚РµСЂРµР·РёСЃ 10% 
+	 * Р±РµР· РЅРµРµ СЂР°Р±РѕС‚Р°С‚СЊ РЅРµ Р±СѓРґРµС‚ */
 	HWREG(0x4402E144) = HWREG(0x4402e144) | (3 << 2);	
 	
-	/* CS аппаратный (отдельной ногой), активен вниз, 4 пинный режим, 8 бит длина  */
-//старый вариант с CS:	cfg = SPI_HW_CTRL_CS | SPI_4PIN_MODE | SPI_TURBO_ON | SPI_CS_ACTIVELOW | SPI_WL_8;
+	/* CS Р°РїРїР°СЂР°С‚РЅС‹Р№ (РѕС‚РґРµР»СЊРЅРѕР№ РЅРѕРіРѕР№), Р°РєС‚РёРІРµРЅ РІРЅРёР·, 4 РїРёРЅРЅС‹Р№ СЂРµР¶РёРј, 8 Р±РёС‚ РґР»РёРЅР°  */
+//СЃС‚Р°СЂС‹Р№ РІР°СЂРёР°РЅС‚ СЃ CS:	cfg = SPI_HW_CTRL_CS | SPI_4PIN_MODE | SPI_TURBO_ON | SPI_CS_ACTIVELOW | SPI_WL_8;
 
 	cfg = SPI_HW_CTRL_CS | SPI_4PIN_MODE/* | SPI_TURBO_ON */| SPI_CS_ACTIVELOW | SPI_WL_8;
 
@@ -30,7 +30,7 @@ void spi_init(void)
 				SPI_CLOCK_FREQ, SPI_MODE_MASTER, SPI_SUB_MODE_1, cfg);
 
 
-	/* включить FIFO */
+	/* РІРєР»СЋС‡РёС‚СЊ FIFO */
         MAP_SPIFIFOEnable(GSPI_BASE, SPI_RX_FIFO); 
 
 	/* Enable SPI for communication */
@@ -38,7 +38,7 @@ void spi_init(void)
 }
 
 /**
- * Остановить SPI
+ * РћСЃС‚Р°РЅРѕРІРёС‚СЊ SPI
  */
 void spi_stop(void)
 {
@@ -46,7 +46,7 @@ void spi_stop(void)
 }
 
 /**
- * Запись с одновременным чтением
+ * Р—Р°РїРёСЃСЊ СЃ РѕРґРЅРѕРІСЂРµРјРµРЅРЅС‹Рј С‡С‚РµРЅРёРµРј
  */
 u8 spi_write_read(u8 data)
 {
@@ -55,40 +55,40 @@ u8 spi_write_read(u8 data)
 	/* Wait for space in FIFO */
 	while (!(HWREG(GSPI_BASE + MCSPI_O_CH0STAT) & MCSPI_CH0STAT_TXS)) {}
 
-	/* Шлем данные или DUMMY */
+	/* РЁР»РµРј РґР°РЅРЅС‹Рµ РёР»Рё DUMMY */
 	HWREG(GSPI_BASE + MCSPI_O_TX0) = data;
 
 	/* Wait for Rx data */
 	while (!(HWREG(GSPI_BASE + MCSPI_O_CH0STAT) & MCSPI_CH0STAT_RXS)) {}
 
-	/* Читаем ответ */
+	/* Р§РёС‚Р°РµРј РѕС‚РІРµС‚ */
 	byte = HWREG(GSPI_BASE + MCSPI_O_RX0);
 
 	return byte;
 }
 
-/* CS вниз */
+/* CS РІРЅРёР· */
 void spi_cs_on(void)
 {
-//старое для отл. платы        MAP_GPIOPinWrite(SPI_CS_BASE, SPI_CS_BIT, ~SPI_CS_BIT);  /* Ставим в 0 */
+//СЃС‚Р°СЂРѕРµ РґР»СЏ РѕС‚Р». РїР»Р°С‚С‹        MAP_GPIOPinWrite(SPI_CS_BASE, SPI_CS_BIT, ~SPI_CS_BIT);  /* РЎС‚Р°РІРёРј РІ 0 */
 }
 
-/* CS вверх */
+/* CS РІРІРµСЂС… */
 void spi_cs_off(void)
 {
-//старое        MAP_GPIOPinWrite(SPI_CS_BASE, SPI_CS_BIT, SPI_CS_BIT);  /* Ставим в 1 */
+//СЃС‚Р°СЂРѕРµ        MAP_GPIOPinWrite(SPI_CS_BASE, SPI_CS_BIT, SPI_CS_BIT);  /* РЎС‚Р°РІРёРј РІ 1 */
 }
 
 
 /**
- * Тактируем входы SPI для ADS131 - нам надо 4 ноги для интерфейса SPI
+ * РўР°РєС‚РёСЂСѓРµРј РІС…РѕРґС‹ SPI РґР»СЏ ADS131 - РЅР°Рј РЅР°РґРѕ 4 РЅРѕРіРё РґР»СЏ РёРЅС‚РµСЂС„РµР№СЃР° SPI
  */
 static void spi_mux_config(void)
 {
 	/* Enable Peripheral Clocks */
 	MAP_PRCMPeripheralClkEnable(PRCM_GSPI, PRCM_RUN_MODE_CLK);
 	
-	/* PRCM_GPIOA2 - для ноги CS. Если поменяются PIN - то сменить! */
+	/* PRCM_GPIOA2 - РґР»СЏ РЅРѕРіРё CS. Р•СЃР»Рё РїРѕРјРµРЅСЏСЋС‚СЃСЏ PIN - С‚Рѕ СЃРјРµРЅРёС‚СЊ! */
 	MAP_PRCMPeripheralClkEnable(PRCM_GPIOA2, PRCM_RUN_MODE_CLK);
 
 	/* Configure PIN_05 for SPI0 GSPI_CLK */
@@ -100,17 +100,17 @@ static void spi_mux_config(void)
 	/* Configure PIN_07 for SPI0 GSPI_MOSI */
 	MAP_PinTypeSPI(SPI_MOSI_PIN, SPI_MOSI_MODE);
 
-	/* Configure PIN_08 for SPI0 GSPI_CS на выход и ставим в "1" */	
+	/* Configure PIN_08 for SPI0 GSPI_CS РЅР° РІС‹С…РѕРґ Рё СЃС‚Р°РІРёРј РІ "1" */	
 	MAP_PinTypeGPIO(SPI_CS_PIN, SPI_CS_MODE, false);
 	MAP_GPIODirModeSet(SPI_CS_BASE, SPI_CS_BIT, GPIO_DIR_MODE_OUT);      
-        MAP_GPIOPinWrite(SPI_CS_BASE, SPI_CS_BIT, SPI_CS_BIT);  /* Ставим в 1 */
+        MAP_GPIOPinWrite(SPI_CS_BASE, SPI_CS_BIT, SPI_CS_BIT);  /* РЎС‚Р°РІРёРј РІ 1 */
 }
 
 
 /**
- * Получить 32 бита из АЦП данные сразу со всех каналов в Little ENDIAN + 3 первых байта статуса
- * количество бит для чтения - по этой формуле: 24 + num * 24 
- * Переделать на DMA
+ * РџРѕР»СѓС‡РёС‚СЊ 32 Р±РёС‚Р° РёР· РђР¦Рџ РґР°РЅРЅС‹Рµ СЃСЂР°Р·Сѓ СЃРѕ РІСЃРµС… РєР°РЅР°Р»РѕРІ РІ Little ENDIAN + 3 РїРµСЂРІС‹С… Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР°
+ * РєРѕР»РёС‡РµСЃС‚РІРѕ Р±РёС‚ РґР»СЏ С‡С‚РµРЅРёСЏ - РїРѕ СЌС‚РѕР№ С„РѕСЂРјСѓР»Рµ: 24 + num * 24 
+ * РџРµСЂРµРґРµР»Р°С‚СЊ РЅР° DMA
  */
 #if 1
 void spi_write_read_data(int num, u32 * data)
@@ -119,52 +119,52 @@ void spi_write_read_data(int num, u32 * data)
     u8 st[3];
     int i;
 
-    // посмотреть картинку 38!!! - может изменить задержку CS и пр?
-    // Читаем сначала статус 3 байта
+    // РїРѕСЃРјРѕС‚СЂРµС‚СЊ РєР°СЂС‚РёРЅРєСѓ 38!!! - РјРѕР¶РµС‚ РёР·РјРµРЅРёС‚СЊ Р·Р°РґРµСЂР¶РєСѓ CS Рё РїСЂ?
+    // Р§РёС‚Р°РµРј СЃРЅР°С‡Р°Р»Р° СЃС‚Р°С‚СѓСЃ 3 Р±Р°Р№С‚Р°
     st[0] = spi_write_read(0);
     st[1] = spi_write_read(0);
     st[2] = spi_write_read(0);
 
-    /* Получаем в формате Little ENDIAN!!! */
+    /* РџРѕР»СѓС‡Р°РµРј РІ С„РѕСЂРјР°С‚Рµ Little ENDIAN!!! */
     for (i = 0; i < num; i++) {
-	hi = spi_write_read(0);	// старший
-	mi = spi_write_read(0);	// средний
-	lo = spi_write_read(0);	// младший
+	hi = spi_write_read(0);	// СЃС‚Р°СЂС€РёР№
+	mi = spi_write_read(0);	// СЃСЂРµРґРЅРёР№
+	lo = spi_write_read(0);	// РјР»Р°РґС€РёР№
 	data[i] = ((u32) hi << 24) | ((u32) mi << 16) | ((u32) lo << 8);
     }
 }
 #else
 
 /**
- * Передача данных по DMA
+ * РџРµСЂРµРґР°С‡Р° РґР°РЅРЅС‹С… РїРѕ DMA
  */
 void spi_write_read_data(int num, u32 * data)
 {
     int len;
-    len = 3 + 3 * num;     // длина в байтах 27 байт
+    len = 3 + 3 * num;     // РґР»РёРЅР° РІ Р±Р°Р№С‚Р°С… 27 Р±Р°Р№С‚
     u8 buf[28];
 
     /* Initialize uDMA */
     UDMAInit();
 
 
-    /* Настраиваем канал DMA для SPI Rx */
-    UDMASetupTransfer(UDMA_CH6_GSPI_RX, /* канал DMA */
-		      UDMA_MODE_BASIC,	/* Простой режим */
-		      len,		/* Длина передачи с заголовком */
-		      UDMA_SIZE_8,	/* По байту */
-		      UDMA_ARB_1,	/* Гранулярность? */
-		      (void *) (GSPI_BASE + 0x13c),	/* Адрес назначения - GPSI RX*/
-		      UDMA_SRC_INC_NONE,	/* Адрес источника не инкрементируется */
-		      buf,		/* Буфер приема */
-		      UDMA_DST_INC_8);	/* Адрес назначения инкрементируется на 8 бит */
+    /* РќР°СЃС‚СЂР°РёРІР°РµРј РєР°РЅР°Р» DMA РґР»СЏ SPI Rx */
+    UDMASetupTransfer(UDMA_CH6_GSPI_RX, /* РєР°РЅР°Р» DMA */
+		      UDMA_MODE_BASIC,	/* РџСЂРѕСЃС‚РѕР№ СЂРµР¶РёРј */
+		      len,		/* Р”Р»РёРЅР° РїРµСЂРµРґР°С‡Рё СЃ Р·Р°РіРѕР»РѕРІРєРѕРј */
+		      UDMA_SIZE_8,	/* РџРѕ Р±Р°Р№С‚Сѓ */
+		      UDMA_ARB_1,	/* Р“СЂР°РЅСѓР»СЏСЂРЅРѕСЃС‚СЊ? */
+		      (void *) (GSPI_BASE + 0x13c),	/* РђРґСЂРµСЃ РЅР°Р·РЅР°С‡РµРЅРёСЏ - GPSI RX*/
+		      UDMA_SRC_INC_NONE,	/* РђРґСЂРµСЃ РёСЃС‚РѕС‡РЅРёРєР° РЅРµ РёРЅРєСЂРµРјРµРЅС‚РёСЂСѓРµС‚СЃСЏ */
+		      buf,		/* Р‘СѓС„РµСЂ РїСЂРёРµРјР° */
+		      UDMA_DST_INC_8);	/* РђРґСЂРµСЃ РЅР°Р·РЅР°С‡РµРЅРёСЏ РёРЅРєСЂРµРјРµРЅС‚РёСЂСѓРµС‚СЃСЏ РЅР° 8 Р±РёС‚ */
 
-   // Ждать окончания передачи 
+   // Р–РґР°С‚СЊ РѕРєРѕРЅС‡Р°РЅРёСЏ РїРµСЂРµРґР°С‡Рё 
    for(volatile int i , 0; i < 1000;i++);
    memcpy(data, buf + 3, num * 3);
 
 
-    /* Запустить прередачу */
+    /* Р—Р°РїСѓСЃС‚РёС‚СЊ РїСЂРµСЂРµРґР°С‡Сѓ */
     MAP_SPIDmaEnable(GSPI_BASE, SPI_RX_DMA);
 }
 #endif
