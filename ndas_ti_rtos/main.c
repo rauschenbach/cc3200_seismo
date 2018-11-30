@@ -35,13 +35,13 @@
 
 static GNS_PARAM_STRUCT gns;
 static ADS131_Params par;
-static TEST_STATE_t test_state;	/* 4 байта непонятного выравнивания */
+static TEST_STATE_t test_state;	/* 4 Р±Р°Р№С‚Р° РЅРµРїРѕРЅСЏС‚РЅРѕРіРѕ РІС‹СЂР°РІРЅРёРІР°РЅРёСЏ */
 static INIT_STATE_t init_state;
 static int res = 0;
 
 
 
-/* Пока просто флаг окончания записи */
+/* РџРѕРєР° РїСЂРѕСЃС‚Рѕ С„Р»Р°Рі РѕРєРѕРЅС‡Р°РЅРёСЏ Р·Р°РїРёСЃРё */
 static bool stop_aqcuis = false;
 
 static void Loader(void *par);
@@ -50,21 +50,21 @@ static void check_time_task(void *);
 
 
 /** 
- * Обработчик прерываний таймера точного времени - запуск и останов работы 
+ * РћР±СЂР°Р±РѕС‚С‡РёРє РїСЂРµСЂС‹РІР°РЅРёР№ С‚Р°Р№РјРµСЂР° С‚РѕС‡РЅРѕРіРѕ РІСЂРµРјРµРЅРё - Р·Р°РїСѓСЃРє Рё РѕСЃС‚Р°РЅРѕРІ СЂР°Р±РѕС‚С‹ 
  */
 static void timer_callback_func(u32 sec)
 {
-    /* Запуск и останов работы по "часам" */
+    /* Р—Р°РїСѓСЃРє Рё РѕСЃС‚Р°РЅРѕРІ СЂР°Р±РѕС‚С‹ РїРѕ "С‡Р°СЃР°Рј" */
     if (sec == gns.gns_start_time) {
 	ADS131_start_irq();
     } else if (sec == gns.gns_finish_time) {
-	stop_aqcuis = true;	/* Окончание регистрации */
+	stop_aqcuis = true;	/* РћРєРѕРЅС‡Р°РЅРёРµ СЂРµРіРёСЃС‚СЂР°С†РёРё */
     }
 }
 
 int main(void)
 {
-    /* В качестве времени - время компиляции */
+    /* Р’ РєР°С‡РµСЃС‚РІРµ РІСЂРµРјРµРЅРё - РІСЂРµРјСЏ РєРѕРјРїРёР»СЏС†РёРё */
     status_init();
 
     /* Initailizing the board */
@@ -72,26 +72,26 @@ int main(void)
 
     timer_simple_init();
 
-    /* Получаем состояние сенсоров - они установились предварительно vvvvv - перенести вверх, в main будет ставить статусы!!! */
+    /* РџРѕР»СѓС‡Р°РµРј СЃРѕСЃС‚РѕСЏРЅРёРµ СЃРµРЅСЃРѕСЂРѕРІ - РѕРЅРё СѓСЃС‚Р°РЅРѕРІРёР»РёСЃСЊ РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅРѕ vvvvv - РїРµСЂРµРЅРµСЃС‚Рё РІРІРµСЂС…, РІ main Р±СѓРґРµС‚ СЃС‚Р°РІРёС‚СЊ СЃС‚Р°С‚СѓСЃС‹!!! */
     status_get_test_state(&test_state);
 
-    /* Инициализация терминала на выход. Только на время отладки */
+    /* РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ С‚РµСЂРјРёРЅР°Р»Р° РЅР° РІС‹С…РѕРґ. РўРѕР»СЊРєРѕ РЅР° РІСЂРµРјСЏ РѕС‚Р»Р°РґРєРё */
     com_mux_config();
     PRINTF("INFO: Program start OK\n");
 
-    /* Светодиоды */
+    /* РЎРІРµС‚РѕРґРёРѕРґС‹ */
     led_init();
 
-    /* Инициализация i2c также настройка пинов 2 и 3  + Создадим Lock объект */
+    /* РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ i2c С‚Р°РєР¶Рµ РЅР°СЃС‚СЂРѕР№РєР° РїРёРЅРѕРІ 2 Рё 3  + РЎРѕР·РґР°РґРёРј Lock РѕР±СЉРµРєС‚ */
     twi_init();
 
-    /* SD карту к процессору */
+    /* SD РєР°СЂС‚Сѓ Рє РїСЂРѕС†РµСЃСЃРѕСЂСѓ */
     set_sd_to_mcu();
 
     /* 
-     * Если у нас карта не монтирована - Подключим SD карту к BF и монтируем ФС  
-     * Можно убрать проверку что монтирована - после загрузчика что то остается в памяти
-     * и это участок кода не выполняется
+     * Р•СЃР»Рё Сѓ РЅР°СЃ РєР°СЂС‚Р° РЅРµ РјРѕРЅС‚РёСЂРѕРІР°РЅР° - РџРѕРґРєР»СЋС‡РёРј SD РєР°СЂС‚Сѓ Рє BF Рё РјРѕРЅС‚РёСЂСѓРµРј Р¤РЎ  
+     * РњРѕР¶РЅРѕ СѓР±СЂР°С‚СЊ РїСЂРѕРІРµСЂРєСѓ С‡С‚Рѕ РјРѕРЅС‚РёСЂРѕРІР°РЅР° - РїРѕСЃР»Рµ Р·Р°РіСЂСѓР·С‡РёРєР° С‡С‚Рѕ С‚Рѕ РѕСЃС‚Р°РµС‚СЃСЏ РІ РїР°РјСЏС‚Рё
+     * Рё СЌС‚Рѕ СѓС‡Р°СЃС‚РѕРє РєРѕРґР° РЅРµ РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ
      */
     if (!log_check_mounted()) {
 	if (log_mount_fs() != RES_NO_ERROR) {
@@ -105,7 +105,7 @@ int main(void)
     VStartSimpleLinkSpawnTask(9);
     PRINTF("INFO: StartSimpleLinkTask OK\n");
 
-    /* Попробуем сделать самозагрузку */
+    /* РџРѕРїСЂРѕР±СѓРµРј СЃРґРµР»Р°С‚СЊ СЃР°РјРѕР·Р°РіСЂСѓР·РєСѓ */
     osi_TaskCreate(Loader, (const signed char *) "LoaderTask", OSI_STACK_SIZE * 2, NULL, LOADER_TASK_PRIORITY, NULL);
 #else
     run_task();
@@ -116,7 +116,7 @@ int main(void)
     return res;
 }
 
-/* Запуск остальных задач  */
+/* Р—Р°РїСѓСЃРє РѕСЃС‚Р°Р»СЊРЅС‹С… Р·Р°РґР°С‡  */
 static void run_task(void)
 {
     char str[32];
@@ -125,32 +125,32 @@ static void run_task(void)
 
     status_get_init_state(&init_state);
 
-    /* Открыть файл регистрации и получить все времена */
+    /* РћС‚РєСЂС‹С‚СЊ С„Р°Р№Р» СЂРµРіРёСЃС‚СЂР°С†РёРё Рё РїРѕР»СѓС‡РёС‚СЊ РІСЃРµ РІСЂРµРјРµРЅР° */
     res = log_read_reg_file(&gns);
     if (res != RES_NO_ERROR) {
 	PRINTF("ERROR:log file create. error # %d\n", res);
-        init_state.no_reg_file = 1; /* Нет файла регистрации */
+        init_state.no_reg_file = 1; /* РќРµС‚ С„Р°Р№Р»Р° СЂРµРіРёСЃС‚СЂР°С†РёРё */
     } else {
 	log_write_log_file("INFO: log file create OK\n");
-	test_state.sd_ok = 1;	/* Запишем что sd OK */
+	test_state.sd_ok = 1;	/* Р—Р°РїРёС€РµРј С‡С‚Рѕ sd OK */
     }
 
 
     log_write_log_file("INFO: Params file was read and parsed OK\n");
     log_write_log_file("INFO: Device ID: %04d with %s CPU\n", gns.gns_addr, get_cpu_endian() == 1 ? "Big-endian" : "Little-endian");
-    log_write_log_file("INFO: Work DIR: %s\n", gns.gns_dir_name);	/* Название директории для всех файлов */
+    log_write_log_file("INFO: Work DIR: %s\n", gns.gns_dir_name);	/* РќР°Р·РІР°РЅРёРµ РґРёСЂРµРєС‚РѕСЂРёРё РґР»СЏ РІСЃРµС… С„Р°Р№Р»РѕРІ */
     log_write_log_file("INFO: Freq %d, pga0 %d, pga1 %d, pga2 %d, pga3 %d\n", 
 			gns.gns_adc_freq, 
 			gns.gns_adc_pga[0],
 			gns.gns_adc_pga[1],
 			gns.gns_adc_pga[2],
-			gns.gns_adc_pga[3]);	/* Частота АЦП   Усиление АЦП  */
+			gns.gns_adc_pga[3]);	/* Р§Р°СЃС‚РѕС‚Р° РђР¦Рџ   РЈСЃРёР»РµРЅРёРµ РђР¦Рџ  */
 
-    log_write_log_file("INFO: bitmap 0x%02X, consum %s\n", gns.gns_adc_bitmap, gns.gns_adc_consum ? "Hi" : "Lo");	/* энергопотребление сюда */
+    log_write_log_file("INFO: bitmap 0x%02X, consum %s\n", gns.gns_adc_bitmap, gns.gns_adc_consum ? "Hi" : "Lo");	/* СЌРЅРµСЂРіРѕРїРѕС‚СЂРµР±Р»РµРЅРёРµ СЃСЋРґР° */
     log_write_log_file("INFO: Work mode: %d\n", gns.gns_work_mode);
     log_write_log_file("INFO: This program can properly work until 2038\n");
 
-    /* Получить версию */
+    /* РџРѕР»СѓС‡РёС‚СЊ РІРµСЂСЃРёСЋ */
     get_str_ver(str);
     log_write_log_file("INFO: Prog. ver: %s\n", str);
     delay_ms(50);
@@ -163,18 +163,18 @@ static void run_task(void)
 	test_state.gps_ok = 1;
     }
 
-    /* Сенсоры не в задаче. Будем смотреть, какие датчики запустились - такие и будем опрашивать */
+    /* РЎРµРЅСЃРѕСЂС‹ РЅРµ РІ Р·Р°РґР°С‡Рµ. Р‘СѓРґРµРј СЃРјРѕС‚СЂРµС‚СЊ, РєР°РєРёРµ РґР°С‚С‡РёРєРё Р·Р°РїСѓСЃС‚РёР»РёСЃСЊ - С‚Р°РєРёРµ Рё Р±СѓРґРµРј РѕРїСЂР°С€РёРІР°С‚СЊ */
     res = sensor_init();
     if (res & TEST_STATE_ACCEL_OK) {
 	log_write_log_file("INFO: Accelerometer init OK\n");
 	test_state.acc_ok = 1;
     }
-    /* компас */
+    /* РєРѕРјРїР°СЃ */
     if (res & TEST_STATE_COMP_OK) {
 	log_write_log_file("INFO: Magnetometer init OK\n");
 	test_state.comp_ok = 1;
     }
-    /* датчик давления */
+    /* РґР°С‚С‡РёРє РґР°РІР»РµРЅРёСЏ */
     if (res & TEST_STATE_PRESS_OK) {
 	log_write_log_file("INFO: Press and temp sensor init OK\n");
 	test_state.press_ok = 1;
@@ -184,47 +184,47 @@ static void run_task(void)
 	test_state.hum_ok = 1;
     }
 
-    /* Инициализация компаса и акселерометра датчика давления и температуры. нет некоторых сенсоров!  */
+    /* РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєРѕРјРїР°СЃР° Рё Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂР° РґР°С‚С‡РёРєР° РґР°РІР»РµРЅРёСЏ Рё С‚РµРјРїРµСЂР°С‚СѓСЂС‹. РЅРµС‚ РЅРµРєРѕС‚РѕСЂС‹С… СЃРµРЅСЃРѕСЂРѕРІ!  */
     sensor_create_task(res);
 
-    /* В этой задаче происходит подстройка под GPS  */
+    /* Р’ СЌС‚РѕР№ Р·Р°РґР°С‡Рµ РїСЂРѕРёСЃС…РѕРґРёС‚ РїРѕРґСЃС‚СЂРѕР№РєР° РїРѕРґ GPS  */
     gps_create_task();
 
-    /*  Запустим простой таймер */
+    /*  Р—Р°РїСѓСЃС‚РёРј РїСЂРѕСЃС‚РѕР№ С‚Р°Р№РјРµСЂ */
     timer_set_sec_ticks(gps_get_gps_time());
 
-    /* Задача регулировки генератора */
+    /* Р—Р°РґР°С‡Р° СЂРµРіСѓР»РёСЂРѕРІРєРё РіРµРЅРµСЂР°С‚РѕСЂР° */
     pwm_create_task();
 
-    /* Таймер в качестве точных часов PRTC */
+    /* РўР°Р№РјРµСЂ РІ РєР°С‡РµСЃС‚РІРµ С‚РѕС‡РЅС‹С… С‡Р°СЃРѕРІ PRTC */
     test_state.rtc_ok = 1;
 
-    /* Запишем что EEPROM OK */
+    /* Р—Р°РїРёС€РµРј С‡С‚Рѕ EEPROM OK */
     test_state.eeprom_ok = 1;
 
-    /* Cтавим статусы */
+    /* CС‚Р°РІРёРј СЃС‚Р°С‚СѓСЃС‹ */
     status_set_test_state(&test_state);
 
-     /* Нет файла рег - если проверяем  */
+     /* РќРµС‚ С„Р°Р№Р»Р° СЂРµРі - РµСЃР»Рё РїСЂРѕРІРµСЂСЏРµРј  */
     status_set_init_state(&init_state);
 
-    /*  Включение таймера PWM калибровки */
-    /* calib_init();  используемый таймер! */
+    /*  Р’РєР»СЋС‡РµРЅРёРµ С‚Р°Р№РјРµСЂР° PWM РєР°Р»РёР±СЂРѕРІРєРё */
+    /* calib_init();  РёСЃРїРѕР»СЊР·СѓРµРјС‹Р№ С‚Р°Р№РјРµСЂ! */
     /* calib_set_data(120); */
 
-    /* Проверим файл lock.fil - он будет стираться при каждом запуске */
+    /* РџСЂРѕРІРµСЂРёРј С„Р°Р№Р» lock.fil - РѕРЅ Р±СѓРґРµС‚ СЃС‚РёСЂР°С‚СЊСЃСЏ РїСЂРё РєР°Р¶РґРѕРј Р·Р°РїСѓСЃРєРµ */
     res = log_check_lock_file();
 
-    /* В рабочем режиме запускаем по времени записанном на SD карте. Только если есть файл lock.fil */
+    /* Р’ СЂР°Р±РѕС‡РµРј СЂРµР¶РёРјРµ Р·Р°РїСѓСЃРєР°РµРј РїРѕ РІСЂРµРјРµРЅРё Р·Р°РїРёСЃР°РЅРЅРѕРј РЅР° SD РєР°СЂС‚Рµ. РўРѕР»СЊРєРѕ РµСЃР»Рё РµСЃС‚СЊ С„Р°Р№Р» lock.fil */
     if (GNS_NORMAL_MODE == gns.gns_work_mode && RES_NO_ERROR == res) {
 
-	/* Запустим задачу ожидания старта */
+	/* Р—Р°РїСѓСЃС‚РёРј Р·Р°РґР°С‡Сѓ РѕР¶РёРґР°РЅРёСЏ СЃС‚Р°СЂС‚Р° */
 	osi_TaskCreate(check_time_task, (const signed char *) "CheckTimeTask", OSI_STACK_SIZE, NULL, CHECK_TIME_TASK_PRIORITY, NULL);
 
 	/* mode=2 sps=2 pga=5 mux=5 sign=0 freq=2 bitmap=F len=1  */
-	par.mode = WORK_MODE;	/* режим работы програмы */
+	par.mode = WORK_MODE;	/* СЂРµР¶РёРј СЂР°Р±РѕС‚С‹ РїСЂРѕРіСЂР°РјС‹ */
 
-	/* частота */
+	/* С‡Р°СЃС‚РѕС‚Р° */
 	if (gns.gns_adc_freq == 4000) {
 	    par.sps = SPS4K;
 	} else if (gns.gns_adc_freq == 2000) {
@@ -256,15 +256,15 @@ static void run_task(void)
 	}
 
   
-	/* Включенные каналы: 1 канал включен, 0 - выключен */
+	/* Р’РєР»СЋС‡РµРЅРЅС‹Рµ РєР°РЅР°Р»С‹: 1 РєР°РЅР°Р» РІРєР»СЋС‡РµРЅ, 0 - РІС‹РєР»СЋС‡РµРЅ */
 	par.bitmap = gns.gns_adc_bitmap;
 	par.mux = (ADS131_MuxEn) gns.gns_mux;
 	par.test_sign = (ADS131_TestEn) gns.gns_test_sign;
 	par.test_freq = (ADS131_TestFreqEn) gns.gns_test_freq;
-	par.file_len = DATA_FILE_LEN;	/* По 4 часа пишем  */
+	par.file_len = DATA_FILE_LEN;	/* РџРѕ 4 С‡Р°СЃР° РїРёС€РµРј  */
 
-	/* Прежде чем начать запись в рабочем режиме - настроить часы и таймер! 
-	 * и проверить все заданные времена */
+	/* РџСЂРµР¶РґРµ С‡РµРј РЅР°С‡Р°С‚СЊ Р·Р°РїРёСЃСЊ РІ СЂР°Р±РѕС‡РµРј СЂРµР¶РёРјРµ - РЅР°СЃС‚СЂРѕРёС‚СЊ С‡Р°СЃС‹ Рё С‚Р°Р№РјРµСЂ! 
+	 * Рё РїСЂРѕРІРµСЂРёС‚СЊ РІСЃРµ Р·Р°РґР°РЅРЅС‹Рµ РІСЂРµРјРµРЅР° */
 	ADS131_test(&par);
     } else {			/*if (gns.gns_work_mode == GNS_CMD_MODE) */
 	xchg_start(&gns);
@@ -274,22 +274,22 @@ static void run_task(void)
 
 
 /**
- * Выдает параметры наружу
+ * Р’С‹РґР°РµС‚ РїР°СЂР°РјРµС‚СЂС‹ РЅР°СЂСѓР¶Сѓ
  */
 void get_gns_start_params(GNS_PARAM_STRUCT * par)
 {
-    if (par != NULL) {		/* Передает в параметр Эту структуру */
+    if (par != NULL) {		/* РџРµСЂРµРґР°РµС‚ РІ РїР°СЂР°РјРµС‚СЂ Р­С‚Сѓ СЃС‚СЂСѓРєС‚СѓСЂСѓ */
 	mem_copy(par, &gns, sizeof(GNS_PARAM_STRUCT));
     }
 }
 
 
 /**
- * Копируют всю структуру за раз
+ * РљРѕРїРёСЂСѓСЋС‚ РІСЃСЋ СЃС‚СЂСѓРєС‚СѓСЂСѓ Р·Р° СЂР°Р·
  */
 void set_gns_start_params(GNS_PARAM_STRUCT * par)
 {
-    if (par != NULL) {		/* Ставит эту структуру из параметра  */
+    if (par != NULL) {		/* РЎС‚Р°РІРёС‚ СЌС‚Сѓ СЃС‚СЂСѓРєС‚СѓСЂСѓ РёР· РїР°СЂР°РјРµС‚СЂР°  */
 	mem_copy(&gns, par, sizeof(GNS_PARAM_STRUCT));
     }
 }
@@ -301,8 +301,8 @@ bool is_finish(void)
 
 
 /**  
- * Проверить время "сейчас" и заданное.
- * Установить обработчики прерываний если работаем по заданию на SD карте
+ * РџСЂРѕРІРµСЂРёС‚СЊ РІСЂРµРјСЏ "СЃРµР№С‡Р°СЃ" Рё Р·Р°РґР°РЅРЅРѕРµ.
+ * РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РѕР±СЂР°Р±РѕС‚С‡РёРєРё РїСЂРµСЂС‹РІР°РЅРёР№ РµСЃР»Рё СЂР°Р±РѕС‚Р°РµРј РїРѕ Р·Р°РґР°РЅРёСЋ РЅР° SD РєР°СЂС‚Рµ
  */
 static void check_time_task(void *par)
 {
@@ -312,48 +312,48 @@ static void check_time_task(void *par)
     char str1[32];
     char str2[32];
 
-    /* Ждать синхронизации и подстройки генератора */
+    /* Р–РґР°С‚СЊ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё Рё РїРѕРґСЃС‚СЂРѕР№РєРё РіРµРЅРµСЂР°С‚РѕСЂР° */
     do {
 	osi_Sleep(1000);
     } while (!timer_is_sync());
 
 
-    /* Создадим заголовок здесь! */
+    /* РЎРѕР·РґР°РґРёРј Р·Р°РіРѕР»РѕРІРѕРє Р·РґРµСЃСЊ! */
     status_get_gps_data(&date);
     log_create_adc_header(&date);
 
     PRINTF("INFO: timer  was sync\r\n");
 
-    /* Получим время Сейчас */
+    /* РџРѕР»СѓС‡РёРј РІСЂРµРјСЏ РЎРµР№С‡Р°СЃ */
     t0 = timer_get_sec_ticks();
 
-    /* Делаем проверки */
+    /* Р”РµР»Р°РµРј РїСЂРѕРІРµСЂРєРё */
     PRINTF("INFO: Checking times...\n");
     sec_to_str(t0, str0);
 
     sec_to_str(gns.gns_start_time, str1);
     sec_to_str(gns.gns_finish_time, str2);
 
-    /* Если нет хотя бы 10 минут на запись! - сбросим плату */
+    /* Р•СЃР»Рё РЅРµС‚ С…РѕС‚СЏ Р±С‹ 10 РјРёРЅСѓС‚ РЅР° Р·Р°РїРёСЃСЊ! - СЃР±СЂРѕСЃРёРј РїР»Р°С‚Сѓ */
     if (gns.gns_finish_time <= (t0 + 600)) {
 	PRINTF("ERROR: No time for recording. Now: %s Finish: %s. Reset\n", str0, str2);
 	log_close_log_file();
 	board_reset();
     }
 
-    /* Если время "сейчас" меньше времени старта на 30 секунд - ошибка - 
-     * просто время начала и окончания передвинем на время, кратное минуте
+    /* Р•СЃР»Рё РІСЂРµРјСЏ "СЃРµР№С‡Р°СЃ" РјРµРЅСЊС€Рµ РІСЂРµРјРµРЅРё СЃС‚Р°СЂС‚Р° РЅР° 30 СЃРµРєСѓРЅРґ - РѕС€РёР±РєР° - 
+     * РїСЂРѕСЃС‚Рѕ РІСЂРµРјСЏ РЅР°С‡Р°Р»Р° Рё РѕРєРѕРЅС‡Р°РЅРёСЏ РїРµСЂРµРґРІРёРЅРµРј РЅР° РІСЂРµРјСЏ, РєСЂР°С‚РЅРѕРµ РјРёРЅСѓС‚Рµ
      */
     if (gns.gns_start_time - t0 < TIME_SHIFT) {
-	long rec;		// Время записи по SD карте
+	long rec;		// Р’СЂРµРјСЏ Р·Р°РїРёСЃРё РїРѕ SD РєР°СЂС‚Рµ
 	rec = gns.gns_finish_time - gns.gns_start_time;
-	gns.gns_start_time = (t0 - t0 % 60) + TIME_SHIFT;	/* на минуту позже "сейчас" */
+	gns.gns_start_time = (t0 - t0 % 60) + TIME_SHIFT;	/* РЅР° РјРёРЅСѓС‚Сѓ РїРѕР·Р¶Рµ "СЃРµР№С‡Р°СЃ" */
 	/*      gns.gns_finish_time = gns.gns_start_time + rec;  */
 	PRINTF("ERROR: Start time %s can't be less time now %s. Try to shift start time for test\n", str1, str0);
     }
 
 
-    /* Ставим обработчик прерываний */
+    /* РЎС‚Р°РІРёРј РѕР±СЂР°Р±РѕС‚С‡РёРє РїСЂРµСЂС‹РІР°РЅРёР№ */
     timer_set_callback((void *) timer_callback_func);
 
     sec_to_str(gns.gns_start_time, str1);
@@ -364,7 +364,7 @@ static void check_time_task(void *par)
 }
 
 /**
- * Самозагрузчик
+ * РЎР°РјРѕР·Р°РіСЂСѓР·С‡РёРє
  */
 static void Loader(void *par)
 {
@@ -375,12 +375,12 @@ static void Loader(void *par)
 	PRINTF("ERROR: sl_Start\n\r");
 	for (;;);
     }
-    /* Делаем паузу и перезагрузку */
+    /* Р”РµР»Р°РµРј РїР°СѓР·Сѓ Рё РїРµСЂРµР·Р°РіСЂСѓР·РєСѓ */
     res = log_check_loader_file();
     if (res == RES_NO_ERROR) {
 	delay_ms(25);
 	board_reset();
-    } else if (res == RES_NO_LOCK_FILE) {	// Обычная работа
+    } else if (res == RES_NO_LOCK_FILE) {	// РћР±С‹С‡РЅР°СЏ СЂР°Р±РѕС‚Р°
 	PRINTF("========= start==========\n\r");
 	run_task();
     }
@@ -392,7 +392,7 @@ static void Loader(void *par)
 
 
 /**
- * В каком режиме запущена станция - нужно доля отладки
+ * Р’ РєР°РєРѕРј СЂРµР¶РёРјРµ Р·Р°РїСѓС‰РµРЅР° СЃС‚Р°РЅС†РёСЏ - РЅСѓР¶РЅРѕ РґРѕР»СЏ РѕС‚Р»Р°РґРєРё
  */
 int get_gns_work_mode(void)
 {
